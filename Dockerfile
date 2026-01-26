@@ -25,5 +25,6 @@ RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 VOLUME ["/code/storage"]
-ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["sh","/entrypoint.sh"]
 
