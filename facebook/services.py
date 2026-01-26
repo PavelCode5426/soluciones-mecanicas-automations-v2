@@ -35,7 +35,7 @@ class FacebookAutomationService:
             groups_links = page.locator('[role="main"] [role="list"] [role="listitem"] a') \
                 .filter(has_not_text='Ver grupo')
 
-            print(groups_links)
+            print(groups_links.all())
             groups = []
             for link in groups_links.all():
                 if link.text_content():
