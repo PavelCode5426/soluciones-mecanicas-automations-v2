@@ -2,26 +2,20 @@ from django.conf import settings
 import time
 
 from playwright.async_api import async_playwright
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
-from facebook.models import FacebookProfile, FacebookPost
+from facebook.models import FacebookProfile, FacebookPost, FacebookGroup
 
 
 class FacebookAutomationService:
     def __init__(self, user: FacebookProfile):
         self.user = user
 
-    def get_browser(self, pw):
+    def get_browser(self, pw: Playwright):
         return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
 
-    def get_playwright(self):
+    def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()
-
-    async def async_get_all_groups(self):
-        async with async_playwright() as pw:
-            browser = await pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
-            page = await browser.new_page()
-            await page.goto("https://www.facebook.com/groups/")
 
     def get_all_groups(self):
         with self.get_playwright() as pw:
@@ -50,17 +44,22 @@ class FacebookAutomationService:
             page.close()
             return groups
 
-    def create_post(self, group_url, post: FacebookPost):
+    def create_post(self, group: FacebookGroup, post: FacebookPost):
         with self.get_playwright() as pw:
-            page = self.get_browser(pw).new_page()
-            page.goto(group_url, timeout=settings.PLAYWRIGHT['timeout'])
-            page.get_by_text('Escribe algo…').click()
-            page.click('[aria-placeholder="Crea una publicación pública..."]')
+            try:
+                page = self.get_browser(pw).new_page()
+                page.goto(group.url, timeout=settings.PLAYWRIGHT['timeout'])
+                page.get_by_text('Escribe algo…').click()
+                page.click('[aria-placeholder="Crea una publicación pública..."]')
 
-            file_input = page.locator('input[type="file"][multiple]')
-            file_input.set_input_files([post.file])
-            page.keyboard.type(post.text)
+                file_input = page.locator('input[type="file"][multiple]')
+                file_input.set_input_files(files=[post.file.path])
+                page.keyboard.type(post.text)
 
-            page.click('[aria-label="Publicar"]')
-            page.get_by_text("Publicando", exact=True).wait_for(state='hidden', timeout=settings.PLAYWRIGHT['timeout'])
-            page.close()
+                page.click('[aria-label="Publicar"]')
+                page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
+                                                                    timeout=settings.PLAYWRIGHT['timeout'])
+                page.close()
+            except Exception as e:
+                group.screenshot = page.screenshot(full_page=True, quality=80, type='jpeg')
+                group.save()

@@ -23,7 +23,7 @@ def download_groups_task(user):
 
     for group in groups:
         FacebookGroup.objects.update_or_create(
-            defaults={"name": group['name']},
+            defaults={"name": group['name'], "active": True},
             create_defaults=group,
             url=group['url']
         )
@@ -38,4 +38,4 @@ def enqueue_active_facebook_posts():
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
-            async_task(service.create_post, group.url, post, task_name=task_name)
+            async_task(service.create_post, group, post, task_name=task_name)
