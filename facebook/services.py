@@ -13,8 +13,7 @@ class FacebookAutomationService:
         self.user = user
 
     def get_browser(self, pw: Playwright):
-        # return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
-        return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.state_file.file)
+        return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
 
     def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()

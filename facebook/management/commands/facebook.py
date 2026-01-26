@@ -9,4 +9,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         user = FacebookProfile.objects.first()
+
         download_groups_task(user)
