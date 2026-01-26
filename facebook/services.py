@@ -61,5 +61,7 @@ class FacebookAutomationService:
                                                                     timeout=settings.PLAYWRIGHT['timeout'])
                 page.close()
             except Exception as e:
-                group.screenshot = page.screenshot(full_page=True, quality=80, type='jpeg')
+                file_name = f"{group}_screenshot.jpeg"
+                image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
+                group.screenshot.save(file_name, image_bytes)
                 group.save()
