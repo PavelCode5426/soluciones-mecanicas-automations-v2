@@ -38,4 +38,4 @@ def enqueue_active_facebook_posts():
         groups = FacebookGroup.objects.filter(active=True, categories__groups__posts=post).all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
-            async_task(service.create_post, [group.url, post], task_name=task_name)
+            async_task(service.create_post, group.url, post, task_name=task_name)

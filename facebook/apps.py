@@ -7,10 +7,10 @@ class FacebookConfig(AppConfig):
 
     def ready(self):
         from django_q.tasks import schedule, Schedule
-        # Schedule.objects.all().delete()
+        Schedule.objects.all().delete()
 
-        # schedule(func='facebook.tasks.enqueue_active_facebook_posts',
-        #          name='enqueue_active_facebook_posts',
-        #          repeats=-1,
-        #          schedule_type=Schedule.MINUTES,
-        #          minutes=1)
+        schedule(func='facebook.tasks.enqueue_active_facebook_posts',
+                 name='enqueue_active_facebook_posts',
+                 repeats=-1,
+                 schedule_type=Schedule.MINUTES,
+                 minutes=1)
