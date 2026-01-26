@@ -30,6 +30,6 @@ class FacebookProfile(models.Model):
 class FacebookPost(models.Model):
     title = models.CharField(max_length=250)
     text = models.TextField()
-    file = models.ImageField()
+    file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
