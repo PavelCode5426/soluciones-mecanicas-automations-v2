@@ -1,0 +1,31 @@
+version: '3.3'
+
+services:
+  app:
+    container_name: soluciones-mecanicas-config
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: soluciones-mecanicas-automations:latest
+    environment:
+      DEBUG: 'True'
+
+      DATABASE_HOST: soluciones-mecanicas-database
+      DATABASE_PORT: 3306
+      DATABASE_NAME: soluciones_mecanicas_automations
+      DATABASE_USER: soluciones_mecanicas
+      DATABASE_PASSWORD: S0luc10n3s*
+    volumes:
+      - storage:/code/storage
+    networks:
+      - soluciones-mecanicas-net
+      - nginx-proxy-manager_default
+volumes:
+  storage:
+
+networks:
+  soluciones-mecanicas-net:
+    driver: bridge
+  nginx-proxy-manager_default:
+    external: true

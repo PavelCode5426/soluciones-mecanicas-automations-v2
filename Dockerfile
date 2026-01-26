@@ -1,0 +1,28 @@
+FROM python:3.11
+
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV DEBUG FALSE
+
+MAINTAINER https://pavelcode5426.github.io
+
+WORKDIR /code
+
+
+RUN pip install --upgrade pip
+RUN apt-get install -y --no-install-recommends supervisor
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+RUN playwright install-deps
+RUN playwright install
+
+COPY . .
+COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
+RUN chmod +x entrypoint.sh
+
+
+EXPOSE 8000
+VOLUME ["/code/storage"]
+ENTRYPOINT ["entrypoint.sh"]
+
