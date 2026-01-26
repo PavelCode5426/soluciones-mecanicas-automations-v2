@@ -19,10 +19,10 @@ RUN playwright install
 
 COPY . .
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
-RUN chmod +x entrypoint.sh
+RUN chmod +x /code/entrypoint.sh
 
 
 EXPOSE 8000
 VOLUME ["/code/storage"]
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["code/entrypoint.sh"]
 
