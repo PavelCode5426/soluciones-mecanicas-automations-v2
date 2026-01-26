@@ -58,7 +58,7 @@ class FacebookAutomationService:
             page.click('[aria-placeholder="Crea una publicación pública..."]')
 
             file_input = page.locator('input[type="file"][multiple]')
-            file_input.set_input_files([post.file.file])
+            file_input.set_input_files([post.file])
             page.keyboard.type(post.text)
 
             page.click('[aria-label="Publicar"]')
