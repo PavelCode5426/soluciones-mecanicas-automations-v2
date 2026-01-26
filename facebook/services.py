@@ -44,7 +44,7 @@ class FacebookAutomationService:
             for link in groups_links.all():
                 if link.text_content():
                     groups.append(dict(
-                        link=link.get_attribute('href'),
+                        url=link.get_attribute('href'),
                         name=link.text_content()
                     ))
             page.close()
