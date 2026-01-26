@@ -10,7 +10,7 @@ WORKDIR /code
 
 
 RUN pip install --upgrade pip
-RUN apt-get install -y --no-install-recommends supervisor
+RUN  apt-get update && apt-get install -y --no-install-recommends supervisor && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
