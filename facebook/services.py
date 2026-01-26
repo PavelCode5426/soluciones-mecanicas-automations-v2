@@ -1,5 +1,6 @@
 import time
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.core.files.base import ContentFile
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
@@ -65,5 +66,6 @@ class FacebookAutomationService:
             except Exception as e:
                 file_name = f"{group}_screenshot.jpeg"
                 image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
-                group.screenshot.save(file_name, ContentFile(image_bytes))
+                # group.screenshot.save(file_name, ContentFile(image_bytes))
+                sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
                 group.save()
