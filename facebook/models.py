@@ -23,6 +23,7 @@ class FacebookGroupCategory(models.Model):
 class FacebookProfile(models.Model):
     name = models.CharField(max_length=250)
     context = models.JSONField(default=dict)
+    state_file = models.FileField(upload_to='profile_states', null=True, blank=True)
 
     def __str__(self):
         return self.name

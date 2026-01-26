@@ -13,7 +13,8 @@ class FacebookAutomationService:
         self.user = user
 
     def get_browser(self, pw: Playwright):
-        return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
+        # return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
+        return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.state_file)
 
     def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()
@@ -35,7 +36,6 @@ class FacebookAutomationService:
             groups_links = page.locator('[role="main"] [role="list"] [role="listitem"] a') \
                 .filter(has_not_text='Ver grupo')
 
-            print(groups_links.all())
             groups = []
             for link in groups_links.all():
                 if link.text_content():
