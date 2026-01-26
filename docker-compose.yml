@@ -19,13 +19,13 @@ services:
     volumes:
       - storage:/code/storage
     networks:
-      - soluciones-mecanicas-net
+      - soluciones-mecanicas-backend_soluciones-mecanicas-net
       - nginx-proxy-manager_default
 volumes:
   storage:
 
 networks:
-  soluciones-mecanicas-net:
+  soluciones-mecanicas-backend_soluciones-mecanicas-net:
     driver: bridge
   nginx-proxy-manager_default:
     external: true
