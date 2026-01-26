@@ -13,4 +13,4 @@ class FacebookConfig(AppConfig):
                  name='enqueue_active_facebook_posts',
                  repeats=-1,
                  schedule_type=Schedule.MINUTES,
-                 minutes=1)
+                 minutes=60)

@@ -27,5 +27,5 @@ class FacebookProfile(models.Model):
 class FacebookPost(models.Model):
     text = models.TextField()
     file = models.ImageField()
-    categories = models.ManyToManyField(FacebookGroup, related_name='posts')
+    categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
