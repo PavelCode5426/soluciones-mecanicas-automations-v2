@@ -15,6 +15,9 @@ class FacebookGroupCategory(models.Model):
     name = models.CharField(max_length=250)
     groups = models.ManyToManyField(FacebookGroup, related_name='categories')
 
+    def __str__(self):
+        return self.name
+
 
 class FacebookProfile(models.Model):
     name = models.CharField(max_length=250)
@@ -25,6 +28,7 @@ class FacebookProfile(models.Model):
 
 
 class FacebookPost(models.Model):
+    title = models.CharField(max_length=250)
     text = models.TextField()
     file = models.ImageField()
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')

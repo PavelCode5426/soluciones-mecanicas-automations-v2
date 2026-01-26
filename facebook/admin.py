@@ -30,4 +30,6 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
 
 
-admin.site.register(FacebookPost)
+@admin.register(FacebookPost)
+class FacebookFacebookPostAdmin(admin.ModelAdmin):
+    list_display = ('title',)
