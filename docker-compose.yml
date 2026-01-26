@@ -26,6 +26,6 @@ volumes:
 
 networks:
   soluciones-mecanicas-backend_soluciones-mecanicas-net:
-    driver: bridge
+    external: true
   nginx-proxy-manager_default:
     external: true
