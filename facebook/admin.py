@@ -11,7 +11,7 @@ from facebook.tasks import download_groups_task
 def sync_facebook_groups(modeladmin, request, queryset):
     users = queryset.all()
     for user in users:
-        async_task(download_groups_task, (user,), task_name=f"download_{user}_groups")
+        async_task(download_groups_task, user, task_name=f"download_{user}_groups")
 
 
 @admin.register(FacebookProfile)
