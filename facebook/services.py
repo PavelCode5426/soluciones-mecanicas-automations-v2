@@ -54,8 +54,8 @@ class FacebookAutomationService:
         with self.get_playwright() as pw:
             page = self.get_browser(pw).new_page()
             page.goto(group_url, timeout=settings.PLAYWRIGHT['timeout'])
-            page.get_by_text('Escribe algo…', timeout=settings.PLAYWRIGHT['timeout']).click()
-            page.click('[aria-placeholder="Crea una publicación pública..."]', timeout=settings.PLAYWRIGHT['timeout'])
+            page.get_by_text('Escribe algo…').click()
+            page.click('[aria-placeholder="Crea una publicación pública..."]')
 
             file_input = page.locator('input[type="file"][multiple]')
             file_input.set_input_files([post.file.file])
