@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-@!x4c09e0*99*v_)w*8_w*1dwg-dhi2bet^6qii$5*l9%24jnp
 DEBUG = env('DEBUG', cast=bool, default=True)
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://automations.soluciones-mecanicas.duckdns.org']
 
 # Application definition
 
@@ -49,7 +49,7 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
-    #"django.middleware.csrf.CsrfViewMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
