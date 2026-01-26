@@ -2,12 +2,12 @@ version: '3.3'
 
 services:
   app:
-    container_name: soluciones-mecanicas-config
+    container_name: soluciones-mecanicas-automations-v2
     restart: always
     build:
       context: .
       dockerfile: Dockerfile
-    image: soluciones-mecanicas-automations:latest
+    image: soluciones-mecanicas-automations:v2
     environment:
       DEBUG: 'True'
 
