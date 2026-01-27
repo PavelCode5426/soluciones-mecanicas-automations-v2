@@ -69,3 +69,6 @@ class FacebookAutomationService:
                 # group.screenshot.save(file_name, ContentFile(image_bytes))
                 sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
                 group.asave()
+
+    def sign_in(self, user: FacebookProfile):
+        pass

