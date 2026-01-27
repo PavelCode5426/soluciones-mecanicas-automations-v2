@@ -28,6 +28,7 @@ def download_groups_task(user):
             create_defaults=group,
             url=group['url']
         )
+    return groups
 
 
 def enqueue_active_facebook_posts():
