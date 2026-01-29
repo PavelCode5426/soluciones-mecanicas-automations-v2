@@ -35,3 +35,6 @@ class FacebookPost(models.Model):
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
+    published_count = models.BigIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
