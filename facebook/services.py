@@ -3,6 +3,7 @@ import time
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.db.models import F
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
 from facebook.models import FacebookProfile, FacebookPost, FacebookGroup
@@ -63,8 +64,8 @@ class FacebookAutomationService:
                     page.click('[aria-label="Publicar"]')
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
-                    post.published_count += 1
-                    post.save()
+                    post.published_count = F('published_count') + 1
+                    post.save(update_fields=["published_count"])
                     page.close()
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
