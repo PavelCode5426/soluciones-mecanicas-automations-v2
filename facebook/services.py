@@ -64,7 +64,7 @@ class FacebookAutomationService:
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count += 1
-                    post.asave()
+                    post.save()
                     page.close()
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
