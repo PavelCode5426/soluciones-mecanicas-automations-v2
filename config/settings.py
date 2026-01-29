@@ -160,6 +160,7 @@ Q_CLUSTER = {
     "label": "Tareas pendientes",
     "name": "soluciones",
     "workers": 1,
+    "timeout": 10 * 60,
     "recycle": 500,
     "retry": 15 * 60,
     "queue_limit": 50,
