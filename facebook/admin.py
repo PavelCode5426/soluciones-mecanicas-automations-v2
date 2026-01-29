@@ -32,4 +32,4 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
-    list_display = ('title','active')
+    list_display = ('title', 'published_count', 'updated_at', 'active')
