@@ -157,11 +157,11 @@ PLAYWRIGHT = dict(
 )
 
 Q_CLUSTER = {
+    "label": "Tareas pendientes",
     "name": "soluciones",
     "workers": 1,
     "recycle": 500,
-    "timeout": 500,
-    "retry": 800,
+    "retry": 15 * 60,
     "queue_limit": 50,
     "bulk": 10,
     "orm": "default"
