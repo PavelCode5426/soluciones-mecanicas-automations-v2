@@ -66,7 +66,6 @@ class FacebookAutomationService:
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count = F('published_count') + 1
                     post.save(update_fields=["published_count"])
-                    page.close()
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
