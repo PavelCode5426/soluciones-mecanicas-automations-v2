@@ -14,7 +14,7 @@ class FacebookAutomationService:
         self.user = user
 
     def get_browser(self, pw: Playwright):
-        self.user.refresh_from_db()
+        sync_to_async(self.user.refresh_from_db)()
         print("Refrescando el usuario")
         print(f"Despues: {self.user}")
         return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
@@ -75,7 +75,7 @@ class FacebookAutomationService:
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
                     sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
-                    group.asave()
+                    sync_to_async(group.save)()
 
     def sign_in(self, user: FacebookProfile):
         pass
