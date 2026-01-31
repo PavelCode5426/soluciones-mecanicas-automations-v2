@@ -9,6 +9,10 @@ from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playw
 from facebook.models import FacebookProfile, FacebookPost, FacebookGroup
 
 
+def get_playwright() -> PlaywrightContextManager:
+    return sync_playwright()
+
+
 class FacebookAutomationService:
     def __init__(self, user: FacebookProfile):
         self.user = user
@@ -19,12 +23,9 @@ class FacebookAutomationService:
     def get_browser(self, pw: Playwright):
         return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
 
-    def get_playwright(self) -> PlaywrightContextManager:
-        return sync_playwright()
-
     def get_all_groups(self):
         self.refresh_user()
-        with self.get_playwright() as pw:
+        with get_playwright() as pw:
             browser = self.get_browser(pw)
             page = browser.new_page()
             page.goto("https://www.facebook.com/groups/joins/?nav_source=tab", timeout=settings.PLAYWRIGHT['timeout'])
@@ -57,7 +58,7 @@ class FacebookAutomationService:
         group.refresh_from_db()
         post.refresh_from_db()
         if post.active and group.active:
-            with self.get_playwright() as pw:
+            with get_playwright() as pw:
                 try:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
@@ -73,14 +74,14 @@ class FacebookAutomationService:
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count = F('published_count') + 1
-                    post.save(update_fields=["published_count"])
+                    post.asave(update_fields=["published_count"])
                     return "Publicado correctamente"
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
-                    group.screenshot.save(file_name, ContentFile(image_bytes))
-                    group.save()
+                    sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
+                    group.asave()
 
     def sign_in(self, user: FacebookProfile):
         pass
