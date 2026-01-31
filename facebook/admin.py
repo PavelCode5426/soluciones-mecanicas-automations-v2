@@ -42,7 +42,6 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
 admin.site.unregister(OrmQ)
 
 
-@admin.site.register(OrmQ)
 class NewQueueAdmin(QueueAdmin):
     actions = QueueAdmin.actions + ('clear_queue', 'execute_now',)
 
@@ -57,3 +56,6 @@ class NewQueueAdmin(QueueAdmin):
         self.message_user(request, f"{count} registros marcados como activos.", level=messages.SUCCESS)
 
     execute_now.short_description = 'Actualizar fecha de ejecucion de las tareas seleccionadas.'
+
+
+admin.site.register(OrmQ, NewQueueAdmin)
