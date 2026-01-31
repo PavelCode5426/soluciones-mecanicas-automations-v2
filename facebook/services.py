@@ -49,7 +49,7 @@ class FacebookAutomationService:
     def create_post(self, group: FacebookGroup, post: FacebookPost):
         group.refresh_from_db()
         post.refresh_from_db()
-        if post.active:
+        if post.active and group.active:
             with self.get_playwright() as pw:
                 try:
                     page = self.get_browser(pw).new_page()

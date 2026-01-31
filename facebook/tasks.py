@@ -12,7 +12,7 @@
 #             traceback.print_exc()
 
 
-from django_q.tasks import async_task
+from django_q.tasks import async_task, count_group
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
 from facebook.services import FacebookAutomationService
 
@@ -32,12 +32,13 @@ def download_groups_task(user):
 
 
 def enqueue_active_facebook_posts():
-    user = FacebookProfile.objects.first()
-    service = FacebookAutomationService(user)
-    posts = FacebookPost.objects.filter(active=True).all()
+    if count_group('enqueue_active_facebook_posts') == 0:
+        user = FacebookProfile.objects.first()
+        service = FacebookAutomationService(user)
+        posts = FacebookPost.objects.filter(active=True).all()
 
-    for post in posts:
-        groups = FacebookGroup.objects.filter(active=True, categories__posts=post).all()
-        for group in groups:
-            task_name = f"{group.name} -> Post:{post.id}"
-            async_task(service.create_post, group, post, task_name=task_name)
+        for post in posts:
+            groups = FacebookGroup.objects.filter(active=True, categories__posts=post).all()
+            for group in groups:
+                task_name = f"{group.name} -> Post:{post.id}"
+                async_task(service.create_post, group, post, task_name=task_name,group=f'facebook_post_{post.id}')
