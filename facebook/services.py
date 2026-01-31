@@ -27,7 +27,7 @@ class FacebookAutomationService:
             last_height = page.evaluate("document.body.scrollHeight")
             while True:
                 page.evaluate(f"window.scrollBy(0,document.body.scrollHeight)")
-                time.sleep(3)
+                time.sleep(20)
                 new_height = page.evaluate("document.body.scrollHeight")
                 if new_height == last_height:
                     break
