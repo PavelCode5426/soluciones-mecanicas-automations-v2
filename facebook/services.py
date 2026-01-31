@@ -22,7 +22,7 @@ class FacebookAutomationService:
     def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()
 
-    async def get_all_groups(self):
+    def get_all_groups(self):
         self.refresh_user()
         with self.get_playwright() as pw:
             browser = self.get_browser(pw)
@@ -51,7 +51,7 @@ class FacebookAutomationService:
             page.close()
             return groups
 
-    async def create_post(self, group: FacebookGroup, post: FacebookPost):
+    def create_post(self, group: FacebookGroup, post: FacebookPost):
         self.refresh_user()
         print(self.user)
         group.refresh_from_db()
@@ -79,8 +79,8 @@ class FacebookAutomationService:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
-                    await sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
-                    await group.asave()
+                    group.screenshot.save(file_name, ContentFile(image_bytes))
+                    group.save()
 
     def sign_in(self, user: FacebookProfile):
         pass
