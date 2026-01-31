@@ -39,6 +39,9 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
 
 
+admin.site.unregister(OrmQ)
+
+
 @admin.site.register(OrmQ)
 class NewQueueAdmin(QueueAdmin):
     actions = QueueAdmin.actions + ['clear_queue', 'execute_now']
