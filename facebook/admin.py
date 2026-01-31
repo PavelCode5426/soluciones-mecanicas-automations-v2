@@ -44,7 +44,7 @@ admin.site.unregister(OrmQ)
 
 @admin.site.register(OrmQ)
 class NewQueueAdmin(QueueAdmin):
-    actions = QueueAdmin.actions + ['clear_queue', 'execute_now']
+    actions = QueueAdmin.actions + ('clear_queue', 'execute_now',)
 
     def clear_queue(self, request, query):
         self.model.delete()
