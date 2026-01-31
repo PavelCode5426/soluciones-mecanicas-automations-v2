@@ -14,7 +14,7 @@ class FacebookAutomationService:
         self.user = user
 
     def get_browser(self, pw: Playwright):
-        sync_to_async(self.user.refresh_from_db)()
+        self.user.refresh_from_db()
         print("Refrescando el usuario")
         print(f"Despues: {self.user}")
         return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
