@@ -45,8 +45,8 @@ admin.site.unregister(OrmQ)
 class NewQueueAdmin(QueueAdmin):
     actions = QueueAdmin.actions + ('clear_queue', 'execute_now',)
 
-    def clear_queue(self, model, request, query):
-        model.delete()
+    def clear_queue(self, request, query):
+        OrmQ.objects.delete()
         self.message_user(request, f"Todos los elementos borrados correctamente", level=messages.SUCCESS)
 
     clear_queue.short_description = 'Vaciar todas las tareas.'
