@@ -13,18 +13,19 @@ class FacebookAutomationService:
     def __init__(self, user: FacebookProfile):
         self.user = user
 
-    async def get_browser(self, pw: Playwright):
+    def refresh_user(self):
         self.user.refresh_from_db()
-        print("Refrescando el usuario")
-        print(f"Despues: {self.user}")
+
+    def get_browser(self, pw: Playwright):
         return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
 
     def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()
 
     async def get_all_groups(self):
+        self.refresh_user()
         with self.get_playwright() as pw:
-            browser = await self.get_browser(pw)
+            browser = self.get_browser(pw)
             page = browser.new_page()
             page.goto("https://www.facebook.com/groups/joins/?nav_source=tab", timeout=settings.PLAYWRIGHT['timeout'])
 
@@ -51,12 +52,14 @@ class FacebookAutomationService:
             return groups
 
     async def create_post(self, group: FacebookGroup, post: FacebookPost):
+        self.refresh_user()
+        print(self.user)
         group.refresh_from_db()
         post.refresh_from_db()
         if post.active and group.active:
             with self.get_playwright() as pw:
                 try:
-                    browser = await self.get_browser(pw)
+                    browser = self.get_browser(pw)
                     page = browser.new_page()
                     page.goto(group.url, timeout=settings.PLAYWRIGHT['timeout'])
                     page.get_by_text('Escribe algo…').click()
@@ -76,8 +79,8 @@ class FacebookAutomationService:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
-                    sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
-                    await sync_to_async(group.save)()
+                    await sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
+                    await group.asave()
 
     def sign_in(self, user: FacebookProfile):
         pass
