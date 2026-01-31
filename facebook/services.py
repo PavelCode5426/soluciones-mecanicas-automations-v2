@@ -13,7 +13,7 @@ class FacebookAutomationService:
     def __init__(self, user: FacebookProfile):
         self.user = user
 
-    def get_browser(self, pw: Playwright):
+    async def get_browser(self, pw: Playwright):
         self.user.refresh_from_db()
         print("Refrescando el usuario")
         print(f"Despues: {self.user}")
@@ -22,9 +22,10 @@ class FacebookAutomationService:
     def get_playwright(self) -> PlaywrightContextManager:
         return sync_playwright()
 
-    def get_all_groups(self):
+    async def get_all_groups(self):
         with self.get_playwright() as pw:
-            page = self.get_browser(pw).new_page()
+            browser = await self.get_browser(pw)
+            page = browser.new_page()
             page.goto("https://www.facebook.com/groups/joins/?nav_source=tab", timeout=settings.PLAYWRIGHT['timeout'])
 
             last_height = page.evaluate("document.body.scrollHeight")
@@ -49,13 +50,14 @@ class FacebookAutomationService:
             page.close()
             return groups
 
-    def create_post(self, group: FacebookGroup, post: FacebookPost):
+    async def create_post(self, group: FacebookGroup, post: FacebookPost):
         group.refresh_from_db()
         post.refresh_from_db()
         if post.active and group.active:
             with self.get_playwright() as pw:
                 try:
-                    page = self.get_browser(pw).new_page()
+                    browser = await self.get_browser(pw)
+                    page = browser.new_page()
                     page.goto(group.url, timeout=settings.PLAYWRIGHT['timeout'])
                     page.get_by_text('Escribe algo…').click()
                     page.click('[aria-placeholder="Crea una publicación pública..."]')
@@ -75,7 +77,7 @@ class FacebookAutomationService:
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
                     sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
-                    sync_to_async(group.save)()
+                    await sync_to_async(group.save)()
 
     def sign_in(self, user: FacebookProfile):
         pass
