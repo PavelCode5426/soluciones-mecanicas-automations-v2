@@ -88,7 +88,7 @@ class FacebookAutomationService:
                                                                     timeout=settings.PLAYWRIGHT['timeout'])
             except Exception as e:
                 exception = e
-        return page.screenshot(full_page=True, quality=80, type='jpeg'), exception
+            return page.screenshot(full_page=True, quality=80, type='jpeg'), exception
 
     def sign_in(self, user: FacebookProfile):
         pass
