@@ -77,7 +77,7 @@ class FacebookAutomationService:
             try:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
-                page.goto(url, timeout=settings.PLAYWRIGHT['timeout'])
+                page.goto(url)
                 page.get_by_text('Escribe algo…').click()
                 page.click('[aria-placeholder="Crea una publicación pública..."]')
 
@@ -86,8 +86,7 @@ class FacebookAutomationService:
                 page.keyboard.type(post.text)
 
                 page.click('[aria-label="Publicar"]')
-                page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
-                                                                    timeout=settings.PLAYWRIGHT['timeout'])
+                page.get_by_text("Publicando", exact=True).wait_for(state='hidden')
             except Exception as e:
                 exception = e
             return page.screenshot(full_page=True, quality=80, type='jpeg'), exception
