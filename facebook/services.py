@@ -74,13 +74,12 @@ class FacebookAutomationService:
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count = F('published_count') + 1
-                    # sync_to_async(post.save)(update_fields=["published_count"])
-                    post.asave(update_fields=["published_count"])
+                    post.save(update_fields=["published_count"])
                     return "Publicado correctamente"
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
-                    sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
+                    group.screenshot.save(file_name, ContentFile(image_bytes))
 
     def sign_in(self, user: FacebookProfile):
         pass
