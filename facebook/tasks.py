@@ -23,12 +23,12 @@ def enqueue_active_facebook_posts():
     user = FacebookProfile.objects.first()
     service = FacebookAutomationService(user)
     posts = FacebookPost.objects.filter(active=True).all()
-    groups = 0
+    total_items = 0
 
     for post in posts:
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
             async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
-        groups += groups.count()
-    return f"Agendadas {posts.count() * groups} publicaciones"
+        total_items += groups.count()
+    return f"Agendadas {total_items} publicaciones"
