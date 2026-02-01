@@ -1,10 +1,10 @@
+import asyncio
 import time
 
-from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
-from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
+from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright, Page
 
 from facebook.models import FacebookProfile, FacebookPost, FacebookGroup
 
@@ -74,12 +74,19 @@ class FacebookAutomationService:
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count = F('published_count') + 1
-                    post.save(update_fields=["published_count"])
+                    asyncio.run(post.asave(update_fields=["published_count"]))
+
+                    self.__save_screenshot(page, group)
                     return "Publicado correctamente"
                 except Exception as e:
-                    file_name = f"{group}_screenshot.jpeg"
-                    image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
-                    group.screenshot.save(file_name, ContentFile(image_bytes))
+                    self.__save_screenshot(page, group)
+                    raise e
+
+    def __save_screenshot(self, page: Page, group: FacebookGroup):
+        file_name = f"{group}_screenshot.jpeg".lower()
+        screenshot = page.screenshot(full_page=True, quality=80, type='jpeg')
+        group.screenshot.save(file_name, ContentFile(screenshot), False)
+        asyncio.run(group.asave(update_fields=["screenshot"]))
 
     def sign_in(self, user: FacebookProfile):
         pass
