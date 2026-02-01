@@ -26,7 +26,7 @@ class FacebookUserAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
-    list_display = ("name", "url", "active")
+    list_display = ("name", "url", "active", "error_at",)
 
 
 @admin.register(FacebookGroupCategory)
