@@ -1,3 +1,4 @@
+from django_q.models import Task
 from django_q.tasks import async_task, count_group
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
 from facebook.services import FacebookAutomationService
@@ -18,7 +19,7 @@ def download_groups_task(user):
 
 
 def enqueue_active_facebook_posts():
-    if count_group('enqueue_active_facebook_posts') == 0:
+    if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
         user = FacebookProfile.objects.first()
         service = FacebookAutomationService(user)
         posts = FacebookPost.objects.filter(active=True).all()
