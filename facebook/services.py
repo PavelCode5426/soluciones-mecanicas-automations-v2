@@ -1,10 +1,10 @@
-import asyncio
 import time
 
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
-from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright, Page
+from django.utils.timezone import now
+from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
 from facebook.models import FacebookProfile, FacebookPost, FacebookGroup
 
@@ -58,16 +58,18 @@ class FacebookAutomationService:
         post.refresh_from_db()
         if post.active and group.active:
             screenshot, exception = self.__publish_group_post(group.url, post)
-            self.__save_screenshot(group, screenshot)
+            file_name = f"{group}_screenshot.jpeg".lower()
+            group.screenshot.save(file_name, ContentFile(screenshot), False)
+
+            group.error_at = None
             if exception:
+                group.error_at = now()
+                group.save()
                 raise exception
+
+            group.save()
             post.published_count = F('published_count') + 1
             post.save(update_fields=["published_count"])
-
-    def __save_screenshot(self, group: FacebookGroup, screenshot: bytes):
-        file_name = f"{group}_screenshot.jpeg".lower()
-        group.screenshot.save(file_name, ContentFile(screenshot), False)
-        group.save(update_fields=["screenshot"])
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
