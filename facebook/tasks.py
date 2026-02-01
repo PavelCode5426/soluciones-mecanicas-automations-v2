@@ -30,5 +30,5 @@ def enqueue_active_facebook_posts():
             for group in groups:
                 task_name = f"{group.name} -> Post:{post.id}"
                 async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
-            groups += len(groups)
-        return f"Agendadas {len(posts) * groups} publicaciones"
+            groups += groups.count()
+        return f"Agendadas {posts.count() * groups} publicaciones"
