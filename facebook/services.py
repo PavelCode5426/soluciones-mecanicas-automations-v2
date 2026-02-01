@@ -54,39 +54,41 @@ class FacebookAutomationService:
 
     def create_post(self, group: FacebookGroup, post: FacebookPost):
         self.refresh_user()
-        print(self.user)
         group.refresh_from_db()
         post.refresh_from_db()
         if post.active and group.active:
-            with get_playwright() as pw:
-                try:
-                    browser = self.get_browser(pw)
-                    page = browser.new_page()
-                    page.goto(group.url, timeout=settings.PLAYWRIGHT['timeout'])
-                    page.get_by_text('Escribe algo…').click()
-                    page.click('[aria-placeholder="Crea una publicación pública..."]')
+            screenshot, exception = self.__publish_group_post(group.url, post)
+            self.__save_screenshot(group, screenshot)
+            if exception:
+                raise exception
+            post.published_count = F('published_count') + 1
+            post.save(update_fields=["published_count"])
 
-                    file_input = page.locator('input[type="file"][multiple]')
-                    file_input.set_input_files(files=[post.file.path])
-                    page.keyboard.type(post.text)
-
-                    page.click('[aria-label="Publicar"]')
-                    page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
-                                                                        timeout=settings.PLAYWRIGHT['timeout'])
-                    post.published_count = F('published_count') + 1
-                    asyncio.run(post.asave(update_fields=["published_count"]))
-
-                    self.__save_screenshot(page, group)
-                    return "Publicado correctamente"
-                except Exception as e:
-                    self.__save_screenshot(page, group)
-                    raise e
-
-    def __save_screenshot(self, page: Page, group: FacebookGroup):
+    def __save_screenshot(self, group: FacebookGroup, screenshot: bytes):
         file_name = f"{group}_screenshot.jpeg".lower()
-        screenshot = page.screenshot(full_page=True, quality=80, type='jpeg')
         group.screenshot.save(file_name, ContentFile(screenshot), False)
-        asyncio.run(group.asave(update_fields=["screenshot"]))
+        group.save(update_fields=["screenshot"])
+
+    def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
+        exception = None
+        with get_playwright() as pw:
+            try:
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+                page.goto(url, timeout=settings.PLAYWRIGHT['timeout'])
+                page.get_by_text('Escribe algo…').click()
+                page.click('[aria-placeholder="Crea una publicación pública..."]')
+
+                file_input = page.locator('input[type="file"][multiple]')
+                file_input.set_input_files(files=[post.file.path])
+                page.keyboard.type(post.text)
+
+                page.click('[aria-label="Publicar"]')
+                page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
+                                                                    timeout=settings.PLAYWRIGHT['timeout'])
+            except Exception as e:
+                exception = e
+        return page.screenshot(full_page=True, quality=80, type='jpeg'), exception
 
     def sign_in(self, user: FacebookProfile):
         pass
