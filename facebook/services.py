@@ -1,6 +1,6 @@
 import time
 
-from asgiref.sync import sync_to_async
+from asgiref.sync import sync_to_async, async_to_sync
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
@@ -74,14 +74,13 @@ class FacebookAutomationService:
                     page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
                                                                         timeout=settings.PLAYWRIGHT['timeout'])
                     post.published_count = F('published_count') + 1
-                    post.asave(update_fields=["published_count"])
+                    sync_to_async(post.save)(update_fields=["published_count"])
                     return "Publicado correctamente"
                 except Exception as e:
                     file_name = f"{group}_screenshot.jpeg"
                     image_bytes = page.screenshot(full_page=True, quality=80, type='jpeg')
                     # group.screenshot.save(file_name, ContentFile(image_bytes))
                     sync_to_async(group.screenshot.save)(file_name, ContentFile(image_bytes), True)
-                    group.asave()
 
     def sign_in(self, user: FacebookProfile):
         pass
