@@ -1,7 +1,3 @@
-import os
-from pathlib import Path
-
-from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
 
@@ -21,7 +17,7 @@ class Command(BaseCommand):
 
         for file in files:
             if file not in screenshots:
-                default_storage.delete(files)
+                default_storage.delete(file)
 
         for directory in dirs:
             default_storage.delete(directory)
@@ -33,5 +29,4 @@ class Command(BaseCommand):
             subdirs, subfiles = self.get_files_and_folders(f"{path}/{directory}")
             dirs += subdirs
             files += subfiles
-
         return dirs, files
