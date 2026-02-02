@@ -17,10 +17,21 @@ class Command(BaseCommand):
             download_groups_task(profile)
 
         screenshots = set(FacebookGroup.objects.exclude(screenshot__isnull=True).all())
-        groups_folder = "groups_screenshots"
-        screenshots_folder = Path(settings.MEDIA_ROOT).joinpath(groups_folder)
+        dirs, files = self.get_files_and_folders("groups_screenshots")
 
-        for file in os.listdir(screenshots_folder):
-            current_file = f"{groups_folder}/{file}"
-            if current_file not in screenshots:
-                default_storage.delete(current_file)
+        for file in files:
+            if file not in screenshots:
+                default_storage.delete(files)
+
+        for directory in dirs:
+            default_storage.delete(directory)
+
+    def get_files_and_folders(self, path=""):
+        dirs, files = default_storage.listdir(path)
+
+        for directory in dirs:
+            subdirs, subfiles = self.get_files_and_folders(f"{path}/{directory}")
+            dirs += subdirs
+            files += subfiles
+
+        return dirs, files
