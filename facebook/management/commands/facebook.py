@@ -32,4 +32,5 @@ class Command(BaseCommand):
             dirs.extend(subdirs)
             files.extend(subfiles)
 
+        dirs = sorted(dirs, key=lambda d: len(d.split("/")), reverse=True)
         return dirs, files
