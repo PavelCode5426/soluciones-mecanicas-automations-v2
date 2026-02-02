@@ -73,7 +73,7 @@ class FacebookAutomationService:
 
             group.save()
             post.published_count = F('published_count') + 1
-            post.save(update_fields=["published_count"])
+            post.save()
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
