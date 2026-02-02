@@ -79,8 +79,8 @@ class FacebookAutomationService:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto(url)
-                page.get_by_text('Escribe algo…').click(timeout=settings.PLAYWRIGHT['timeout'])
-                page.click('[aria-placeholder="Crea una publicación pública..."]',
+                page.get_by_text('Escribe algo', exact=False).click(timeout=settings.PLAYWRIGHT['timeout'])
+                page.click('[aria-placeholder*="Crea una publicación"]',
                            timeout=settings.PLAYWRIGHT['timeout'])
 
                 file_input = page.locator('input[type="file"][multiple]')
