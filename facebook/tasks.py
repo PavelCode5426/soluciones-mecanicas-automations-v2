@@ -23,11 +23,11 @@ def enqueue_active_facebook_posts():
     # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
     user = FacebookProfile.objects.first()
     service = FacebookAutomationService(user)
-    posts = FacebookPost.objects.filter(active=True).all()
+    posts = FacebookPost.objects.filter(active=True).order_by('?').all()
     total_items = 0
 
     for post in posts:
-        groups = FacebookGroup.objects.filter(active=True, categories__posts=post).all()
+        groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
             async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
