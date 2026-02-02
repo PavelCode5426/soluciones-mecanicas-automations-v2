@@ -1,3 +1,5 @@
+import random
+
 from django_q.models import Task
 from django_q.tasks import async_task, count_group
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
@@ -24,12 +26,21 @@ def enqueue_active_facebook_posts():
     user = FacebookProfile.objects.first()
     service = FacebookAutomationService(user)
     posts = FacebookPost.objects.filter(active=True).order_by('?').all()
-    total_items = 0
 
+    for_enqueue = []
     for post in posts:
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
-            async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
-        total_items += groups.count()
+            for_enqueue.append(dict(
+                args=(service.create_post, group, post,),
+                kwargs=dict(task_name=task_name, group=f'facebook_post_{post.id}')
+            ))
+            # async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
+
+    total_items = len(for_enqueue)
+    random.shuffle(for_enqueue)
+    for task in for_enqueue:
+        async_task(*task['args'], **task['kwargs'])
+
     return f"Agendadas {total_items} publicaciones"
