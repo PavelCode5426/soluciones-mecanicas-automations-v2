@@ -24,10 +24,12 @@ class Command(BaseCommand):
 
     def get_files_and_folders(self, path=""):
         dirs, files = default_storage.listdir(path)
+        files = [f"{path}/{file}" for file in files]
+        dirs = [f"{path}/{directory}" for directory in dirs]
 
-        for directory in dirs:
-            current_dir = f"{path}/{directory}"
-            subdirs, subfiles = self.get_files_and_folders(current_dir)
-            dirs += [f"{current_dir}/{subdirectory}" for subdirectory in subdirs]
-            files += [f"{current_dir}/{file}" for file in subfiles]
+        for subdir in dirs:
+            subdirs, subfiles = self.get_files_and_folders(subdir)
+            dirs.extend(subdirs)
+            files.extend(subfiles)
+
         return dirs, files
