@@ -22,7 +22,9 @@ class FacebookAutomationService:
         self.user.refresh_from_db()
 
     def get_browser(self, pw: Playwright):
-        return pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
+        context = pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
+        context.set_default_timeout(settings.PLAYWRIGHT['timeout'])
+        return context
 
     def get_all_groups(self):
         self.refresh_user()
@@ -75,11 +77,12 @@ class FacebookAutomationService:
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
-        with get_playwright() as pw:
+        with (get_playwright() as pw):
             try:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto(url)
+
                 # page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
                 # page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
                 # file_input = page.locator('input[type="file"][multiple]')
@@ -88,9 +91,15 @@ class FacebookAutomationService:
                 # page.get_by_text('Publicar').click()
                 # page.get_by_text("Publicando").wait_for(state='hidden')
 
-                page.get_by_text('Escribe algo…').click(timeout=settings.PLAYWRIGHT['timeout'])
-                page.click('[aria-placeholder="Crea una publicación pública..."]',
-                           timeout=settings.PLAYWRIGHT['timeout'])
+                page.wait_for_load_state(state='load')
+                write_btn = page.get_by_text('Escribe algo')
+                write_btn.wait_for(state='visible')
+                write_btn.click()
+
+                page.get_by_text('Crear publicación').wait_for(state='visible')
+                text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
+                text_area.wait_for(state='visible')
+                text_area.click()
 
                 file_input = page.locator('input[type="file"][multiple]')
                 file_input.set_input_files(files=[post.file.path])
@@ -98,8 +107,7 @@ class FacebookAutomationService:
 
                 time.sleep(random.randint(30, 60))
                 page.click('[aria-label="Publicar"]')
-                page.get_by_text("Publicando", exact=True).wait_for(state='hidden',
-                                                                    timeout=settings.PLAYWRIGHT['timeout'])
+                page.get_by_text("Publicando", exact=True).wait_for(state='hidden')
 
             except Exception as e:
                 exception = e

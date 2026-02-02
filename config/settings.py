@@ -153,16 +153,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PLAYWRIGHT = dict(
     headless=env('PW_HEADLESS', cast=bool, default=True),
     slow_mo=500,
-    timeout=300_000
+    timeout=100_000
 )
 
 Q_CLUSTER = {
     "label": "Tareas pendientes",
     "name": "soluciones",
-    "workers": 4,
-    "timeout": 10 * 60,
+    "workers": 1,
+    "timeout": 3 * 60,
     "recycle": 500,
-    "retry": 15 * 60,
+    "retry": 5 * 60,
     "queue_limit": 50,
     "bulk": 10,
     "orm": "default"
