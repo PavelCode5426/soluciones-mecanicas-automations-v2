@@ -26,7 +26,8 @@ class Command(BaseCommand):
         dirs, files = default_storage.listdir(path)
 
         for directory in dirs:
-            subdirs, subfiles = self.get_files_and_folders(f"{path}/{directory}")
-            dirs += subdirs
-            files += subfiles
+            current_dir = f"{path}/{directory}"
+            subdirs, subfiles = self.get_files_and_folders(current_dir)
+            dirs += [f"{current_dir}/{subdirectory}" for subdirectory in subdirs]
+            files += [f"{current_dir}/{file}" for file in subfiles]
         return dirs, files
