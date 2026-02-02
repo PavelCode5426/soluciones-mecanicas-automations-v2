@@ -79,14 +79,14 @@ class FacebookAutomationService:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto(url)
-                page.get_by_text('Escribe algo', exact=False).click(timeout=settings.PLAYWRIGHT['timeout'])
+                page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
                 page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
                 file_input = page.locator('input[type="file"][multiple]')
                 file_input.set_input_files(files=[post.file.path])
                 page.keyboard.type(post.text)
 
                 page.get_by_text('Publicar').click()
-                page.get_by_text("Publicando", exact=True).wait_for(state='hidden')
+                page.get_by_text("Publicando").wait_for(state='hidden')
             except Exception as e:
                 exception = e
             return page.screenshot(full_page=True, quality=80, type='jpeg'), exception
