@@ -59,6 +59,7 @@ class FacebookAutomationService:
         if post.active and group.active:
             screenshot, exception = self.__publish_group_post(group.url, post)
             file_name = f"{group}_screenshot.jpeg".lower()
+            group.screenshot.delete(False)
             group.screenshot.save(file_name, ContentFile(screenshot), False)
 
             group.error_at = None
