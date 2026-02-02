@@ -153,7 +153,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 PLAYWRIGHT = dict(
     headless=env('PW_HEADLESS', cast=bool, default=True),
     slow_mo=500,
-    timeout=600_000
+    timeout=100_000
 )
 
 Q_CLUSTER = {
