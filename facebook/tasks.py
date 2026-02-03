@@ -32,11 +32,11 @@ def enqueue_active_facebook_posts():
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
-            for_enqueue.append(dict(
-                args=(service.create_post, group, post,),
-                kwargs=dict(task_name=task_name, group=f'facebook_post_{post.id}')
-            ))
-            # async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
+            # for_enqueue.append(dict(
+            #     args=(service.create_post, group, post,),
+            #     kwargs=dict(task_name=task_name, group=f'facebook_post_{post.id}')
+            # ))
+            async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
 
     total_items = len(for_enqueue)
     random.shuffle(for_enqueue)

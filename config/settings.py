@@ -161,7 +161,7 @@ Q_CLUSTER = {
     "name": "soluciones",
     "workers": 3,
     "timeout": 3 * 60,
-    "recycle": 500,
+    "recycle": 50,
     "retry": 5 * 60,
     "queue_limit": 50,
     "bulk": 10,
