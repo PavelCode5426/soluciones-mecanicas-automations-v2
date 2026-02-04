@@ -96,9 +96,9 @@ class FacebookAutomationService:
                 write_btn.wait_for(state='visible')
                 write_btn.click()
 
-                page.get_by_text('Crear publicación').wait_for(state='visible')
+                # page.get_by_text('Crear publicación').wait_for(state='visible')
                 text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                text_area.wait_for(state='visible')
+                # text_area.wait_for(state='visible')
                 text_area.click()
 
                 file_input = page.locator('input[type="file"][multiple]')
