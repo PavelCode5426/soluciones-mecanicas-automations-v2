@@ -21,6 +21,14 @@ services:
     networks:
       - soluciones-mecanicas-backend_soluciones-mecanicas-net
       - nginx-proxy-manager_default
+    deploy:
+      resources:
+        limits:
+          cpus: 1.3
+          memory: 1G
+        reservations:
+          cpus: 1
+          memory: 700M
 volumes:
   storage:
 
