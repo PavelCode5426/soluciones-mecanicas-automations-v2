@@ -10,10 +10,9 @@ def download_groups_task(user):
     service = FacebookAutomationService(user)
     groups = service.get_all_groups()
 
-    FacebookGroup.objects.update(active=False)
     for group in groups:
         FacebookGroup.objects.update_or_create(
-            defaults={"name": group['name'], "active": True, "error_at": None, "screenshot": None},
+            defaults={"name": group['name']},
             create_defaults=group,
             url=group['url']
         )
