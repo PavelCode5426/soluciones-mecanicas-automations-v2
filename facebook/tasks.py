@@ -1,7 +1,7 @@
 import random
 
-from django_q.models import Task
-from django_q.tasks import async_task, count_group
+from django_q.tasks import async_task
+
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
 from facebook.services import FacebookAutomationService
 
@@ -20,6 +20,14 @@ def download_groups_task(user):
     return groups
 
 
+def check_profile_status():
+    users = FacebookProfile.objects.all()
+    for user in users:
+        service = FacebookAutomationService(user)
+        async_task(service.check_status, task_name=f'check_status', group='check_status')
+    return "Comprobación de estado agendada correctamente"
+
+
 def enqueue_active_facebook_posts():
     # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
     user = FacebookProfile.objects.first()
@@ -35,7 +43,6 @@ def enqueue_active_facebook_posts():
                 args=(group, post,),
                 kwargs=dict(task_name=task_name, group=f'facebook_post_{post.id}')
             ))
-            # async_task(service.create_post, group, post, task_name=task_name, group=f'facebook_post_{post.id}')
 
     total_items = len(for_enqueue)
     random.shuffle(for_enqueue)

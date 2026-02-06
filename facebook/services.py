@@ -18,6 +18,17 @@ class FacebookAutomationService:
     def __init__(self, user: FacebookProfile):
         self.user = user
 
+    def check_status(self):
+        self.refresh_user()
+        if self.user.active:
+            with (get_playwright() as pw):
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+                page.goto('https://www.facebook.com/')
+                self.user.active = not page.get_by_placeholder('Contraseña').is_visible()
+        self.user.save(update_fields=['active'])
+        return self.user.active
+
     def refresh_user(self):
         self.user.refresh_from_db()
 
@@ -59,7 +70,7 @@ class FacebookAutomationService:
         self.refresh_user()
         group.refresh_from_db()
         post.refresh_from_db()
-        if post.active and group.active:
+        if post.active and group.active and self.user.active:
             screenshot, exception = self.__publish_group_post(group.url, post)
             file_name = f"{group}_screenshot.jpeg".lower()
             group.screenshot.delete(False)

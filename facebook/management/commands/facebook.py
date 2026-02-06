@@ -9,8 +9,8 @@ class Command(BaseCommand):
     help = "Sincroniza la informacion de facebook con la base de datos"
 
     def handle(self, *args, **options):
-        for profile in FacebookProfile.objects.all():
-            download_groups_task(profile)
+        # for profile in FacebookProfile.objects.all():
+        #     download_groups_task(profile)
 
         screenshots = set(FacebookGroup.objects.exclude(screenshot__isnull=True).all())
         dirs, files = self.get_files_and_folders("groups_screenshots")
