@@ -25,7 +25,7 @@ class FacebookAutomationService:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
-                self.user.active = not page.get_by_placeholder('Contraseña').is_visible()
+                self.user.active = not page.get_by_text('Iniciar sesión').is_visible()
         self.user.save(update_fields=['active'])
         return self.user.active
 
@@ -114,9 +114,11 @@ class FacebookAutomationService:
 
                 file_input = page.locator('input[type="file"][multiple]')
                 file_input.set_input_files(files=[post.file.path])
-                page.keyboard.insert_text(post.text)
 
-                time.sleep(random.randint(30, 60))
+                page.keyboard.type(post.text)
+                # page.keyboard.insert_text(post.text)
+                # time.sleep(random.randint(30, 60))
+
                 page.click('[aria-label="Publicar"]')
                 page.get_by_text("Publicando", exact=True).wait_for(state='hidden')
 
