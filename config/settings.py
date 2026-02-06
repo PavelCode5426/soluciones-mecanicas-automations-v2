@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+
 import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -158,12 +159,18 @@ PLAYWRIGHT = dict(
 
 Q_CLUSTER = {
     "label": "Tareas pendientes",
-    "name": "soluciones",
+    "name": "default",
     "workers": 3,
     "timeout": 5 * 60,
     "recycle": 50,
     "retry": 6 * 60,
     "queue_limit": 50,
     "bulk": 10,
-    "orm": "default"
+    "orm": "default",
+    "ALT_CLUSTER": {
+        "high_priority": {
+            "workers": 1,
+            'max_attempts': 3
+        },
+    },
 }
