@@ -167,7 +167,7 @@ Q_CLUSTER = {
     "queue_limit": 50,
     "bulk": 10,
     "orm": "default",
-    "ALT_CLUSTER": {
+    "ALT_CLUSTERS": {
         "high_priority": {
             "workers": 1,
             'max_attempts': 3
