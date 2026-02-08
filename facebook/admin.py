@@ -20,7 +20,7 @@ class FacebookUserAdmin(admin.ModelAdmin):
     def sync_facebook_groups(self, request, queryset):
         users = queryset.all()
         for user in users:
-            async_task(download_groups_task, user, task_name=f"download_{user}_groups".lower())
+            async_task(download_groups_task, user, task_name=f"download_{user}_groups".lower(), cluster='high_priority')
         self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
 
     sync_facebook_groups.short_description = 'Actualizar grupos del perfil'
@@ -53,10 +53,10 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
 
     def add_to_queue(self, request, query):
         user = FacebookProfile.objects.first()
-        enqueue_posts(user, posts=query.all())
-        self.message_user(request, f"Todas las publicaciones fueron agendados correctamente", level=messages.SUCCESS)
+        total_items = enqueue_posts(user, posts=query.all())
+        self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
 
-    add_to_queue.short_description = 'Poner publicaciones en cola'
+    add_to_queue.short_description = 'Agendar publicaciones'
 
 
 admin.site.unregister(OrmQ)

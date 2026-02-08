@@ -1,8 +1,7 @@
 from django.core.files.storage import default_storage
 from django.core.management.base import BaseCommand
 
-from facebook.models import FacebookGroup, FacebookProfile
-from facebook.tasks import download_groups_task
+from facebook.models import FacebookGroup
 
 
 class Command(BaseCommand):

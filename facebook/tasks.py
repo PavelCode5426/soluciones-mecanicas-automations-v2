@@ -11,11 +11,8 @@ def download_groups_task(user):
     groups = service.get_all_groups()
 
     for group in groups:
-        FacebookGroup.objects.update_or_create(
-            defaults={"name": group['name']},
-            create_defaults=group,
-            url=group['url']
-        )
+        FacebookGroup.objects.update_or_create(defaults={"name": group['name']},
+                                               create_defaults=group, url=group['url'])
 
     return groups
 
@@ -24,7 +21,7 @@ def check_profile_status():
     users = FacebookProfile.objects.all()
     for user in users:
         service = FacebookAutomationService(user)
-        async_task(service.check_status, task_name=f'check_status', group='check_status')
+        async_task(service.check_status, task_name=f'check_status', group='check_status', cluster='high_priority')
     return "Comprobación de estado agendada correctamente"
 
 
@@ -45,11 +42,14 @@ def enqueue_posts(user: FacebookProfile, posts: list[FacebookPost]):
     for task in for_enqueue:
         async_task(service.create_post, *task['args'], **task['kwargs'])
 
-    return f"Agendadas {total_items} publicaciones"
+    return total_items
 
 
 def enqueue_active_facebook_posts():
     # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
-    user = FacebookProfile.objects.first()
+    total_items = 0
+    users = FacebookProfile.objects.all()
     posts = FacebookPost.objects.filter(active=True).order_by('?').all()
-    return enqueue_posts(user, posts)
+    for user in users:
+        total_items += enqueue_posts(user, posts)
+    return f"Agendadas {total_items} publicaciones"
