@@ -6,7 +6,8 @@ from django_q.models import Task, OrmQ
 from django_q.tasks import async_task
 
 from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost
-from facebook.tasks import download_groups_task
+from facebook.services import FacebookAutomationService
+from facebook.tasks import download_groups_task, enqueue_posts
 
 
 # Register your models here.
@@ -49,6 +50,13 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
 
     image.short_description = 'Image'
+
+    def add_to_queue(self, request, query):
+        user = FacebookProfile.objects.first()
+        enqueue_posts(user, posts=query.all())
+        self.message_user(request, f"Todas las publicaciones fueron agendados correctamente", level=messages.SUCCESS)
+
+    add_to_queue.short_description = 'Poner publicaciones en cola'
 
 
 admin.site.unregister(OrmQ)

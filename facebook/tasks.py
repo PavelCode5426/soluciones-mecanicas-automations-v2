@@ -28,12 +28,8 @@ def check_profile_status():
     return "Comprobación de estado agendada correctamente"
 
 
-def enqueue_active_facebook_posts():
-    # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
-    user = FacebookProfile.objects.first()
+def enqueue_posts(user: FacebookProfile, posts: list[FacebookPost]):
     service = FacebookAutomationService(user)
-    posts = FacebookPost.objects.filter(active=True).order_by('?').all()
-
     for_enqueue = []
     for post in posts:
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
@@ -50,3 +46,10 @@ def enqueue_active_facebook_posts():
         async_task(service.create_post, *task['args'], **task['kwargs'])
 
     return f"Agendadas {total_items} publicaciones"
+
+
+def enqueue_active_facebook_posts():
+    # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
+    user = FacebookProfile.objects.first()
+    posts = FacebookPost.objects.filter(active=True).order_by('?').all()
+    return enqueue_posts(user, posts)
