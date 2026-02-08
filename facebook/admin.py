@@ -31,7 +31,7 @@ class FacebookGroudAdmin(admin.ModelAdmin):
     readonly_fields = ("image",)
 
     def image(self, obj):
-        return format_html('<img  width="200" src="{}" />'.format(obj.screenshot.url))
+        return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
 
     image.short_description = 'Image'
 
@@ -46,7 +46,7 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
 
     def image(self, obj):
-        return format_html('<img  width="200" src="{}" />'.format(obj.file.url))
+        return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
 
     image.short_description = 'Image'
 
