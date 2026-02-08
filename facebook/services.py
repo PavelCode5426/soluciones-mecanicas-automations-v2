@@ -112,8 +112,9 @@ class FacebookAutomationService:
                 # text_area.wait_for(state='visible')
                 text_area.click()
 
-                file_input = page.locator('input[type="file"][multiple]')
-                file_input.set_input_files(files=[post.file.path])
+                if post.file:
+                    file_input = page.locator('input[type="file"][multiple]')
+                    file_input.set_input_files(files=[post.file.path])
 
                 # page.keyboard.type(post.text)
                 page.keyboard.insert_text(post.text)
