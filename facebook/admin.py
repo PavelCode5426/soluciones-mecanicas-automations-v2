@@ -45,6 +45,7 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
+    actions = ['add_to_queue']
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
