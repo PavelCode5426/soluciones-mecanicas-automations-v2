@@ -25,7 +25,7 @@ class FacebookAutomationService:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
-                self.user.active = not page.get_by_text('Iniciar sesión').is_visible()
+                self.user.active = not bool(page.locator('text=Iniciar sesión').count())
         self.user.save(update_fields=['active'])
         return self.user.active
 

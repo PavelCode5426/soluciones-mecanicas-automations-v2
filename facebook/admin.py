@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.utils.html import format_html
 from django.utils.timezone import now
 from django_q.admin import TaskAdmin, QueueAdmin
 from django_q.models import Task, OrmQ
@@ -27,6 +28,12 @@ class FacebookUserAdmin(admin.ModelAdmin):
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
     list_display = ("name", "url", "active", "error_at",)
+    readonly_fields = ("image",)
+
+    def image(self, obj):
+        return format_html('<img  width="200" src="{}" />'.format(obj.screenshot.url))
+
+    image.short_description = 'Image'
 
 
 @admin.register(FacebookGroupCategory)
@@ -37,6 +44,11 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
+
+    def image(self, obj):
+        return format_html('<img  width="200" src="{}" />'.format(obj.file.url))
+
+    image.short_description = 'Image'
 
 
 admin.site.unregister(OrmQ)
