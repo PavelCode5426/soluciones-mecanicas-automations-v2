@@ -121,7 +121,7 @@ class FacebookAutomationService:
                 time.sleep(random.randint(30, 60))
 
                 page.click('[aria-label="Publicar"]')
-                page.get_by_text("Publicando", exact=True).wait_for(state='hidden')
+                page.get_by_text("Publicando").wait_for(state='hidden')
 
             except Exception as e:
                 exception = e
