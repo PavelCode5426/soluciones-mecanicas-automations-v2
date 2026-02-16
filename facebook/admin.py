@@ -1,12 +1,11 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
 from django.utils.timezone import now
-from django_q.admin import TaskAdmin, QueueAdmin
-from django_q.models import Task, OrmQ
+from django_q.admin import QueueAdmin
+from django_q.models import OrmQ
 from django_q.tasks import async_task
 
 from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost
-from facebook.services import FacebookAutomationService
 from facebook.tasks import download_groups_task, enqueue_posts
 
 
@@ -46,6 +45,7 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
     actions = ['add_to_queue']
+    readonly_fields = ["image"]
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
@@ -58,6 +58,18 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
         self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
 
     add_to_queue.short_description = 'Agendar publicaciones'
+
+    def disable_posts(self, request, queryset):
+        total_items = queryset.update(active=False)
+        self.message_user(request, f"Fueron desactivadas {total_items} publicaciones", level=messages.SUCCESS)
+
+    disable_posts.short_description = 'Desactivar publicaciones'
+
+    def enable_posts(self, request, queryset):
+        total_items = queryset.update(active=True)
+        self.message_user(request, f"Fueron activadas {total_items} publicaciones", level=messages.SUCCESS)
+
+    enable_posts.short_description = 'Activar publicaciones'
 
 
 admin.site.unregister(OrmQ)

@@ -109,7 +109,7 @@ class FacebookAutomationService:
 
                 # page.get_by_text('Crear publicación').wait_for(state='visible')
                 text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                text_area.wait_for(state='visible')
+                # text_area.wait_for(state='visible')
                 text_area.click()
 
                 if post.file:
@@ -118,6 +118,7 @@ class FacebookAutomationService:
 
                 # page.keyboard.type(post.text)
                 page.keyboard.insert_text(post.text)
+                page.keyboard.insert_text(self.user.posts_footer)
                 time.sleep(random.randint(30, 60))
 
                 page.click('[aria-label="Publicar"]')

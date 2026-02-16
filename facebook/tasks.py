@@ -30,6 +30,8 @@ def enqueue_posts(user: FacebookProfile, posts: list[FacebookPost]):
     for_enqueue = []
     for post in posts:
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
+        if post.distribution_count:
+            groups = groups[:post.distribution_count]
         for group in groups:
             task_name = f"{group.name} -> Post:{post.id}"
             for_enqueue.append(dict(

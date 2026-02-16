@@ -25,6 +25,7 @@ class FacebookProfile(models.Model):
     name = models.CharField(max_length=250)
     context = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
+    posts_footer = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -37,5 +38,6 @@ class FacebookPost(models.Model):
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
     published_count = models.BigIntegerField(default=0)
+    distribution_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
