@@ -178,3 +178,6 @@ Q_CLUSTER = {
         },
     },
 }
+
+IA_OLLAMA_HOST = 'https://ia.pavelcode5426.duckdns.org'
+IA_POST_PERSISTEN = MEDIA_ROOT / "query_engine"
