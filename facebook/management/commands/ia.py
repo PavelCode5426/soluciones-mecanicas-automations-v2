@@ -71,12 +71,13 @@ class Command(BaseCommand):
         agent = AgentWorkflow(agents=[seller_agent])
         ctx = Context(agent)
 
-        while True:
-            query = input("Tu:")
-            if query == "q":
-                break
-            if query != "":
-                response = agent.run(query, ctx=ctx)
-                while not response.done():
-                    self.stdout.write('.')
-                self.stdout.write(response)
+        async def main():
+            while True:
+                query = input("Tu:")
+                if query == "q":
+                    break
+                if query != "":
+                    response = await agent.run(query, ctx=ctx)
+                    print(response)
+
+        asyncio.run(main())
