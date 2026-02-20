@@ -41,7 +41,7 @@ class Command(BaseCommand):
             documents = []
             posts = FacebookPost.objects.filter(active=True).all()
             for post in posts:
-                documents.append(Document(text_resource=post.text))
+                documents.append(Document(text=post.text))
             vector_index = VectorStoreIndex.from_documents(documents)
             vector_index.storage_context.persist(PERSIST_DIR)
 
