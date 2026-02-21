@@ -9,26 +9,6 @@ from django.db.models import F
 from django.utils.timezone import now
 from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
     SimpleDirectoryReader
-from llama_index.core.agent import FunctionAgent, ReActAgent
-from llama_index.core.response_synthesizers import ResponseMode
-from llama_index.core.tools import QueryEngineTool
-from llama_index.embeddings.ollama import OllamaEmbedding
-from llama_index.llms.ollama import Ollama
-from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
-
-from facebook.models import FacebookPost
-from facebook.models import FacebookProfile, FacebookGroup
-import random
-import time
-from pathlib import Path
-
-import requests
-from django.conf import settings
-from django.core.files.base import ContentFile
-from django.db.models import F
-from django.utils.timezone import now
-from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
-    SimpleDirectoryReader
 from llama_index.core.agent import FunctionAgent
 from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.tools import QueryEngineTool
@@ -242,13 +222,13 @@ class IAService:
         return FunctionAgent(name='seller_agent',
                              verbose=self.verbose,
                              description="Encagado de responder informacion de la tienda y productos.",
-                             tools=[products_query_engine_tool], system_prompt=self.system_prompt)
+                             tools=[], system_prompt=self.system_prompt)
 
     def get_seller_agent_thinker(self):
         self.init_llamaindex()
         products_query_engine_tool = self.get_products_query_engine_tool()
 
-        return ReActAgent(name='seller_agent',
+        return FunctionAgent(name='seller_agent',
                              verbose=self.verbose,
                              description="Encagado de responder informacion de la tienda y productos.",
                              tools=[products_query_engine_tool], system_prompt=self.system_prompt)
