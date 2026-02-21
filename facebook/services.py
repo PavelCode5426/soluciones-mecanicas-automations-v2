@@ -186,6 +186,7 @@ class IAService:
     Emily: "¡Hola! Soy Emily de Soluciones Hevia. ¿En qué puedo ayudarte hoy? Tenemos una amplia variedad de autopartes y herramientas. ¿Buscas algún producto en especial?"
     """
 
+    verbose = True
     embedding_model = 'nomic-embed-text:latest'
     llm_model = 'llama3.1:8b-instruct-q4_K_M'
 
@@ -238,6 +239,7 @@ class IAService:
         products_query_engine_tool = self.get_products_query_engine_tool()
 
         return FunctionAgent(name='seller_agent',
+                             verbose=self.verbose,
                              description="Encagado de responder informacion de la tienda y productos.",
                              tools=[products_query_engine_tool], system_prompt=self.system_prompt)
 
