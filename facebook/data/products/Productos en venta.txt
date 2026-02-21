@@ -82,8 +82,7 @@ DESCRIPCION: Delantero exterior UAZ
 PRECIO: 3130.00 CUP
 APLICACIONES: UAZ, rueda delantera
 
-# RODAMIENTOS DE BOLA
-PRODUCTO: Rodamiento de Bola 6201
+PRODUCTO: Rodamientos de Bola 6201
 CATEGORIA: Rodamientos de Bola
 DESCRIPCION: Para bombas de agua, ruedas de motor eléctricas y pulidoras
 PRECIO: 550.00 CUP
@@ -149,7 +148,6 @@ DESCRIPCION: Eje de mando de la caja de velocidad del Lada (tiene que venir ranu
 PRECIO: 3130.00 CUP
 APLICACIONES: Lada, caja de velocidad, eje de mando
 
-# CORREAS DE DISTRIBUCIÓN
 PRODUCTO: Correa de Distribución 13568-YZZ01
 CATEGORIA: Correas de Distribución
 DESCRIPCION: Correa Dentada Toyota, motores 2L, 3L, 5L (129 dientes)
@@ -204,7 +202,6 @@ DESCRIPCION: Correa Dentada Corta Ford Endura (85 dientes)
 PRECIO: 2200.00 CUP
 APLICACIONES: Ford Endura
 
-# CORREAS DE PISTA 4PK
 PRODUCTO: Correa de Pista 4PK715
 CATEGORIA: Correas de Pista 4PK
 DESCRIPCION: Daihatsu Move, Coure, Peugeot 309, MG6
