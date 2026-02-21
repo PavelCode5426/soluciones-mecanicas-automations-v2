@@ -30,7 +30,7 @@ SECRET_KEY = "django-insecure-@!x4c09e0*99*v_)w*8_w*1dwg-dhi2bet^6qii$5*l9%24jnp
 DEBUG = env('DEBUG', cast=bool, default=True)
 
 ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ["*"]
+APPEND_SLASH = True
 CORS_ORIGIN_ALLOW_ALL = True
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
