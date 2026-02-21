@@ -1,10 +1,12 @@
+from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
 class WhatsAppMessageWebhookView(APIView):
 
     def get(self, request, *args, **kwargs):
-        return 'OK'
+        return Response(status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         data = request.data
