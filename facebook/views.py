@@ -7,9 +7,12 @@ from rest_framework.views import APIView
 
 class WhatsAppMessageWebhookView(APIView):
 
-    def dispatch(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs):
         print(request.GET)
-        print(request.POST)
         print(request.body)
+        return Response(status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        print(request.POST)
         print(request.data)
         return Response(status=status.HTTP_200_OK)
