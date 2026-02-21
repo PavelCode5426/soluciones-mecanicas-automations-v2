@@ -1,3 +1,4 @@
+import asyncio
 import random
 
 from asgiref.sync import async_to_sync
@@ -64,15 +65,15 @@ def reply_whatsapp_message(message, account_id, account_name):
     ia_service = IAService()
     agent = ia_service.get_seller_agent()
 
-    previus_context = cache.get_or_set(account_id, {})
-    ctx = Context(agent, previous_context=previus_context)
+    async def main():
+        previus_context = cache.get_or_set(account_id, {})
+        ctx = Context(agent, previous_context=previus_context)
 
-    WAHAService.start_typing(account_id)
+        WAHAService.start_typing(account_id)
+        response = await agent.run(message, ctx=ctx)
+        WAHAService.send_text(account_id, response)
+        WAHAService.stop_typing(account_id)
 
-    agent_run = async_to_sync(agent.run)
-    response = agent_run(message, ctx=ctx)
+        cache.set(account_id, ctx.to_dict())
 
-    WAHAService.send_text(account_id, response)
-    WAHAService.stop_typing(account_id)
-
-    cache.set(account_id, ctx.to_dict())
+    asyncio.run(main())
