@@ -65,14 +65,22 @@ def reply_whatsapp_message(message, account_id, account_name):
     ia_service = IAService()
     agent = ia_service.get_seller_agent()
 
+    async def keep_typing():
+        try:
+            while True:
+                WAHAService.start_typing(account_id)
+                await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            WAHAService.stop_typing(account_id)
+
     async def main():
         previus_context = cache.get_or_set(account_id, {})
         ctx = Context(agent, previous_context=previus_context)
 
-        WAHAService.start_typing(account_id)
+        typing_task = asyncio.create_task(keep_typing())
         result = await agent.run(message, ctx=ctx)
         WAHAService.send_text(account_id, result.response)
-        WAHAService.stop_typing(account_id)
+        typing_task.cancel()
 
         cache.set(account_id, ctx.to_dict())
 
