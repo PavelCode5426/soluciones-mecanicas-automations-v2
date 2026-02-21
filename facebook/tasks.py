@@ -1,9 +1,12 @@
 import random
 
+from asgiref.sync import async_to_sync
+from django.core.cache import cache
 from django_q.tasks import async_task
+from llama_index.core.workflow import Context
 
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
-from facebook.services import FacebookAutomationService
+from facebook.services import FacebookAutomationService, IAService, WAHAService
 
 
 def download_groups_task(user):
@@ -55,3 +58,22 @@ def enqueue_active_facebook_posts():
     for user in users:
         total_items += enqueue_posts(user, posts)
     return f"Agendadas {total_items} publicaciones"
+
+
+def reply_whatsapp_message(message, account_id, account_name):
+    ia_service = IAService()
+    waha_service = WAHAService()
+    agent = ia_service.get_seller_agent()
+
+    previus_context = cache.get_or_set(account_id, {})
+    ctx = Context(agent, previous_context=previus_context)
+
+    waha_service.start_typing(account_id)
+
+    agent_run = async_to_sync(agent.run)
+    response = agent_run(message, ctx=ctx)
+
+    waha_service.send_text(account_id, response)
+    waha_service.stop_typing(account_id)
+
+    cache.set(account_id, ctx.to_dict())
