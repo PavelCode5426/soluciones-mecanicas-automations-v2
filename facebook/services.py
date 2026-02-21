@@ -262,6 +262,7 @@ class WAHAService:
     def _ensure_initialized(cls):
         if not cls._initialized:
             cls._auth = ('pavelcode5426', 'pavelcode5426')
+            cls._headers = {'X-Api-Key': 'admin'}
             cls._api_url = 'https://whatsapp.pavelcode5426.duckdns.org'
             cls._initialized = True
 
@@ -279,6 +280,7 @@ class WAHAService:
         WAHAService._ensure_initialized()
         response = requests.get(
             f"{WAHAService._api_url}/api/contacts/check-exists",
+            headers=WAHAService._headers,
             auth=WAHAService._auth,
             params={"phone": phone_number, "session": "default"},
             timeout=10,
@@ -301,12 +303,12 @@ class WAHAService:
         response = requests.post(
             f"{WAHAService._api_url}/api/startTyping",
             auth=WAHAService._auth,
+            headers=WAHAService._headers,
             data={"chatId": chat_id, "session": "default"},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
-
 
     @staticmethod
     def stop_typing(chat_id: str) -> int:
@@ -323,12 +325,12 @@ class WAHAService:
         response = requests.post(
             f"{WAHAService._api_url}/api/stopTyping",
             auth=WAHAService._auth,
+            headers=WAHAService._headers,
             data={"chatId": chat_id, "session": "default"},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
-
 
     @staticmethod
     def send_text(chat_id: str, message: str) -> int:
@@ -345,6 +347,7 @@ class WAHAService:
 
         response = requests.post(
             f"{WAHAService._api_url}/api/sendText",
+            headers=WAHAService._headers,
             auth=WAHAService._auth,
             json={
                 "chatId": chat_id,
@@ -357,7 +360,6 @@ class WAHAService:
         )
         response.raise_for_status()
         return response.status_code
-
 
     @staticmethod
     def send_image(chat_id: str, image_url: str, caption: str) -> int:
@@ -376,6 +378,7 @@ class WAHAService:
 
         response = requests.post(
             f"{WAHAService._api_url}/api/sendImage",
+            headers=WAHAService._headers,
             auth=WAHAService._auth,
             data={
                 "chatId": chat_id,
