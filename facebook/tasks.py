@@ -63,7 +63,7 @@ def enqueue_active_facebook_posts():
 
 def reply_whatsapp_message(message, account_id, account_name):
     ia_service = IAService()
-    agent = ia_service.get_seller_agent()
+    agent = ia_service.get_seller_agent_thinker()
 
     async def keep_typing():
         try:
