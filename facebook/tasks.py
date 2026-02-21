@@ -78,9 +78,11 @@ def reply_whatsapp_message(message, account_id, account_name):
         ctx = Context(agent, previous_context=previus_context)
 
         typing_task = asyncio.create_task(keep_typing())
-        result = await agent.run(message, ctx=ctx)
-        WAHAService.send_text(account_id, str(result.response))
-        typing_task.cancel()
+        try:
+            result = await agent.run(message, ctx=ctx)
+            WAHAService.send_text(account_id, str(result.response))
+        finally:
+            typing_task.cancel()
 
         cache.set(account_id, ctx.to_dict())
 
