@@ -237,7 +237,7 @@ class IAService:
 
     def get_seller_agent(self):
         self.init_llamaindex()
-        products_query_engine_tool = self.get_products_query_engine_tool(True)
+        products_query_engine_tool = self.get_products_query_engine_tool()
 
         return FunctionAgent(name='seller_agent',
                              verbose=self.verbose,

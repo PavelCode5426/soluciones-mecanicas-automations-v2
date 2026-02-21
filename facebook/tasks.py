@@ -74,18 +74,20 @@ def reply_whatsapp_message(message, account_id, account_name):
             WAHAService.stop_typing(account_id)
 
     async def main():
-        previus_context = cache.get_or_set(account_id, {}) if '--reset' not in message else {}
+        previus_context = cache.get_or_set(account_id, {})
         ctx = Context(agent, previous_context=previus_context)
 
         typing_task = asyncio.create_task(keep_typing())
         try:
             result = await agent.run(message, ctx=ctx)
-            print(result)
-            print(str(result))
             WAHAService.send_text(account_id, str(result))
         finally:
             typing_task.cancel()
 
         cache.set(account_id, ctx.to_dict())
 
-    asyncio.run(main())
+    if '--reset' in message:
+        cache.clear(account_id)
+        WAHAService.send_text(account_id, "Memoria borrada....")
+    else:
+        asyncio.run(main())
