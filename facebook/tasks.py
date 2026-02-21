@@ -74,7 +74,7 @@ def reply_whatsapp_message(message, account_id, account_name):
             WAHAService.stop_typing(account_id)
 
     async def main():
-        previus_context = cache.get_or_set(account_id, {})
+        previus_context = cache.get_or_set(account_id, {}) if '--reset' not in message else {}
         ctx = Context(agent, previous_context=previus_context)
 
         typing_task = asyncio.create_task(keep_typing())
