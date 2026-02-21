@@ -87,7 +87,7 @@ def reply_whatsapp_message(message, account_id, account_name):
         cache.set(account_id, ctx.to_dict())
 
     if '--reset' in message:
-        cache.clear(account_id)
+        cache.delete(account_id)
         WAHAService.send_text(account_id, "Memoria borrada....")
     else:
         asyncio.run(main())
