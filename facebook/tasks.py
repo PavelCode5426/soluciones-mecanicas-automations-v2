@@ -70,8 +70,8 @@ def reply_whatsapp_message(message, account_id, account_name):
         ctx = Context(agent, previous_context=previus_context)
 
         WAHAService.start_typing(account_id)
-        response = await agent.run(message, ctx=ctx)
-        WAHAService.send_text(account_id, str(response))
+        result = await agent.run(message, ctx=ctx)
+        WAHAService.send_text(account_id, result.response)
         WAHAService.stop_typing(account_id)
 
         cache.set(account_id, ctx.to_dict())
