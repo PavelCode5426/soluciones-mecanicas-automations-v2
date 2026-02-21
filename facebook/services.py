@@ -227,7 +227,7 @@ class IAService:
         return FunctionAgent(name='seller_agent',
                              verbose=self.verbose,
                              description="Encagado de responder informacion de la tienda y productos.",
-                             tools=[], system_prompt=self.system_prompt)
+                             tools=[products_query_engine_tool], system_prompt=self.system_prompt)
 
     def get_seller_agent_thinker(self):
         self.init_llamaindex()
