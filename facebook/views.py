@@ -1,3 +1,5 @@
+import json
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -6,21 +8,13 @@ from rest_framework.views import APIView
 class WhatsAppMessageWebhookView(APIView):
 
     def get(self, request, *args, **kwargs):
-        return Response(status=status.HTTP_200_OK)
+        get_params = dict(request.GET)
+        body_raw = request.body.decode('utf-8', errors='ignore')
+        try:
+            json_data = json.loads(body_raw) if body_raw else {}
+        except:
+            json_data = "No es JSON válido"
 
-    def post(self, request, *args, **kwargs):
-        data = request.data
-        print(data)
-        return data
-        # application = cache.get_or_set(app, System.objects.get(name=app))
-        # template = Template(application.redirect_to)
-        # context = Context({'id': orderId})
-        # url = template.render(context)
-        # print(url)
-        # response = requests.post(url, json=data)
-        # if response.status_code >= 500:
-        #     return JsonResponse({})
-        # response.raise_for_status()
-        # # success_response = dict(Success=True, Status=1, Resultmsg="OK")
-        # print(response.json())
-        # return JsonResponse(response.json(), safe=False)
+        print(get_params)
+        print(json_data)
+        return Response(status=status.HTTP_200_OK)
