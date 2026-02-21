@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 
 class WhatsAppMessageWebhookView(APIView):
 
-    def post(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         data = request.data
         print(data)
         return data
