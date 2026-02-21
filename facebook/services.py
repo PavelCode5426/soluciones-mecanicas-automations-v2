@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
     SimpleDirectoryReader
 from llama_index.core.agent import FunctionAgent
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.tools import QueryEngineTool
 from llama_index.embeddings.ollama import OllamaEmbedding
@@ -205,10 +206,14 @@ class IAService:
         else:
             DATA_DIR = Path(__file__).parent / 'data/products'
             documents = SimpleDirectoryReader(DATA_DIR).load_data()
-            vector_index = VectorStoreIndex.from_documents(documents)
+            parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+            nodes = parser.get_nodes_from_documents(documents)
+            vector_index = VectorStoreIndex(nodes)
+            # vector_index = VectorStoreIndex.from_documents(documents)
             vector_index.storage_context.persist(PERSIST_DIR)
 
-        query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True)
+        query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True,
+                                                    similarity_top_k=10)
         return QueryEngineTool.from_defaults(
             query_engine=query_engine,
             name="consultar_precios",

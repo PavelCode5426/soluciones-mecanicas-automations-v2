@@ -5,6 +5,7 @@ import ollama
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, load_index_from_storage, Settings
 from llama_index.core.agent import AgentWorkflow, ReActAgent, FunctionAgent
 from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
+from llama_index.core.node_parser import SentenceSplitter
 from llama_index.core.query_engine import RouterQueryEngine
 from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.selectors import LLMSingleSelector
@@ -60,7 +61,9 @@ if PERSIST_DIR.exists():
 else:
     reader = SimpleDirectoryReader(input_dir=str(DATA_DIR))
     documents = reader.load_data(True)
-    vector_index = VectorStoreIndex.from_documents(documents)
+    parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+    nodes = parser.get_nodes_from_documents(documents)
+    vector_index = VectorStoreIndex(nodes)
     vector_index.storage_context.persist(PERSIST_DIR)
 
 vector_query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, similarity_top_k=10)
