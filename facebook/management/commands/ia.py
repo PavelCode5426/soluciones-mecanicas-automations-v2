@@ -27,7 +27,6 @@ class Command(BaseCommand):
 
     def init_llamaindex(self):
         host = settings.IA_OLLAMA_HOST
-        client = Client(host=host)
         Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text:latest", base_url=host)
         Settings.llm = Ollama(base_url=host, model="mistral:7b-instruct", request_timeout=360.0, context_window=8000)
 
@@ -56,22 +55,21 @@ class Command(BaseCommand):
             description="Utiliza esta herramienta para obtener información sobre productos y precios basandose en publicaciones."
         )
 
-        query_engine = RouterQueryEngine(
+        router_query_engine = RouterQueryEngine(
             selector=LLMSingleSelector.from_defaults(),
             query_engine_tools=[post_query_engine_tool]
         )
-        query_engine_tool = QueryEngineTool.from_defaults(query_engine=query_engine)
-
-        agent_tools_or_functions = [post_query_engine_tool]
+        router_query_engine_tool = QueryEngineTool.from_defaults(query_engine=router_query_engine)
+        agent_tools_or_functions = [router_query_engine_tool]
 
         seller_agent = ReActAgent(name='seller_agent',
                                   description="Encagado de responder informacion de la tienda y productos.",
                                   tools=agent_tools_or_functions, system_prompt=self.system_prompt)
 
         agent = AgentWorkflow(agents=[seller_agent])
-        ctx = Context(agent)
 
         async def main():
+            ctx = Context(agent)
             while True:
                 query = input("Tu:")
                 if query == "q":

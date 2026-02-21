@@ -3,7 +3,7 @@ from pathlib import Path
 
 import ollama
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, load_index_from_storage, Settings
-from llama_index.core.agent import AgentWorkflow, ReActAgent
+from llama_index.core.agent import AgentWorkflow, ReActAgent, FunctionAgent
 from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
 from llama_index.core.query_engine import RouterQueryEngine
 from llama_index.core.response_synthesizers import ResponseMode
@@ -12,6 +12,7 @@ from llama_index.core.tools import QueryEngineTool
 from llama_index.core.workflow import Context
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
+import logging
 
 host = 'https://ia.pavelcode5426.duckdns.org'
 
@@ -19,44 +20,39 @@ BASE_DIR = Path(__file__).resolve().parent
 PERSIST_DIR = BASE_DIR / 'persistent'
 DATA_DIR = BASE_DIR / 'data'
 
-import logging
+system_prompt = """
+Eres Emily, una vendedora amable y profesional de Soluciones Hevia, una tienda de autopartes y herramientas mecánicas.
 
-logging.basicConfig(level=logging.DEBUG)
+INFORMACIÓN DE LA TIENDA:
+- Nombre: Soluciones Hevia
+- Web: www.solucioneshevia.com
+- Teléfono: +53 54266836
+- Dirección: Santa Emilia 210 e/ Flores y Serrano
+- Contacto: Ing. Michael Hevia Rodriguez
 
-s7ystem_prompt = """"
-Te llamas Emily, eres una vendedora profesional que atiende al cliente desde un chat en línea. 
-Tu objetivo es garantizar la venta ofreciendo información clara, atractiva y convincente basada en los documentos disponibles. 
-Habla siempre en español, con tono cordial, persuasivo y seguro. 
+INSTRUCCIONES:
+1. Responde SIEMPRE en español, de forma cordial y servicial.
+2. Cuando el cliente te salude (hola, buenos días, etc.), responde amablemente y ofrécele ayuda.
+3. Para cualquier consulta sobre productos, precios o disponibilidad, DEBES usar la herramienta 'consultar_productos' (o el nombre que le hayas dado). Nunca inventes información.
+4. Si el cliente pide información de la tienda (dirección, teléfono), puedes proporcionarla directamente.
+5. Mantén un tono positivo y orientado a soluciones.
 
-Cuando el cliente salude con expresiones simples como "hola" o "buenas tardes", responde con un saludo cálido y breve, preséntate como representante de la tienda y ofrece tu ayuda de manera amable, sin entrar aún en detalles de productos ni precios. 
+Ejemplo de respuesta a saludo:
+Cliente: "Hola"
+Emily: "¡Hola! Soy Emily de Soluciones Hevia. ¿En qué puedo ayudarte hoy? Tenemos una amplia variedad de autopartes y herramientas. ¿Buscas algún producto en especial?"
 
-Cuando el cliente pregunte por productos, precios o características, entonces sí describe lo que tenemos en nuestra tienda, destacando beneficios, ventajas y valor de la compra. 
-No menciones la palabra "inventario"; en su lugar, refiérete a "nuestra tienda" y presenta los productos como disponibles para el cliente. 
-
-Adapta tu respuesta al contexto del cliente: 
-- Si pregunta por productos informale del precio.
-- Si pregunta por precios, recalca la relación calidad-precio. 
-- Si pregunta por características, resalta cómo le solucionan una necesidad. 
-- Si duda, ofrece alternativas atractivas.
-
-Tu meta es cerrar la venta transmitiendo confianza y profesionalismo. 
-Responde siempre de forma firme y sencilla, pero ajusta el nivel de detalle según lo que el cliente pregunte, evitando ser demasiado impulsiva cuando solo saluda.
 
 """
 
-system_prompt = (
-    "Eres Emily, una vendedora en una tienda de autopartes. "
-    "Siempre respondes en español, de forma amable y profesional. "
-    "Cuando el cliente pregunte por productos o precios, debes usar la herramienta 'consultar_precios' para obtener la información precisa."
-)
-
 client = ollama.Client(host=host)
+client.pull('llama3.1:8b-instruct-q4_K_M')
 # client.delete("embeddinggemma:latest")
 # client.delete("mistral:7b-instruct")
 
 
 Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text:latest", base_url=host)
-Settings.llm = Ollama(base_url=host, model="mistral:7b-instruct", request_timeout=360.0, context_window=8000)
+Settings.llm = Ollama(base_url=host, model="llama3.1:8b-instruct-q4_K_M", request_timeout=360.0, context_window=8000,
+                      temperature=0.0)
 
 if PERSIST_DIR.exists():
     storage_context = StorageContext.from_defaults(persist_dir=str(PERSIST_DIR))
@@ -64,43 +60,40 @@ if PERSIST_DIR.exists():
 else:
     reader = SimpleDirectoryReader(input_dir=str(DATA_DIR))
     documents = reader.load_data(True)
-    # splitter = SentenceSplitter(chunk_size=200, chunk_overlap=0)
-    # nodes = splitter.get_nodes_from_documents(documents)
-    # vector_index = VectorStoreIndex(nodes)
     vector_index = VectorStoreIndex.from_documents(documents)
     vector_index.storage_context.persist(PERSIST_DIR)
 
-vector_query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True)
+vector_query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, similarity_top_k=10)
 vector_tool = QueryEngineTool.from_defaults(
     query_engine=vector_query_engine,
-    name="consultar_precios",
-    description="Utiliza esta herramienta para obtener información sobre productos, precios y disponibilidad. Pasa la consulta del cliente tal cual."
+    name="consultar_productos",
+    description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
 )
-
 
 # SELECCIONA EL MEJOR QUERY ENGINE PARA LO QUE SE VAYA A HACER.
-query_engine = RouterQueryEngine(selector=LLMSingleSelector.from_defaults(), query_engine_tools=[vector_tool])
-query_engine_tool = QueryEngineTool.from_defaults(
-    query_engine=query_engine, name='informacion',
-    description="""
-    Util para responder informacion sobre la empresa o precios. Si te preguntan informacion de precios, productos o la empresa usa la herramienta 'consultar_precios'
-    """
+# query_engine = RouterQueryEngine(selector=LLMSingleSelector.from_defaults(), query_engine_tools=[vector_tool])
+# query_engine_tool = QueryEngineTool.from_defaults(
+#     query_engine=query_engine, name='informacion',
+#     description="""
+#     Util para responder informacion sobre la empresa o precios. Si te preguntan informacion de precios, productos o la empresa usa la herramienta 'consultar_precios'
+#     """
+# )
+# agent_tools_or_functions = [query_engine_tool]
+
+agent_tools_or_functions = [vector_tool]
+
+seller_agent = FunctionAgent(
+    name='seller_agent',
+    description="Encagado de responder informacion de la tienda y productos.",
+    verbose=True,
+    tools=agent_tools_or_functions, system_prompt=system_prompt
 )
-
-agent_tools_or_functions = [query_engine_tool]
-
-seller_agent = ReActAgent(name='seller_agent',
-                          description="Encagado de responder informacion de la tienda y productos.",
-                          tools=agent_tools_or_functions, system_prompt=system_prompt)
-
-agent = AgentWorkflow(agents=[seller_agent])
-ctx = Context(agent)
-
-faith_evaluator = FaithfulnessEvaluator()
-relevancy_evaluator = RelevancyEvaluator()
+agent = AgentWorkflow(agents=[seller_agent], root_agent=seller_agent.name, verbose=True)
 
 
 async def main():
+    logging.basicConfig(level=logging.DEBUG)
+    ctx = Context(agent)
     while True:
         query = input("Tu:")
         if query == "q":
