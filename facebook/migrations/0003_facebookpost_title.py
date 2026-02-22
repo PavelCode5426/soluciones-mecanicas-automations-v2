@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("marketing", "0002_alter_facebookpost_categories"),
+        ("facebook", "0002_alter_facebookpost_categories"),
     ]
 
     operations = [

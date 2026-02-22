@@ -59,7 +59,7 @@ class Migration(migrations.Migration):
                 (
                     "groups",
                     models.ManyToManyField(
-                        related_name="categories", to="marketing.facebookgroup"
+                        related_name="categories", to="facebook.facebookgroup"
                     ),
                 ),
             ],
@@ -82,7 +82,7 @@ class Migration(migrations.Migration):
                 (
                     "categories",
                     models.ManyToManyField(
-                        related_name="posts", to="marketing.facebookgroup"
+                        related_name="posts", to="facebook.facebookgroup"
                     ),
                 ),
             ],

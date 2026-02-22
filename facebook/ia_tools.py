@@ -1,4 +1,4 @@
-from marketing import services
+from facebook import services
 
 
 def get_products_information(query: str) -> str:

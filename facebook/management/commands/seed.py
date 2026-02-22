@@ -5,12 +5,12 @@ from django_q.tasks import schedule, Schedule
 
 
 class Command(BaseCommand):
-    help = "Sincroniza la informacion de marketing con la base de datos"
+    help = "Sincroniza la informacion de facebook con la base de datos"
 
     def handle(self, *args, **options):
         Schedule.objects.all().delete()
 
-        schedule(func='marketing.tasks.enqueue_active_facebook_posts',
+        schedule(func='facebook.tasks.enqueue_active_facebook_posts',
                  name='enqueue_active_facebook_posts',
                  repeats=-1,
                  schedule_type=Schedule.MINUTES,

@@ -2,7 +2,7 @@ import asyncio
 
 from django.core.management.base import BaseCommand
 from llama_index.core.workflow import Context
-from marketing import services
+from facebook import services
 
 
 class Command(BaseCommand):

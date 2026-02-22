@@ -5,9 +5,9 @@ from django.core.cache import cache
 from django_q.tasks import async_task
 from llama_index.core.workflow import Context
 
-from marketing.models import FacebookGroup, FacebookProfile, FacebookPost
-from marketing.services.automations import FacebookAutomationService
-from marketing.services import IAService, WAHAService
+from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
+from facebook.services.automations import FacebookAutomationService
+from facebook.services import IAService, WAHAService
 
 
 def download_groups_task(user):

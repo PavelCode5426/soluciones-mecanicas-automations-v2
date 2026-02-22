@@ -7,8 +7,8 @@ from django.db.models import F
 from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
-from marketing.models import FacebookPost
-from marketing.models import FacebookProfile, FacebookGroup
+from facebook.models import FacebookPost
+from facebook.models import FacebookProfile, FacebookGroup
 
 
 def get_playwright() -> PlaywrightContextManager:

@@ -4,7 +4,7 @@ import logging
 from llama_index.core.agent import AgentWorkflow
 from llama_index.core.workflow import Context
 
-from marketing.services import SolucionesMecanicasAPIServices, IAService
+from facebook.services import SolucionesMecanicasAPIServices, IAService
 
 host = 'https://ia.pavelcode5426.duckdns.org'
 

@@ -5,8 +5,8 @@ from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
 
-from marketing.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost
-from marketing.tasks import download_groups_task, enqueue_posts
+from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost
+from facebook.tasks import download_groups_task, enqueue_posts
 
 
 # Register your models here.

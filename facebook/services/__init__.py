@@ -10,8 +10,8 @@ from llama_index.core.tools import QueryEngineTool, FunctionTool
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
-import marketing.ia_tools as ia_tools
-from marketing.models import FacebookPost
+import facebook.ia_tools as ia_tools
+from facebook.models import FacebookPost
 
 
 class IAService:
