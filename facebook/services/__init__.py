@@ -15,35 +15,12 @@ from facebook.models import FacebookPost, AgentsConfig
 
 
 class IAService:
-    system_prompt = """
-    Eres Emily, una vendedora amable y profesional de Soluciones Hevia, una tienda de autopartes y piezas de autos.
-
-    INFORMACIÓN DE LA TIENDA:
-    - Nombre: Soluciones Hevia
-    - Sitio web: www.solucioneshevia.com
-    - Teléfono: +53 54266836
-    - Dirección: Santa Emilia 210 e/ Flores y Serrano
-    - Contacto: Ing. Michael Hevia Rodriguez
-
-    INSTRUCCIONES:
-    1. Responde SIEMPRE en español, de forma cordial y servicial.
-    2. Cuando el cliente te salude (hola, buenos días, etc.), responde amablemente y ofrécele ayuda, ten en cuenta que debes presentarte si no lo haz hecho.
-    3. Si el cliente pide información de la tienda (dirección, teléfono), puedes proporcionarla directamente.
-    4. Mantén un tono positivo y orientado a soluciones.
-    
-    IMPORTANTE: Siempre que el cliente pregunte por productos, precios, disponibilidad o categorías, 
-    DEBES utilizar las herramientas disponibles ('consultar_productos' y 'consultar_categorias_de_productos') para obtener la información.
-    No inventes productos ni uses tu conocimiento interno para responder sobre el catálogo. 
-    Si no estás seguro de qué herramienta usar, prefiere llamar a la función correspondiente antes de responder."
-    
-    """
-
     verbose = True
     embedding_model = 'nomic-embed-text:latest'
     llm_model = 'llama3.1:8b-instruct-q4_K_M'
 
     def init_llamaindex(self):
-        host = "https://ia.pavelcode5426.duckdns.org"  # settings.IA_OLLAMA_HOST
+        host = settings.IA_OLLAMA_HOST
         Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
         Settings.llm = Ollama(base_url=host, model=self.llm_model, request_timeout=360.0,
                               context_window=8000, temperature=0.0)
@@ -111,24 +88,23 @@ class IAService:
         products_tool = self.get_products_function_tool()
         categories_tool = self.get_categories_function_tool()
 
-        agent_config = AgentsConfig.objects.get(name='seller_agent')
+        config = AgentsConfig.objects.get(name='seller_agent')
 
-        return FunctionAgent(name=agent_config.name,
+        return FunctionAgent(name=config.name,
                              verbose=self.verbose,
-                             description=agent_config.description,
-                             system_prompt=agent_config.system_prompt,
-                             # description="Encagado de responder informacion de la tienda y productos.",
-                             # system_prompt=self.system_prompt,
+                             description=config.description,
+                             system_prompt=config.system_prompt,
                              tools=[products_tool, categories_tool])
 
     def get_seller_agent_thinker(self):
         self.init_llamaindex()
         products_tool = self.get_products_function_tool()
 
+        config = AgentsConfig.objects.get(name='seller_agent')
         return ReActAgent(name='seller_agent',
                           verbose=self.verbose,
-                          description="Encagado de responder informacion de la tienda y productos.",
-                          tools=[products_tool], system_prompt=self.system_prompt)
+                          description=config.description,system_prompt=config.system_prompt,
+                          tools=[products_tool])
 
 
 class WAHAService:
