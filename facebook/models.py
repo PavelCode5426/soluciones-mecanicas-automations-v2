@@ -41,3 +41,9 @@ class FacebookPost(models.Model):
     distribution_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+
+class AgentsConfig(models.Model):
+    name = models.CharField(max_length=250)
+    description = models.TextField(null=True, blank=True)
+    system_prompt = models.TextField(null=True, blank=True)

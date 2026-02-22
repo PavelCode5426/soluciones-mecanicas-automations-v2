@@ -1,6 +1,7 @@
 import asyncio
 import random
 
+from django.conf import settings
 from django.core.cache import cache
 from django_q.tasks import async_task
 from llama_index.core.workflow import Context
@@ -78,7 +79,7 @@ def reply_whatsapp_message(message, account_id, account_name):
         ctx = Context(agent, previous_context=previus_context)
         typing_task = asyncio.create_task(keep_typing())
         try:
-            async with asyncio.timeout(60):
+            async with asyncio.timeout(settings.IA_TIMEOUT):
                 result = await agent.run(message, ctx=ctx)
                 WAHAService.send_text(account_id, str(result))
         finally:
