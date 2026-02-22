@@ -1,147 +1,17 @@
-import random
-import time
 from pathlib import Path
 
 import requests
 from django.conf import settings
-from django.core.files.base import ContentFile
-from django.db.models import F
-from django.utils.timezone import now
 from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
     SimpleDirectoryReader
-from llama_index.core.agent import FunctionAgent
-from llama_index.core.node_parser import SentenceSplitter
+from llama_index.core.agent import FunctionAgent, ReActAgent
 from llama_index.core.response_synthesizers import ResponseMode
-from llama_index.core.tools import QueryEngineTool
+from llama_index.core.tools import QueryEngineTool, FunctionTool
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
-from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
-from facebook.models import FacebookPost
-from facebook.models import FacebookProfile, FacebookGroup
-
-
-def get_playwright() -> PlaywrightContextManager:
-    return sync_playwright()
-
-
-class FacebookAutomationService:
-    def __init__(self, user: FacebookProfile):
-        self.user = user
-
-    def check_status(self):
-        self.refresh_user()
-        if self.user.active:
-            with (get_playwright() as pw):
-                browser = self.get_browser(pw)
-                page = browser.new_page()
-                page.goto('https://www.facebook.com/')
-                self.user.active = not bool(page.locator('text=Iniciar sesión').count())
-        self.user.save(update_fields=['active'])
-        return self.user.active
-
-    def refresh_user(self):
-        self.user.refresh_from_db()
-
-    def get_browser(self, pw: Playwright):
-        context = pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
-        context.set_default_timeout(settings.PLAYWRIGHT['timeout'])
-        return context
-
-    def get_all_groups(self):
-        self.refresh_user()
-        with get_playwright() as pw:
-            browser = self.get_browser(pw)
-            page = browser.new_page()
-            page.goto("https://www.facebook.com/groups/joins/?nav_source=tab", timeout=settings.PLAYWRIGHT['timeout'])
-
-            last_height = page.evaluate("document.body.scrollHeight")
-            while True:
-                page.evaluate(f"window.scrollBy(0,document.body.scrollHeight)")
-                time.sleep(20)
-                new_height = page.evaluate("document.body.scrollHeight")
-                if new_height == last_height:
-                    break
-                last_height = new_height
-
-            groups_links = page.locator('[role="main"] [role="list"] [role="listitem"] a') \
-                .filter(has_not_text='Ver grupo')
-
-            groups = []
-            for link in groups_links.all():
-                if link.text_content():
-                    groups.append(dict(
-                        url=link.get_attribute('href'),
-                        name=link.text_content()
-                    ))
-            page.close()
-            return groups
-
-    def create_post(self, group: FacebookGroup, post: FacebookPost):
-        self.refresh_user()
-        group.refresh_from_db()
-        post.refresh_from_db()
-        if post.active and group.active and self.user.active:
-            screenshot, exception = self.__publish_group_post(group.url, post)
-            file_name = f"{group}_screenshot.jpeg".lower()
-            group.screenshot.delete(False)
-            group.screenshot.save(file_name, ContentFile(screenshot), False)
-
-            group.error_at = None
-            if exception:
-                group.error_at = now()
-                group.save()
-                raise exception
-
-            group.save()
-            post.published_count = F('published_count') + 1
-            post.save()
-
-    def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
-        exception = None
-        with (get_playwright() as pw):
-            try:
-                browser = self.get_browser(pw)
-                page = browser.new_page()
-                page.goto(url)
-
-                # page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
-                # page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
-                # file_input = page.locator('input[type="file"][multiple]')
-                # file_input.set_input_files(files=[post.file.path])
-                # page.keyboard.type(post.text)
-                # page.get_by_text('Publicar').click()
-                # page.get_by_text("Publicando").wait_for(state='hidden')
-
-                page.wait_for_load_state(state='load')
-                write_btn = page.get_by_text('Escribe algo')
-                write_btn.wait_for(state='visible')
-                write_btn.click()
-
-                # page.get_by_text('Crear publicación').wait_for(state='visible')
-                text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                # text_area.wait_for(state='visible')
-                text_area.click()
-
-                if post.file:
-                    file_input = page.locator('input[type="file"][multiple]')
-                    file_input.set_input_files(files=[post.file.path])
-
-                # page.keyboard.type(post.text)
-                page.keyboard.insert_text(post.text)
-                page.keyboard.insert_text(self.user.posts_footer)
-                time.sleep(random.randint(30, 60))
-
-                page.click('[aria-label="Publicar"]')
-                page.locator('span', has_text='Publicando').wait_for(state='hidden')
-                # page.get_by_text("Publicando").wait_for(state='hidden')
-
-            except Exception as e:
-                exception = e
-            return page.screenshot(quality=80, type='jpeg'), exception
-
-    def sign_in(self, user: FacebookProfile):
-        pass
+import marketing.ia_tools as ia_tools
+from marketing.models import FacebookPost
 
 
 class IAService:
@@ -150,22 +20,22 @@ class IAService:
 
     INFORMACIÓN DE LA TIENDA:
     - Nombre: Soluciones Hevia
-    - Web: www.solucioneshevia.com
+    - Sitio web: www.solucioneshevia.com
     - Teléfono: +53 54266836
     - Dirección: Santa Emilia 210 e/ Flores y Serrano
     - Contacto: Ing. Michael Hevia Rodriguez
 
     INSTRUCCIONES:
     1. Responde SIEMPRE en español, de forma cordial y servicial.
-    2. Cuando el cliente te salude (hola, buenos días, etc.), responde amablemente y ofrécele ayuda.
-    3. Para cualquier consulta sobre productos, precios o disponibilidad, DEBES usar la herramienta 'consultar_productos' (o el nombre que le hayas dado). Nunca inventes información.
-    4. Si el cliente pide información de la tienda (dirección, teléfono), puedes proporcionarla directamente.
-    5. Mantén un tono positivo y orientado a soluciones.
-    6. Solo usa la herramienta 'consultar_productos' cuando el cliente pregunte por productos, precios o disponibilidad.
-
-    Ejemplo de respuesta a saludo:
-    Cliente: "Hola"
-    Emily: "¡Hola! Soy Emily de Soluciones Hevia. ¿En qué puedo ayudarte hoy? Tenemos una amplia variedad de autopartes y herramientas. ¿Buscas algún producto en especial?"
+    2. Cuando el cliente te salude (hola, buenos días, etc.), responde amablemente y ofrécele ayuda, ten en cuenta que debes presentarte si no lo haz hecho.
+    3. Si el cliente pide información de la tienda (dirección, teléfono), puedes proporcionarla directamente.
+    4. Mantén un tono positivo y orientado a soluciones.
+    
+    IMPORTANTE: Siempre que el cliente pregunte por productos, precios, disponibilidad o categorías, 
+    DEBES utilizar las herramientas disponibles ('consultar_productos' y 'consultar_categorias_de_productos') para obtener la información.
+    No inventes productos ni uses tu conocimiento interno para responder sobre el catálogo. 
+    Si no estás seguro de qué herramienta usar, prefiere llamar a la función correspondiente antes de responder."
+    
     """
 
     verbose = True
@@ -173,7 +43,7 @@ class IAService:
     llm_model = 'llama3.1:8b-instruct-q4_K_M'
 
     def init_llamaindex(self):
-        host = settings.IA_OLLAMA_HOST
+        host = "https://ia.pavelcode5426.duckdns.org"  # settings.IA_OLLAMA_HOST
         Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
         Settings.llm = Ollama(base_url=host, model=self.llm_model, request_timeout=360.0,
                               context_window=8000, temperature=0.0)
@@ -198,7 +68,7 @@ class IAService:
             description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
         )
 
-    def get_products_query_engine_tool(self, reset=False):
+    def get_products_query_engine_tool_____no_usar(self, reset=False):
         PERSIST_DIR = settings.IA_POST_PERSISTEN / "products"
         if PERSIST_DIR.exists() and not reset:
             storage_context = StorageContext.from_defaults(persist_dir=str(PERSIST_DIR))
@@ -206,10 +76,10 @@ class IAService:
         else:
             DATA_DIR = Path(__file__).parent / 'data/products'
             documents = SimpleDirectoryReader(DATA_DIR).load_data()
-            parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
-            nodes = parser.get_nodes_from_documents(documents)
-            vector_index = VectorStoreIndex(nodes)
-            # vector_index = VectorStoreIndex.from_documents(documents)
+            # parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+            # nodes = parser.get_nodes_from_documents(documents)
+            # vector_index = VectorStoreIndex(nodes)
+            vector_index = VectorStoreIndex.from_documents(documents)
             vector_index.storage_context.persist(PERSIST_DIR)
 
         query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True,
@@ -220,23 +90,40 @@ class IAService:
             description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
         )
 
+    def get_products_function_tool(self):
+        return FunctionTool.from_defaults(
+            ia_tools.get_products_information,
+            name="consultar_productos",
+            description="""
+            "Utiliza esta función para obtener información detallada (precio, disponibilidad, descripción) de uno o varios productos de la tienda. 
+            La función devuelve una lista de productos relevantes, puedes pasar por parametros lo que esta buscando el cliente, asegurate de pasarlo en singular para poder encontrar el producto
+            No la uses para preguntar sobre categorías; para eso está 'consultar_categorias_de_productos'."
+            """)
+
+    def get_categories_function_tool(self):
+        return FunctionTool.from_defaults(
+            ia_tools.get_categories_information,
+            name="consultar_categorias_de_productos",
+            description="Útil cuando el cliente pregunta por los tipos de productos que comercializamos. Debes analizar la respuesta para adaptarla a la necesidad del cliente.")
+
     def get_seller_agent(self):
         self.init_llamaindex()
-        products_query_engine_tool = self.get_products_query_engine_tool()
+        products_tool = self.get_products_function_tool()
+        categories_tool = self.get_categories_function_tool()
 
         return FunctionAgent(name='seller_agent',
                              verbose=self.verbose,
                              description="Encagado de responder informacion de la tienda y productos.",
-                             tools=[products_query_engine_tool], system_prompt=self.system_prompt)
+                             tools=[products_tool, categories_tool], system_prompt=self.system_prompt)
 
     def get_seller_agent_thinker(self):
         self.init_llamaindex()
-        products_query_engine_tool = self.get_products_query_engine_tool()
+        products_tool = self.get_products_function_tool()
 
-        return FunctionAgent(name='seller_agent',
-                             verbose=self.verbose,
-                             description="Encagado de responder informacion de la tienda y productos.",
-                             tools=[products_query_engine_tool], system_prompt=self.system_prompt)
+        return ReActAgent(name='seller_agent',
+                          verbose=self.verbose,
+                          description="Encagado de responder informacion de la tienda y productos.",
+                          tools=[products_tool], system_prompt=self.system_prompt)
 
 
 class WAHAService:
@@ -387,3 +274,33 @@ class WAHAService:
         )
         response.raise_for_status()
         return response.status_code
+
+
+class SolucionesMecanicasAPIServices:
+    _initialized = False
+    _api_url = None
+
+    @classmethod
+    def __ensure_initialized(cls):
+        if not cls._initialized:
+            cls._api_url = 'https://api.solucioneshevia.com'
+            cls._initialized = True
+
+    @classmethod
+    def get_all_products(cls, search: str) -> list:
+        cls.__ensure_initialized()
+        response = requests.get(f'{cls._api_url}/core/shops', params=dict(search=search.lower()))
+        response.raise_for_status()
+        response = response.json()
+        all_products = [*response.get('results')]
+        while response.get('next'):
+            response = requests.get(response.get('next')).json()
+            all_products.extend(response.get('results'))
+        return all_products
+
+    @classmethod
+    def get_all_categories(cls) -> list:
+        cls.__ensure_initialized()
+        response = requests.get(f'{cls._api_url}/core/categories-with-products/')
+        response.raise_for_status()
+        return response.json()

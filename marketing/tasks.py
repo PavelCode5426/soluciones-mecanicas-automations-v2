@@ -1,13 +1,13 @@
 import asyncio
 import random
 
-from asgiref.sync import async_to_sync
 from django.core.cache import cache
 from django_q.tasks import async_task
 from llama_index.core.workflow import Context
 
-from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
-from facebook.services import FacebookAutomationService, IAService, WAHAService
+from marketing.models import FacebookGroup, FacebookProfile, FacebookPost
+from marketing.services.automations import FacebookAutomationService
+from marketing.services import IAService, WAHAService
 
 
 def download_groups_task(user):
@@ -76,11 +76,11 @@ def reply_whatsapp_message(message, account_id, account_name):
     async def main():
         previus_context = cache.get_or_set(account_id, {})
         ctx = Context(agent, previous_context=previus_context)
-
         typing_task = asyncio.create_task(keep_typing())
         try:
-            result = await agent.run(message, ctx=ctx)
-            WAHAService.send_text(account_id, str(result))
+            async with asyncio.timeout(60):
+                result = await agent.run(message, ctx=ctx)
+                WAHAService.send_text(account_id, str(result))
         finally:
             typing_task.cancel()
 
@@ -90,4 +90,4 @@ def reply_whatsapp_message(message, account_id, account_name):
         cache.delete(account_id)
         WAHAService.send_text(account_id, "Memoria borrada....")
     else:
-        asyncio.run(main())
+        asyncio.run(main(), debug=True)

@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("facebook", "0001_initial"),
+        ("marketing", "0001_initial"),
     ]
 
     operations = [
@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="facebookpost",
             name="categories",
             field=models.ManyToManyField(
-                related_name="posts", to="facebook.facebookgroupcategory"
+                related_name="posts", to="marketing.facebookgroupcategory"
             ),
         ),
     ]

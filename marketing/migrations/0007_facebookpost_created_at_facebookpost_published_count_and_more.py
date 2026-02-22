@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("facebook", "0006_facebookprofile_state_file"),
+        ("marketing", "0006_facebookprofile_state_file"),
     ]
 
     operations = [

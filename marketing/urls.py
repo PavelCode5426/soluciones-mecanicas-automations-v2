@@ -1,7 +1,7 @@
 from django.urls import path, include
-from facebook import views
+from marketing import views
 
-app_name = 'facebook'
+app_name = 'marketing'
 
 urlpatterns = [
     path(r'whatsapp-message/', views.WhatsAppMessageWebhookView.as_view(), name='whatsapp-webhook'),

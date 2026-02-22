@@ -5,7 +5,7 @@ from facebook.models import FacebookGroup
 
 
 class Command(BaseCommand):
-    help = "Sincroniza la informacion de facebook con la base de datos"
+    help = "Sincroniza la informacion de marketing con la base de datos"
 
     def handle(self, *args, **options):
         # for profile in FacebookProfile.objects.all():

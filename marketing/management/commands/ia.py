@@ -1,17 +1,15 @@
 import asyncio
 
 from django.core.management.base import BaseCommand
-from django.utils import asyncio
 from llama_index.core.workflow import Context
-
-from facebook.services import IAService
+from marketing import services
 
 
 class Command(BaseCommand):
     help = "Hablar con la IA"
 
     def handle(self, *args, **options):
-        agent = IAService().get_seller_agent()
+        agent = services.IAService().get_seller_agent()
 
         async def main():
             ctx = Context(agent)
