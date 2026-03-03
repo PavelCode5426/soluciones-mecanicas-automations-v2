@@ -8,6 +8,5 @@ with sync_playwright() as pw:
     page = browser.new_page()
     page.goto('https://www.facebook.com/', timeout=timeout)
     active = not bool(page.locator('text=Iniciar sesión').count())
-    print(active)
     input("Continuar...")
     browser.storage_state(path=state_file)

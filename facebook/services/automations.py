@@ -119,6 +119,7 @@ class FacebookAutomationService:
 
                 # page.keyboard.type(post.text)
                 page.keyboard.insert_text(post.text)
+                page.keyboard.insert_text('\n' * 2)
                 page.keyboard.insert_text(self.user.posts_footer)
                 time.sleep(random.randint(30, 60))
 
