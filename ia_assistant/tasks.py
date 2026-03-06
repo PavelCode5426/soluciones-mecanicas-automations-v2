@@ -7,7 +7,7 @@ from llama_index.core.workflow import Context
 from services import IAService, WAHAService
 
 
-def reply_whatsapp_message(message, account_id, account_name):
+def reply_whatsapp_message(message, account_id):
     ia_service = IAService()
     agent = ia_service.get_seller_agent()
 

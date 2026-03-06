@@ -11,7 +11,8 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
 import ia_assistant.ia_tools as ia_tools
-from facebook.models import FacebookPost, AgentsConfig
+from facebook.models import FacebookPost
+from ia_assistant.models import Agent
 
 
 class IAService:
@@ -88,7 +89,7 @@ class IAService:
         products_tool = self.get_products_function_tool()
         categories_tool = self.get_categories_function_tool()
 
-        config = AgentsConfig.objects.get(name='seller_agent')
+        config = Agent.objects.get(name='seller_agent')
 
         return FunctionAgent(name=config.name,
                              verbose=self.verbose,
@@ -100,10 +101,10 @@ class IAService:
         self.init_llamaindex()
         products_tool = self.get_products_function_tool()
 
-        config = AgentsConfig.objects.get(name='seller_agent')
+        config = Agent.objects.get(name='seller_agent')
         return ReActAgent(name='seller_agent',
                           verbose=self.verbose,
-                          description=config.description,system_prompt=config.system_prompt,
+                          description=config.description, system_prompt=config.system_prompt,
                           tools=[products_tool])
 
 

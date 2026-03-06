@@ -1,0 +1,95 @@
+{
+  'id': 'true_108590211813606@lid_3EB008164CCB1A26C53EAB',
+  'timestamp': 1772767882,
+  'from': '108590211813606@lid',
+  'fromMe': True,
+  'source': 'api',
+  'body': 'Hola! Me alegra poder ayudarte. Soy Emilia, una vendedora de Soluciones Hevia. ¿En qué puedo asistirte hoy? ¿Necesitas ayuda para encontrar algo en particular o tienes alguna pregunta sobre nuestros productos? Estoy aquí para ayudarte.',
+  'to': None,
+  'participant': None,
+  'hasMedia': False,
+  'media': None,
+  'ack': 1,
+  'location': None,
+  'vCards': None,
+  'ackName': 'SERVER',
+  'replyTo': None,
+  '_data': {
+    'Info': {
+      'Chat': '108590211813606@lid',
+      'Sender': '5350735591:3@s.whatsapp.net',
+      'IsFromMe': True,
+      'IsGroup': False,
+      'AddressingMode': '',
+      'SenderAlt': '',
+      'RecipientAlt': '',
+      'BroadcastListOwner': '',
+      'BroadcastRecipients': None,
+      'ID': '3EB008164CCB1A26C53EAB',
+      'ServerID': 0,
+      'Type': '',
+      'PushName': '',
+      'Timestamp': '2026-03-06T03:31:22Z',
+      'Category': '',
+      'Multicast': False,
+      'MediaType': '',
+      'Edit': '',
+      'MsgBotInfo': {
+        'EditType': '',
+        'EditTargetID': '',
+        'EditSenderTimestampMS': '0001-01-01T00:00:00Z'
+      },
+      'MsgMetaInfo': {
+        'TargetID': '',
+        'TargetSender': '',
+        'TargetChat': '',
+        'DeprecatedLIDSession': None,
+        'ThreadMessageID': '',
+        'ThreadMessageSenderJID': ''
+      },
+      'VerifiedName': None,
+      'DeviceSentMeta': None
+    },
+    'Message': {
+      'extendedTextMessage': {
+        'text': 'Hola! Me alegra poder ayudarte. Soy Emilia, una vendedora de Soluciones Hevia. ¿En qué puedo asistirte hoy? ¿Necesitas ayuda para encontrar algo en particular o tienes alguna pregunta sobre nuestros productos? Estoy aquí para ayudarte.',
+        'contextInfo': {
+          'expiration': 86400,
+          'ephemeralSettingTimestamp': 1772767352,
+          'disappearingMode': {
+            'initiator': 0,
+            'trigger': 1,
+            'initiatedByMe': False
+          }
+        }
+      }
+    },
+    'IsEphemeral': False,
+    'IsViewOnce': False,
+    'IsViewOnceV2': False,
+    'IsViewOnceV2Extension': False,
+    'IsDocumentWithCaption': False,
+    'IsLottieSticker': False,
+    'IsBotInvoke': False,
+    'IsEdit': False,
+    'SourceWebMsg': None,
+    'UnavailableRequestID': '',
+    'RetryCount': 0,
+    'NewsletterMeta': None,
+    'RawMessage': {
+      'extendedTextMessage': {
+        'text': 'Hola! Me alegra poder ayudarte. Soy Emilia, una vendedora de Soluciones Hevia. ¿En qué puedo asistirte hoy? ¿Necesitas ayuda para encontrar algo en particular o tienes alguna pregunta sobre nuestros productos? Estoy aquí para ayudarte.',
+        'contextInfo': {
+          'expiration': 86400,
+          'ephemeralSettingTimestamp': 1772767352,
+          'disappearingMode': {
+            'initiator': 0,
+            'trigger': 1,
+            'initiatedByMe': False
+          }
+        }
+      }
+    },
+    'Status': 2
+  }
+}
