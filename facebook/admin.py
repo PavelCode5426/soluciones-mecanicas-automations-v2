@@ -9,9 +9,6 @@ from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategor
 from facebook.tasks import download_groups_task, enqueue_posts
 
 # Register your models here.
-admin.site.register(AgentsConfig)
-
-
 @admin.register(FacebookProfile)
 class FacebookUserAdmin(admin.ModelAdmin):
     list_display = ('name',)
