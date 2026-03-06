@@ -78,9 +78,8 @@ class SolucionesHeviaIAService:
             )
         return tools
 
-    def get_seller_agent(self):
+    def get_agent(self, agent: Agent):
         self.init_llamaindex()
-        agent = Agent.objects.get(name='seller_agent')
 
         return FunctionAgent(name=agent.name,
                              verbose=self.verbose,

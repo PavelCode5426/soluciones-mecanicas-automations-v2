@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = "Hablar con la IA"
 
     def handle(self, *args, **options):
-        agent = services.SolucionesHeviaIAService().get_seller_agent()
+        agent = services.SolucionesHeviaIAService().get_agent()
 
         async def main():
             ctx = Context(agent)
