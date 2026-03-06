@@ -71,7 +71,7 @@ class SolucionesHeviaIAService:
         tools = []
 
         for tool in AgentTool.objects.filter(agent=agent, active=True).all():
-            module, func = tool.function.rsplit('.', 2)[1:]
+            module, func = tool.function.rsplit('.', 1)
             module = importlib.import_module(module)
             tools.append(
                 FunctionTool.from_defaults(getattr(module, func), name=tool.name, description=tool.description)
