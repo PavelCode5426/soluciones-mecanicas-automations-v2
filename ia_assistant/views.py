@@ -17,7 +17,7 @@ class WhatsAppMessageWebhookView(APIView):
             if message_type == 'text':
                 message = payload.get('body')
                 async_task(reply_whatsapp_message, message, from_id,
-                           group_name='ia_assistant',
+                           group='ia_assistant',
                            task_name=f"whatsapp_message_{from_id}".lower(),
                            cluster='high_priority')
 
