@@ -67,20 +67,6 @@ class IAService:
             description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
         )
 
-    def get_products_function_tool(self):
-        return FunctionTool.from_defaults(
-            name="consultar_productos",
-            description="""
-            "Utiliza esta función para obtener información detallada (precio, disponibilidad, descripción) de uno o varios productos de la tienda. 
-            La función devuelve una lista de productos relevantes, puedes pasar por parametros lo que esta buscando el cliente, asegurate de pasarlo en singular para poder encontrar el producto
-            No la uses para preguntar sobre categorías; para eso está 'consultar_categorias_de_productos'."
-            """)
-
-    def get_categories_function_tool(self):
-        return FunctionTool.from_defaults(
-            name="consultar_categorias_de_productos",
-            description="Útil cuando el cliente pregunta por los tipos de productos que comercializamos. Debes analizar la respuesta para adaptarla a la necesidad del cliente.")
-
     def __get_agent_tools(self, agent: Agent):
         tools = []
         agent_tools = importlib.import_module(f"ia_assistant.agent_tools.{agent.name}")
