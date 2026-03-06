@@ -8,15 +8,17 @@ from ia_assistant.models import Agent
 from ia_assistant.services import SolucionesHeviaIAService
 from services import WAHAService
 
+AGENTS_FUNTION = {}
+
 
 def reply_whatsapp_message(agent_name, message, account_id):
     agent = cache.get_or_set(agent_name, Agent.objects.get(name=agent_name))
 
-    func_agent = cache.get(f"{agent_name}_function")
+    func_agent = AGENTS_FUNTION.get(agent_name)
     if not func_agent:
         service = SolucionesHeviaIAService()
         func_agent = service.get_agent(agent)
-        cache.set(f"{agent_name}_function", func_agent)
+        AGENTS_FUNTION.setdefault(agent_name, func_agent)
 
     async def keep_typing():
         try:
