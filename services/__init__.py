@@ -1,4 +1,5 @@
 import requests
+from django.conf import settings
 
 
 class WAHAService:
@@ -13,20 +14,23 @@ class WAHAService:
         _type_: _description_
     """
 
-    _initialized = False
-    _auth = None
-    _api_url = None
-
     @classmethod
-    def _ensure_initialized(cls):
-        if not cls._initialized:
-            cls._auth = ('pavelcode5426', 'pavelcode5426')
-            cls._headers = {'X-Api-Key': 'admin'}
-            cls._api_url = 'https://whatsapp.pavelcode5426.duckdns.org'
-            cls._initialized = True
+    def initialize_using_config(cls):
+        return WAHAService(
+            server_url=settings.WHATSAPP_SERVER_URL,
+            server_username=settings.WHATSAPP_SERVER_USERNAME,
+            server_password=settings.WHATSAPP_SERVER_PASSWORD,
+            server_api_key=settings.WHATSAPP_API_KEY,
+        )
 
-    @staticmethod
-    def check_exist(phone_number: str) -> dict:
+    def __init__(self, server_url: str, server_api_key=None, server_username=None, server_password=None):
+        self._auth = None
+        self._api_url = server_url
+        self._headers = {'X-Api-Key': server_api_key}
+        if server_username and server_password:
+            self._auth = (server_username, server_password)
+
+    def check_exist(self, phone_number: str) -> dict:
         """
         Verifica si el número telefónico está registrado en WhatsApp
 
@@ -36,19 +40,17 @@ class WAHAService:
         Returns:
             bool: True | False
         """
-        WAHAService._ensure_initialized()
         response = requests.get(
-            f"{WAHAService._api_url}/api/contacts/check-exists",
-            headers=WAHAService._headers,
-            auth=WAHAService._auth,
+            f"{self._api_url}/api/contacts/check-exists",
+            headers=self._headers,
+            auth=self._auth,
             params={"phone": phone_number, "session": "default"},
             timeout=10,
         )
         response.raise_for_status()
         return response.json()
 
-    @staticmethod
-    def start_typing(chat_id: str) -> int:
+    def start_typing(self, chat_id: str) -> int:
         """
         WhatsApp comienzo de escritura
 
@@ -58,19 +60,17 @@ class WAHAService:
         Returns:
             int: HTTP código de estado
         """
-        WAHAService._ensure_initialized()
         response = requests.post(
-            f"{WAHAService._api_url}/api/startTyping",
-            auth=WAHAService._auth,
-            headers=WAHAService._headers,
+            f"{self._api_url}/api/startTyping",
+            auth=self._auth,
+            headers=self._headers,
             data={"chatId": chat_id, "session": "default"},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
 
-    @staticmethod
-    def stop_typing(chat_id: str) -> int:
+    def stop_typing(self, chat_id: str) -> int:
         """
         WhatsApp detener la escrituea
 
@@ -80,19 +80,17 @@ class WAHAService:
         Returns:
             int: HTTP código de estado
         """
-        WAHAService._ensure_initialized()
         response = requests.post(
-            f"{WAHAService._api_url}/api/stopTyping",
-            auth=WAHAService._auth,
-            headers=WAHAService._headers,
+            f"{self._api_url}/api/stopTyping",
+            auth=self._auth,
+            headers=self._headers,
             data={"chatId": chat_id, "session": "default"},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
 
-    @staticmethod
-    def send_text(chat_id: str, message: str) -> int:
+    def send_text(self, chat_id: str, message: str) -> int:
         """
         WhatsApp envío de mensaje
         Args:
@@ -102,12 +100,10 @@ class WAHAService:
         Returns:
             int: HTTP código de estado
         """
-        WAHAService._ensure_initialized()
-
         response = requests.post(
-            f"{WAHAService._api_url}/api/sendText",
-            headers=WAHAService._headers,
-            auth=WAHAService._auth,
+            f"{self._api_url}/api/sendText",
+            headers=self._headers,
+            auth=self._auth,
             json={
                 "chatId": chat_id,
                 "reply_to": None,
@@ -120,8 +116,7 @@ class WAHAService:
         response.raise_for_status()
         return response.status_code
 
-    @staticmethod
-    def send_image(chat_id: str, image_url: str, caption: str) -> int:
+    def send_image(self, chat_id: str, image_url: str, caption: str) -> int:
         """
         WhatsApp enviar imagen
 
@@ -133,12 +128,10 @@ class WAHAService:
             int: HTTP código de estado
         """
 
-        WAHAService._ensure_initialized()
-
         response = requests.post(
-            f"{WAHAService._api_url}/api/sendImage",
-            headers=WAHAService._headers,
-            auth=WAHAService._auth,
+            f"{self._api_url}/api/sendImage",
+            headers=self._headers,
+            auth=self._auth,
             data={
                 "chatId": chat_id,
                 "image": image_url,

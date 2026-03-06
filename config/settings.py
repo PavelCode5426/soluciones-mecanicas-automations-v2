@@ -180,6 +180,11 @@ Q_CLUSTER = {
     },
 }
 
-IA_OLLAMA_HOST = 'https://ia.pavelcode5426.duckdns.org'
+IA_OLLAMA_HOST = env("IA_OLLAMA_HOST", default='https://ia.pavelcode5426.duckdns.org')
 IA_TIMEOUT = 360
 IA_POST_PERSISTEN = MEDIA_ROOT / "query_engine"
+
+WHATSAPP_SERVER_URL = env("WHATSAPP_SERVER_URL", default='https://whatsapp.pavelcode5426.duckdns.org')
+WHATSAPP_API_KEY = env("WHATSAPP_APIKEY", default='admin')
+WHATSAPP_SERVER_USERNAME = env("WHATSAPP_SERVER_USERNAME", default='pavelcode5426')
+WHATSAPP_SERVER_PASSWORD = env("WHATSAPP_SERVER_PASSWORD", default='pavelcode5426')
