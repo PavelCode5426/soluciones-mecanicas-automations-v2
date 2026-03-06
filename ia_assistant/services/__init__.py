@@ -69,13 +69,10 @@ class SolucionesHeviaIAService:
 
     def __get_agent_tools(self, agent: Agent):
         tools = []
-        agent_tools = importlib.import_module(f"ia_assistant.agent_tools.{agent.name}")
 
         for tool in AgentTool.objects.filter(agent=agent, active=True).all():
-            tools.append(
-                FunctionTool.from_defaults(
-                    getattr(agent_tools, tool.function), name=tool.name, description=tool.description)
-            )
+            funct = importlib.import_module(tool.function)
+            tools.append(FunctionTool.from_defaults(funct, name=tool.name, description=tool.description))
         return tools
 
     def get_agent(self, agent: Agent):
