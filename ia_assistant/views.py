@@ -9,6 +9,7 @@ from ia_assistant.tasks import reply_whatsapp_message
 class WhatsAppMessageWebhookView(APIView):
     def post(self, request, *args, **kwargs):
         payload = request.data.get('payload')
+        print(payload)
 
         from_id = payload.get('from')
         account_name = payload.get('PushName')
