@@ -14,7 +14,7 @@ from facebook.models import FacebookPost
 from ia_assistant.models import Agent, AgentTool
 
 
-class IAService:
+class SolucionesHeviaIAService:
     verbose = True
     embedding_model = 'nomic-embed-text:latest'
     llm_model = 'llama3.1:8b-instruct-q4_K_M'

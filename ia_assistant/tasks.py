@@ -4,12 +4,12 @@ from django.conf import settings
 from django.core.cache import cache
 from llama_index.core.workflow import Context
 
+from ia_assistant.services import SolucionesHeviaIAService
 from services import WAHAService
-from ia_assistant.services import IAService
 
 
 def reply_whatsapp_message(message, account_id):
-    ia_service = IAService()
+    ia_service = cache.get_or_set('seller_agent', SolucionesHeviaIAService())
     agent = ia_service.get_seller_agent()
 
     async def keep_typing():
