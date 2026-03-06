@@ -1,0 +1,103 @@
+import importlib
+from pathlib import Path
+
+from django.conf import settings
+from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
+    SimpleDirectoryReader
+from llama_index.core.agent import FunctionAgent
+from llama_index.core.response_synthesizers import ResponseMode
+from llama_index.core.tools import QueryEngineTool, FunctionTool
+from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.ollama import Ollama
+
+from facebook.models import FacebookPost
+from ia_assistant.models import Agent, AgentTool
+
+
+class IAService:
+    verbose = True
+    embedding_model = 'nomic-embed-text:latest'
+    llm_model = 'llama3.1:8b-instruct-q4_K_M'
+
+    def init_llamaindex(self):
+        host = settings.IA_OLLAMA_HOST
+        Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
+        Settings.llm = Ollama(base_url=host, model=self.llm_model, request_timeout=60.0,
+                              context_window=8000, temperature=0.0)
+
+    def get_facebook_post_query_engine_tool(self, reset=False):
+        PERSIST_DIR = settings.IA_POST_PERSISTEN / "post"
+        if PERSIST_DIR.exists() and not reset:
+            storage_context = StorageContext.from_defaults(persist_dir=str(PERSIST_DIR))
+            vector_index = load_index_from_storage(storage_context)
+        else:
+            documents = []
+            posts = FacebookPost.objects.filter(active=True).all()
+            for post in posts:
+                documents.append(Document(text=post.text))
+            vector_index = VectorStoreIndex.from_documents(documents)
+            vector_index.storage_context.persist(PERSIST_DIR)
+
+        query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True)
+        return QueryEngineTool.from_defaults(
+            query_engine=query_engine,
+            name="consultar_precios",
+            description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
+        )
+
+    def get_products_query_engine_tool_____no_usar(self, reset=False):
+        PERSIST_DIR = settings.IA_POST_PERSISTEN / "products"
+        if PERSIST_DIR.exists() and not reset:
+            storage_context = StorageContext.from_defaults(persist_dir=str(PERSIST_DIR))
+            vector_index = load_index_from_storage(storage_context)
+        else:
+            DATA_DIR = Path(__file__).parent / 'data/products'
+            documents = SimpleDirectoryReader(DATA_DIR).load_data()
+            # parser = SentenceSplitter(chunk_size=512, chunk_overlap=50)
+            # nodes = parser.get_nodes_from_documents(documents)
+            # vector_index = VectorStoreIndex(nodes)
+            vector_index = VectorStoreIndex.from_documents(documents)
+            vector_index.storage_context.persist(PERSIST_DIR)
+
+        query_engine = vector_index.as_query_engine(response_mode=ResponseMode.COMPACT, use_async=True,
+                                                    similarity_top_k=10)
+        return QueryEngineTool.from_defaults(
+            query_engine=query_engine,
+            name="consultar_precios",
+            description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
+        )
+
+    def get_products_function_tool(self):
+        return FunctionTool.from_defaults(
+            name="consultar_productos",
+            description="""
+            "Utiliza esta función para obtener información detallada (precio, disponibilidad, descripción) de uno o varios productos de la tienda. 
+            La función devuelve una lista de productos relevantes, puedes pasar por parametros lo que esta buscando el cliente, asegurate de pasarlo en singular para poder encontrar el producto
+            No la uses para preguntar sobre categorías; para eso está 'consultar_categorias_de_productos'."
+            """)
+
+    def get_categories_function_tool(self):
+        return FunctionTool.from_defaults(
+            name="consultar_categorias_de_productos",
+            description="Útil cuando el cliente pregunta por los tipos de productos que comercializamos. Debes analizar la respuesta para adaptarla a la necesidad del cliente.")
+
+    def __get_agent_tools(self, agent: Agent):
+        tools = []
+        agent_tools = importlib.import_module(f"ia_assistant.agent_tools.{agent.name}")
+
+        for tool in AgentTool.objects.filter(agent=agent, active=True).all():
+            tools.append(
+                FunctionTool.from_defaults(
+                    getattr(agent_tools, tool.function), name=tool.name, description=tool.description)
+            )
+        return tools
+
+    def get_seller_agent(self):
+        self.init_llamaindex()
+        agent = Agent.objects.get(name='seller_agent')
+
+        return FunctionAgent(name=agent.name,
+                             verbose=self.verbose,
+                             description=agent.description,
+                             system_prompt=agent.system_prompt,
+                             tools=self.__get_agent_tools(agent))

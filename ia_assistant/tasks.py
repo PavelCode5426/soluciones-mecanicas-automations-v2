@@ -4,7 +4,8 @@ from django.conf import settings
 from django.core.cache import cache
 from llama_index.core.workflow import Context
 
-from services import IAService, WAHAService
+from services import WAHAService
+from ia_assistant.services import IAService
 
 
 def reply_whatsapp_message(message, account_id):
