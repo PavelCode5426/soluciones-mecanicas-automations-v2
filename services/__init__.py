@@ -10,7 +10,7 @@ from llama_index.core.tools import QueryEngineTool, FunctionTool
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
-import facebook.ia_tools as ia_tools
+import ia_assistant.ia_tools as ia_tools
 from facebook.models import FacebookPost, AgentsConfig
 
 

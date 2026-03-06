@@ -1,4 +1,4 @@
-from facebook import services
+import services
 
 
 def get_products_information(query: str) -> str:

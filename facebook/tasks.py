@@ -1,14 +1,9 @@
-import asyncio
 import random
 
-from django.conf import settings
-from django.core.cache import cache
 from django_q.tasks import async_task
-from llama_index.core.workflow import Context
 
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
-from facebook.services.automations import FacebookAutomationService
-from facebook.services import IAService, WAHAService
+from services.automations import FacebookAutomationService
 
 
 def download_groups_task(user):
@@ -60,35 +55,3 @@ def enqueue_active_facebook_posts():
     for user in users:
         total_items += enqueue_posts(user, posts)
     return f"Agendadas {total_items} publicaciones"
-
-
-def reply_whatsapp_message(message, account_id, account_name):
-    ia_service = IAService()
-    agent = ia_service.get_seller_agent()
-
-    async def keep_typing():
-        try:
-            while True:
-                WAHAService.start_typing(account_id)
-                await asyncio.sleep(5)
-        except asyncio.CancelledError:
-            WAHAService.stop_typing(account_id)
-
-    async def main():
-        previus_context = cache.get_or_set(account_id, {})
-        ctx = Context(agent, previous_context=previus_context)
-        typing_task = asyncio.create_task(keep_typing())
-        try:
-            async with asyncio.timeout(settings.IA_TIMEOUT):
-                result = await agent.run(message, ctx=ctx)
-                WAHAService.send_text(account_id, str(result))
-        finally:
-            typing_task.cancel()
-
-        cache.set(account_id, ctx.to_dict())
-
-    if '--reset' in message:
-        cache.delete(account_id)
-        WAHAService.send_text(account_id, "Memoria borrada....")
-    else:
-        asyncio.run(main(), debug=True)
