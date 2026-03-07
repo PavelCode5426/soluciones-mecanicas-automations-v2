@@ -9,6 +9,9 @@ class Agent(models.Model):
     active = models.BooleanField(default=True)
     options = models.JSONField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class AgentTool(models.Model):
     name = models.CharField(max_length=250)
@@ -23,3 +26,6 @@ class AgentWorkflow(models.Model):
     agents = models.ManyToManyField(Agent, related_name='workflows')
     root_agent = models.ForeignKey(Agent, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
