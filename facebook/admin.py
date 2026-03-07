@@ -8,6 +8,7 @@ from django_q.tasks import async_task
 from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, AgentsConfig
 from facebook.tasks import download_groups_task, enqueue_posts
 
+
 # Register your models here.
 @admin.register(FacebookProfile)
 class FacebookUserAdmin(admin.ModelAdmin):
@@ -37,6 +38,7 @@ class FacebookGroudAdmin(admin.ModelAdmin):
 @admin.register(FacebookGroupCategory)
 class FacebookGroupCategoryAdmin(admin.ModelAdmin):
     list_display = ('name',)
+    filter_horizontal = ['groups']
 
 
 @admin.register(FacebookPost)
@@ -44,6 +46,7 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ('title', 'published_count', 'updated_at', 'active')
     actions = ['add_to_queue']
     readonly_fields = ["image"]
+    filter_horizontal = ['categories']
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))

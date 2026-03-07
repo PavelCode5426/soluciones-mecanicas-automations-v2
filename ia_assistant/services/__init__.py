@@ -23,8 +23,7 @@ class SolucionesHeviaIAService:
     def init_llamaindex(self):
         host = settings.IA_OLLAMA_HOST
         Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
-        Settings.llm = Ollama(base_url=host, model=self.llm_model, request_timeout=60.0,
-                              context_window=8000, temperature=0.0)
+        Settings.llm = Ollama(base_url=host, model=self.llm_model)
 
     def get_facebook_post_query_engine_tool(self, reset=False):
         PERSIST_DIR = settings.IA_POST_PERSISTEN / "post"
