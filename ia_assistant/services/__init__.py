@@ -70,7 +70,7 @@ class SolucionesHeviaIAService:
     def __get_agent_tools(self, agent: models.Agent):
         tools = []
 
-        for tool in models.AgentTool.objects.filter(agent=agent, active=True).all():
+        for tool in models.FunctionTool.objects.filter(agent=agent, active=True).all():
             module, func = tool.function.rsplit('.', 1)
             module = importlib.import_module(module)
             tools.append(

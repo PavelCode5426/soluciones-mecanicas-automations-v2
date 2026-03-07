@@ -13,7 +13,7 @@ class Agent(models.Model):
         return self.name
 
 
-class AgentTool(models.Model):
+class FunctionTool(models.Model):
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     function = models.CharField(max_length=250)
@@ -25,6 +25,16 @@ class AgentWorkflow(models.Model):
     name = models.CharField(max_length=250)
     agents = models.ManyToManyField(Agent, related_name='workflows')
     root_agent = models.ForeignKey(Agent, on_delete=models.PROTECT)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class AgentTool(models.Model):
+    name = models.CharField(max_length=250)
+    description = models.TextField(null=True, blank=True)
+    agent_workflow = models.ForeignKey(AgentWorkflow, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
 
     def __str__(self):

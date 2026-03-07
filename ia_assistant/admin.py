@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ia_assistant.models import Agent, AgentTool, AgentWorkflow
+from ia_assistant.models import Agent, FunctionTool, AgentWorkflow
 
 
 @admin.register(Agent)
@@ -8,7 +8,7 @@ class AgentAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']
 
 
-@admin.register(AgentTool)
+@admin.register(FunctionTool)
 class AgentAdmin(admin.ModelAdmin):
     list_display = ['agent_name', 'name', 'description']
 
