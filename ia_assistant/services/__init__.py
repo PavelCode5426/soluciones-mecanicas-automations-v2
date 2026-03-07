@@ -17,8 +17,8 @@ from ia_assistant.models import Agent, AgentTool
 class SolucionesHeviaIAService:
     verbose = True
     embedding_model = 'nomic-embed-text:latest'
-    # llm_model = 'llama3.1:8b-instruct-q4_K_M'
-    llm_model = 'llama3.2:3b'
+    llm_model = 'llama3.1:8b-instruct-q4_K_M'
+    # llm_model = 'llama3.2:3b'
 
     def init_llamaindex(self):
         host = settings.IA_OLLAMA_HOST

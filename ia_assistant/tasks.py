@@ -43,7 +43,9 @@ def reply_whatsapp_message(agent_name, message, account_id):
                 handler = func_agent.run(message, ctx=ctx)
                 async for event in handler.stream_events():
                     if isinstance(event, AgentStream):
-                        whatsapp_service.send_text(account_id, event.delta)
+                        whatsapp_service.send_text(account_id, event.response)
+                whatsapp_service.send_text(account_id, await handler)
+
         finally:
             typing_task.cancel()
         cache.set(account_id, ctx.to_dict())
