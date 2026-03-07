@@ -4,8 +4,6 @@ import logging
 from llama_index.core.agent import AgentWorkflow, AgentStream
 from llama_index.core.workflow import Context
 
-from services import SolucionesMecanicasAPIServices
-
 host = 'https://ia.pavelcode5426.duckdns.org'
 
 agent = AgentWorkflow(agents=[])

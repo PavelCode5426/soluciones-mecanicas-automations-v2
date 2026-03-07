@@ -12,7 +12,7 @@ from services import WAHAService
 AGENTS_FUNCTION = {}
 
 
-def get_keep_typing_loop_task(service: WAHAService, account_id):
+def __keep_typing_loop_task(service: WAHAService, account_id):
     async def __keep_typing():
         try:
             while True:
@@ -37,7 +37,7 @@ def reply_whatsapp_message(agent_name, message, account_id):
     async def main():
         previus_context = cache.get_or_set(account_id, {})
         ctx = Context(func_agent, previous_context=previus_context)
-        typing_task = get_keep_typing_loop_task(whatsapp_service, account_id)
+        typing_task = __keep_typing_loop_task(whatsapp_service, account_id)
         try:
             async with asyncio.timeout(settings.IA_TIMEOUT):
                 handler = agent.run(message, ctx=ctx)
