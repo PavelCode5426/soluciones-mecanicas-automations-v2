@@ -13,17 +13,15 @@ class WhatsAppMessageWebhookView(GenericAPIView):
     queryset = Agent.objects.filter(active=True)
 
     def post(self, request, *args, **kwargs):
-        agent = self.get_object()
         payload = request.data.get('payload')
         is_from_me = payload.get('fromMe')
-        if not is_from_me:
-            from_id = payload.get('from')
-            message_type = payload.get('_data').get('Info').get('Type')
-            if message_type == 'text':
-                message = payload.get('body')
-                async_task(reply_whatsapp_message, agent.name, message, from_id,
-                           group='ia_assistant',
-                           task_name=f"whatsapp_message_{from_id}".lower(),
-                           cluster='high_priority')
+        from_id = payload.get('from')
+        message_type = payload.get('_data').get('Info').get('Type')
+        agent = self.get_object() if not is_from_me else self.get_object()
+
+        if message_type == 'text':
+            message = payload.get('body')
+            async_task(reply_whatsapp_message, agent.name, message, from_id, group='ia_assistant',
+                       task_name=f"whatsapp_message_{from_id}".lower(), cluster='high_priority')
 
         return Response(status=status.HTTP_200_OK)
