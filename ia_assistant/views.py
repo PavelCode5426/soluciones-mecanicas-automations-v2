@@ -3,14 +3,14 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
-from ia_assistant.models import Agent
+from ia_assistant.models import AgentWorkflow
 from ia_assistant.tasks import reply_whatsapp_message
 
 
 class WhatsAppMessageWebhookView(GenericAPIView):
     lookup_field = 'name'
     lookup_url_kwarg = 'agent_name'
-    queryset = Agent.objects.filter(active=True)
+    queryset = AgentWorkflow.objects.filter(active=True)
 
     def post(self, request, *args, **kwargs):
         payload = request.data.get('payload')

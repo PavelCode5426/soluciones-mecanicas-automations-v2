@@ -5,11 +5,21 @@ from django.core.cache import cache
 from llama_index.core.agent import AgentStream
 from llama_index.core.workflow import Context
 
-from ia_assistant.models import Agent
+from ia_assistant.models import AgentWorkflow
 from ia_assistant.services import SolucionesHeviaIAService
 from services import WAHAService
 
-AGENTS_FUNCTION = {}
+AGENT_WORKFLOWS = {}
+
+
+def __get_or_set_agent_function(agent_workflow: AgentWorkflow):
+    name = agent_workflow.name
+    func_agent = AGENT_WORKFLOWS.get(name)
+    if not func_agent:
+        service = SolucionesHeviaIAService()
+        func_agent = service.get_agent_workflow(agent_workflow)
+        AGENT_WORKFLOWS.setdefault(name, func_agent)
+    return func_agent
 
 
 def ___keep_typing_loop_task(service: WAHAService, account_id):
@@ -24,28 +34,23 @@ def ___keep_typing_loop_task(service: WAHAService, account_id):
     return asyncio.create_task(__keep_typing())
 
 
-def reply_whatsapp_message(agent_name, message, account_id):
-    agent = cache.get_or_set(agent_name, Agent.objects.get(name=agent_name))
+def reply_whatsapp_message(workflow_name, message, account_id):
     whatsapp_service = WAHAService.initialize_using_config()
-
-    func_agent = AGENTS_FUNCTION.get(agent_name)
-    if not func_agent:
-        service = SolucionesHeviaIAService()
-        func_agent = service.get_agent(agent)
-        AGENTS_FUNCTION.setdefault(agent_name, func_agent)
+    agent = cache.get_or_set(workflow_name, AgentWorkflow.objects.get(name=workflow_name))
+    workflow = __get_or_set_agent_function(agent)
 
     async def main():
         previus_context = cache.get_or_set(account_id, {})
-        ctx = Context(func_agent, previous_context=previus_context)
+        ctx = Context(workflow, previous_context=previus_context)
         typing_task = ___keep_typing_loop_task(whatsapp_service, account_id)
         try:
             async with asyncio.timeout(settings.IA_TIMEOUT):
-                handler = func_agent.run(message, ctx=ctx)
+                handler = workflow.run(message, ctx=ctx)
                 async for event in handler.stream_events():
                     if isinstance(event, AgentStream):
-                        whatsapp_service.send_text(account_id, event.response)
+                        print(event.response)
+                        # whatsapp_service.send_text(account_id, event.response)
                 whatsapp_service.send_text(account_id, await handler)
-
         finally:
             typing_task.cancel()
         cache.set(account_id, ctx.to_dict())
@@ -54,6 +59,4 @@ def reply_whatsapp_message(agent_name, message, account_id):
         cache.delete(account_id)
         whatsapp_service.send_text(account_id, "Memoria borrada....")
     else:
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(main())
         asyncio.run(main(), debug=True)

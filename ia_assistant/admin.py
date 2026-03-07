@@ -1,9 +1,8 @@
 from django.contrib import admin
 
-from ia_assistant.models import Agent, AgentTool
+from ia_assistant.models import Agent, AgentTool, AgentWorkflow
 
 
-# Register your models here.
 @admin.register(Agent)
 class AgentAdmin(admin.ModelAdmin):
     list_display = ['name', 'description']
@@ -18,3 +17,9 @@ class AgentAdmin(admin.ModelAdmin):
 
     agent_name.admin_order_field = 'agent'
     agent_name.short_description = 'Agente'
+
+
+@admin.register(AgentWorkflow)
+class AgentWorkflow(admin.ModelAdmin):
+    list_display = ['name', 'active']
+    filter_horizontal = ['agents']

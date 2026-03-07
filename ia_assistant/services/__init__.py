@@ -4,26 +4,26 @@ from pathlib import Path
 from django.conf import settings
 from llama_index.core import Settings, StorageContext, load_index_from_storage, VectorStoreIndex, Document, \
     SimpleDirectoryReader
-from llama_index.core.agent import FunctionAgent
+from llama_index.core.agent import FunctionAgent, AgentWorkflow
 from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.tools import QueryEngineTool, FunctionTool
-from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
 from facebook.models import FacebookPost
-from ia_assistant.models import Agent, AgentTool
+from ia_assistant import models
 
 
 class SolucionesHeviaIAService:
     verbose = True
     embedding_model = 'nomic-embed-text:latest'
-    # llm_model = 'llama3.1:8b-instruct-q4_K_M'
-    llm_model = 'llama3.2:3b'
+    llm_model = 'llama3.1:8b-instruct-q4_K_M'
+
+    # llm_model = 'llama3.2:3b'
 
     def init_llamaindex(self):
         host = settings.IA_OLLAMA_HOST
         # Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
-        Settings.llm = Ollama(base_url=host, model=self.llm_model)
+        Settings.llm = Ollama(base_url=host, model=self.llm_model, context_window=60000, request_timeout=120)
 
     def get_facebook_post_query_engine_tool(self, reset=False):
         PERSIST_DIR = settings.IA_POST_PERSISTEN / "post"
@@ -67,10 +67,10 @@ class SolucionesHeviaIAService:
             description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
         )
 
-    def __get_agent_tools(self, agent: Agent):
+    def __get_agent_tools(self, agent: models.Agent):
         tools = []
 
-        for tool in AgentTool.objects.filter(agent=agent, active=True).all():
+        for tool in models.AgentTool.objects.filter(agent=agent, active=True).all():
             module, func = tool.function.rsplit('.', 1)
             module = importlib.import_module(module)
             tools.append(
@@ -78,11 +78,11 @@ class SolucionesHeviaIAService:
             )
         return tools
 
-    def get_agent(self, agent: Agent):
-        self.init_llamaindex()
+    def get_agent(self, agent: models.Agent):
+        tools = self.__get_agent_tools(agent)
+        return FunctionAgent(name=agent.name, description=agent.description, system_prompt=agent.system_prompt,
+                             tools=tools, **agent.options)
 
-        return FunctionAgent(name=agent.name,
-                             verbose=self.verbose,
-                             description=agent.description,
-                             system_prompt=agent.system_prompt,
-                             tools=self.__get_agent_tools(agent))
+    def get_agent_workflow(self, workflow: models.AgentWorkflow):
+        agents = [self.get_agent(agent) for agent in workflow.agents.filter(active=True).all()]
+        return AgentWorkflow(agents=agents, root_agent=workflow.root_agent.name)
