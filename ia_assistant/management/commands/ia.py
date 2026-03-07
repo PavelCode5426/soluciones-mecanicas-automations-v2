@@ -25,7 +25,7 @@ class Command(BaseCommand):
                 if query == "q":
                     break
                 if query != "":
-                    handler = agent.run(query, ctx=ctx)
+                    handler = func_agent.run(query, ctx=ctx)
                     async for event in handler.stream_events():
                         if isinstance(event, AgentStream):
                             print(event.delta, end="", flush=True)
