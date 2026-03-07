@@ -20,7 +20,7 @@ class SolucionesHeviaIAService:
 
     # llm_model = 'llama3.2:3b'
 
-    def init_llamaindex(self):
+    def __init__(self):
         host = settings.IA_OLLAMA_HOST
         # Settings.embed_model = OllamaEmbedding(model_name=self.embedding_model, base_url=host)
         Settings.llm = Ollama(base_url=host, model=self.llm_model, context_window=60000, request_timeout=120)

@@ -7,7 +7,7 @@ class Agent(models.Model):
     description = models.TextField(null=True, blank=True)
     system_prompt = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    options = models.JSONField(null=True, blank=True)
+    options = models.JSONField(default=dict)
 
     def __str__(self):
         return self.name
