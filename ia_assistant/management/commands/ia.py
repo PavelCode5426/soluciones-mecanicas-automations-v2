@@ -28,6 +28,8 @@ class Command(BaseCommand):
                     handler = func_agent.run(query, ctx=ctx)
                     async for event in handler.stream_events():
                         if isinstance(event, AgentStream):
-                            print(event.response, end="", flush=True)
+                            if event.response:
+                                print(event.response, end="", flush=True)
+                    print(await handler)
 
         asyncio.run(main(), debug=True)
