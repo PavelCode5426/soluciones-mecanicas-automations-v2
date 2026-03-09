@@ -1,6 +1,8 @@
 import requests
 from django.conf import settings
 
+from ia_assistant.models import RAGApplication
+
 
 class WAHAService:
     """
@@ -15,12 +17,12 @@ class WAHAService:
     """
 
     @classmethod
-    def initialize_using_config(cls):
+    def initialize_using_rag(cls, rag: RAGApplication):
         return WAHAService(
-            server_url=settings.WHATSAPP_SERVER_URL,
-            server_username=settings.WHATSAPP_SERVER_USERNAME,
-            server_password=settings.WHATSAPP_SERVER_PASSWORD,
-            server_api_key=settings.WHATSAPP_API_KEY,
+            server_url=rag.config.waha_base_url,
+            server_username=rag.config.waha_username,
+            server_password=rag.config.waha_password,
+            server_api_key=rag.config.waha_api_key,
         )
 
     def __init__(self, server_url: str, server_api_key=None, server_username=None, server_password=None):

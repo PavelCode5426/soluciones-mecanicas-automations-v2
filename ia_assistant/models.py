@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db import models
 from django_jsonform.models.fields import JSONField
 
@@ -90,3 +91,7 @@ class RAGApplication(models.Model):
     root_workflow = models.ForeignKey(AgentWorkflow, on_delete=models.PROTECT, null=True, blank=True)
     active = models.BooleanField(default=True)
     config = JSONField(schema=JSON_SCHEMA)
+
+    def save(self, *args, **kwargs):
+        cache.remove(self.name)
+        super().save(*args, **kwargs)
