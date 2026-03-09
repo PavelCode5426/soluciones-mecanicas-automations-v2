@@ -1,6 +1,11 @@
 from django.contrib import admin
 
-from ia_assistant.models import Agent, FunctionTool, AgentWorkflow
+from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM
+
+
+@admin.register(OllamaLLM)
+class AgentAdmin(admin.ModelAdmin):
+    list_display = ['name']
 
 
 @admin.register(Agent)
@@ -23,3 +28,5 @@ class AgentAdmin(admin.ModelAdmin):
 class AgentWorkflow(admin.ModelAdmin):
     list_display = ['name', 'active']
     filter_horizontal = ['agents']
+
+

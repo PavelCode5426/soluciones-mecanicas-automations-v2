@@ -11,6 +11,7 @@ from llama_index.llms.ollama import Ollama
 
 from facebook.models import FacebookPost
 from ia_assistant import models
+from ia_assistant.factories import create_function_agent
 
 
 class SolucionesHeviaIAService:
@@ -67,21 +68,8 @@ class SolucionesHeviaIAService:
             description="Utiliza esta herramienta para obtener información sobre productos y precios. Pasa la consulta del cliente tal cual."
         )
 
-    def __get_agent_tools(self, agent: models.Agent):
-        tools = []
-
-        for tool in models.FunctionTool.objects.filter(agent=agent, active=True).all():
-            module, func = tool.function.rsplit('.', 1)
-            module = importlib.import_module(module)
-            tools.append(
-                FunctionTool.from_defaults(getattr(module, func), name=tool.name, description=tool.description)
-            )
-        return tools
-
     def get_agent(self, agent: models.Agent):
-        tools = self.__get_agent_tools(agent)
-        return FunctionAgent(name=agent.name, description=agent.description, system_prompt=agent.system_prompt,
-                             tools=tools, **agent.options)
+        return create_function_agent(agent)
 
     def get_agent_workflow(self, workflow: models.AgentWorkflow):
         agents = [self.get_agent(agent) for agent in workflow.agents.filter(active=True).all()]

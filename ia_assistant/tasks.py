@@ -5,8 +5,8 @@ from django.core.cache import cache
 from llama_index.core.agent import AgentStream
 from llama_index.core.workflow import Context
 
+from ia_assistant.factories import create_agent_workflow
 from ia_assistant.models import AgentWorkflow
-from ia_assistant.services import SolucionesHeviaIAService
 from services import WAHAService
 
 AGENT_WORKFLOWS = {}
@@ -16,8 +16,7 @@ def __get_or_set_agent_function(agent_workflow: AgentWorkflow):
     name = agent_workflow.name
     func_agent = AGENT_WORKFLOWS.get(name)
     if not func_agent:
-        service = SolucionesHeviaIAService()
-        func_agent = service.get_agent_workflow(agent_workflow)
+        func_agent = create_agent_workflow(agent_workflow)
         AGENT_WORKFLOWS.setdefault(name, func_agent)
     return func_agent
 
@@ -48,7 +47,7 @@ def reply_whatsapp_message(workflow_name, message, account_id):
                 handler = workflow.run(message, ctx=ctx)
                 async for event in handler.stream_events():
                     if isinstance(event, AgentStream):
-                        print(event.response)
+                        print(event.response, flush=True)
                         # whatsapp_service.send_text(account_id, event.response)
                 whatsapp_service.send_text(account_id, await handler)
         finally:
