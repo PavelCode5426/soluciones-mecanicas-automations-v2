@@ -44,7 +44,7 @@ def reply_whatsapp_message(workflow_name, message, account_id):
         try:
             async with asyncio.timeout(settings.IA_TIMEOUT):
                 response = await workflow.run(message, ctx=ctx)
-                whatsapp_service.send_text(account_id, response)
+                whatsapp_service.send_text(account_id, str(response))
                 """"
                 async for event in response.stream_events():
                     if isinstance(event, AgentStream):
