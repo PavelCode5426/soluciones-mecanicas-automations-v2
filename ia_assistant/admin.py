@@ -5,7 +5,7 @@ from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM
 
 @admin.register(OllamaLLM)
 class AgentAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', 'model_name']
 
 
 @admin.register(Agent)
@@ -28,5 +28,3 @@ class AgentAdmin(admin.ModelAdmin):
 class AgentWorkflow(admin.ModelAdmin):
     list_display = ['name', 'active']
     filter_horizontal = ['agents']
-
-

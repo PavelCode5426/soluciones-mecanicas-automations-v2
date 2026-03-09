@@ -22,10 +22,7 @@ class Command(BaseCommand):
                 if query == "q":
                     break
                 if query != "":
-                    handler = agent.run(query, ctx=ctx)
-                    async for event in handler.stream_events():
-                        if isinstance(event, AgentStream):
-                            if event.response:
-                                print(event.response, flush=True)
+                    response = await agent.run(query, ctx=ctx)
+                    print(response)
 
         asyncio.run(main(), debug=True)

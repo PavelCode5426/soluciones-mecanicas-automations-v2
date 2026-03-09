@@ -5,6 +5,8 @@ from django.db import models
 
 class OllamaLLM(models.Model):
     name = models.CharField(max_length=100)
+    base_url = models.CharField(max_length=100, blank=True)
+    model_name = models.CharField(max_length=100, blank=True)
     config = models.JSONField(default=dict)
 
     def __str__(self):
