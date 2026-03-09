@@ -1,24 +1,42 @@
 from django.db import models
+from django_jsonform.models.fields import JSONField
 
 
 # Create your models here.
 
 class OllamaLLM(models.Model):
+    JSON_SCHEMA = {
+        'type': 'dict',
+        'keys': {
+            'context_window': {'type': 'number', 'default': -1},
+            'request_timeout': {'type': 'number', 'default': 120, }
+        },
+        'additionalProperties': True
+    }
+
     name = models.CharField(max_length=100)
     base_url = models.CharField(max_length=100, blank=True)
     model_name = models.CharField(max_length=100, blank=True)
-    config = models.JSONField(default=dict)
+    config = JSONField(schema=JSON_SCHEMA)
 
     def __str__(self):
         return self.name
 
 
 class Agent(models.Model):
+    JSON_SCHEMA = {
+        'type': 'dict',
+        'keys': {
+            'verbose': {'type': 'boolean', 'default': False},
+        },
+        'additionalProperties': True
+    }
+
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     system_prompt = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
-    options = models.JSONField(default=dict)
+    options = JSONField(schema=JSON_SCHEMA)
     llm = models.ForeignKey(OllamaLLM, on_delete=models.PROTECT, null=True, blank=True)
 
     def __str__(self):
@@ -26,11 +44,18 @@ class Agent(models.Model):
 
 
 class AgentWorkflow(models.Model):
+    JSON_SCHEMA = {
+        'type': 'dict',
+        'keys': {
+            'verbose': {'type': 'boolean', 'default': False},
+        },
+        'additionalProperties': True
+    }
     name = models.CharField(max_length=250)
     agents = models.ManyToManyField(Agent, related_name='workflows')
     root_agent = models.ForeignKey(Agent, on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
-    options = models.JSONField(default=dict)
+    options = JSONField(schema=JSON_SCHEMA)
 
     def __str__(self):
         return self.name
