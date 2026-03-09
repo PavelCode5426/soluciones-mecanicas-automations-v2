@@ -1,13 +1,11 @@
 import asyncio
 
-from django.conf import settings
-from django.core.cache import cache
 from django.core.management.base import BaseCommand
 from llama_index.core.agent import AgentStream
 from llama_index.core.workflow import Context
 
-from ia_assistant.models import Agent
-from ia_assistant.services import SolucionesHeviaIAService
+from ia_assistant.factories import create_agent_workflow
+from ia_assistant.models import AgentWorkflow
 
 
 class Command(BaseCommand):
@@ -15,17 +13,16 @@ class Command(BaseCommand):
     agent_name = 'seller_agent'
 
     def handle(self, *args, **options):
-        agent = cache.get_or_set(self.agent_name, Agent.objects.get(name=self.agent_name))
-        func_agent = SolucionesHeviaIAService().get_agent(agent)
+        agent = create_agent_workflow(AgentWorkflow.objects.first())
 
         async def main():
-            ctx = Context(func_agent)
+            ctx = Context(agent)
             while True:
                 query = input("Tu:")
                 if query == "q":
                     break
                 if query != "":
-                    handler = func_agent.run(query, ctx=ctx)
+                    handler = agent.run(query, ctx=ctx)
                     async for event in handler.stream_events():
                         if isinstance(event, AgentStream):
                             if event.response:
