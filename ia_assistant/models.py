@@ -70,3 +70,23 @@ class FunctionTool(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RAGApplication(models.Model):
+    JSON_SCHEMA = {
+        'type': 'object',
+        'keys': {
+            'waha_base_url': {'type': 'string', 'placeholder': 'https://whatsapp.com'},
+            'waha_api_key': {'type': 'string', 'placeholder': 'admin'},
+            'waha_username': {'type': 'string', 'placeholder': 'admin'},
+            'waha_password': {'type': 'string', 'placeholder': 'admin'},
+        },
+        'additionalProperties': True
+    }
+
+    name = models.CharField(max_length=250)
+    description = models.TextField(null=True, blank=True)
+    root_agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=True, blank=True)
+    root_workflow = models.ForeignKey(AgentWorkflow, on_delete=models.PROTECT, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    config = JSONField(schema=JSON_SCHEMA)

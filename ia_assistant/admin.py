@@ -1,10 +1,10 @@
 from django.contrib import admin
 
-from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM
+from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM, RAGApplication
 
 
 @admin.register(OllamaLLM)
-class AgentAdmin(admin.ModelAdmin):
+class OllamaLLMAdmin(admin.ModelAdmin):
     list_display = ['name', 'model_name']
 
 
@@ -14,7 +14,7 @@ class AgentAdmin(admin.ModelAdmin):
 
 
 @admin.register(FunctionTool)
-class AgentAdmin(admin.ModelAdmin):
+class FunctionToolAdmin(admin.ModelAdmin):
     list_display = ['agent_name', 'name', 'description']
 
     def agent_name(self, obj):
@@ -25,6 +25,11 @@ class AgentAdmin(admin.ModelAdmin):
 
 
 @admin.register(AgentWorkflow)
-class AgentWorkflow(admin.ModelAdmin):
+class AgentWorkflowAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     filter_horizontal = ['agents']
+
+
+@admin.register(RAGApplication)
+class RAGApplicationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'active']
