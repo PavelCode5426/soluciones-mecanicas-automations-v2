@@ -8,7 +8,7 @@ from ia_assistant import models
 
 
 def create_llm(model: models.OllamaLLM):
-    return Ollama(model=model.name, **model.config)
+    return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
 
 
 def create_function_agent(agent: models.Agent):
