@@ -44,12 +44,14 @@ def reply_whatsapp_message(workflow_name, message, account_id):
         typing_task = ___keep_typing_loop_task(whatsapp_service, account_id)
         try:
             async with asyncio.timeout(settings.IA_TIMEOUT):
-                handler = workflow.run(message, ctx=ctx)
-                async for event in handler.stream_events():
+                response = await workflow.run(message, ctx=ctx)
+                whatsapp_service.send_text(account_id, response)
+                """"
+                async for event in response.stream_events():
                     if isinstance(event, AgentStream):
                         print(event.response, flush=True)
                         # whatsapp_service.send_text(account_id, event.response)
-                whatsapp_service.send_text(account_id, await handler)
+                """
         finally:
             typing_task.cancel()
         cache.set(account_id, ctx.to_dict())
