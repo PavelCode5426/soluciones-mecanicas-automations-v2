@@ -181,7 +181,7 @@ Q_CLUSTER = {
 }
 
 IA_OLLAMA_HOST = env("IA_OLLAMA_HOST", default='https://ia.pavelcode5426.duckdns.org')
-IA_TIMEOUT = 360
+IA_TIMEOUT = 500
 IA_POST_PERSISTEN = MEDIA_ROOT / "query_engine"
 
 WHATSAPP_SERVER_URL = env("WHATSAPP_SERVER_URL", default='https://whatsapp.pavelcode5426.duckdns.org')

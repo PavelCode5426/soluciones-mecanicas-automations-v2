@@ -2,7 +2,6 @@ import asyncio
 
 from django.conf import settings
 from django.core.cache import cache
-from llama_index.core.agent import AgentStream
 from llama_index.core.workflow import Context
 
 from ia_assistant.factories import create_agent_workflow
