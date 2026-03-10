@@ -19,10 +19,10 @@ class WAHAService:
     @classmethod
     def initialize_using_rag(cls, rag: RAGApplication):
         return WAHAService(
-            server_url=rag.config.waha_base_url,
-            server_username=rag.config.waha_username,
-            server_password=rag.config.waha_password,
-            server_api_key=rag.config.waha_api_key,
+            server_url=rag.config.get('waha_base_url'),
+            server_username=rag.config.get('waha_username'),
+            server_password=rag.config.get('waha_password'),
+            server_api_key=rag.config.get('waha_api_key'),
         )
 
     def __init__(self, server_url: str, server_api_key=None, server_username=None, server_password=None):
