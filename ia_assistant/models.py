@@ -93,5 +93,5 @@ class RAGApplication(models.Model):
     config = JSONField(schema=JSON_SCHEMA)
 
     def save(self, *args, **kwargs):
-        cache.remove(self.name)
+        cache.delete(self.name)
         super().save(*args, **kwargs)
