@@ -81,7 +81,7 @@ class RAGApplication(models.Model):
             'waha_api_key': {'type': 'string', 'placeholder': 'admin'},
             'waha_username': {'type': 'string', 'placeholder': 'admin'},
             'waha_password': {'type': 'string', 'placeholder': 'admin'},
-            'waha_ignore_ids': {'type': 'string', 'title': 'Ignore whatsapp numbers', 'format': 'textarea'},
+            'waha_ignore_ids': {'type': 'string', 'title': 'Ignore whatsapp numbers', 'widget': 'textarea'},
         },
         'additionalProperties': True
     }
