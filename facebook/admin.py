@@ -83,7 +83,8 @@ class FacebookLeadExplorerAdmin(admin.ModelAdmin):
 
     def add_to_queue(self, request, query):
         active_leads = query.filter(active=True).all()
-        enqueue_lead_explorer(active_leads)
+        for explorer in active_leads:
+            enqueue_lead_explorer(explorer)
         self.message_user(request, f"Fueron agendadas {active_leads.count()}  publicaciones", level=messages.SUCCESS)
 
     add_to_queue.short_description = 'Comenzar a explorar'
