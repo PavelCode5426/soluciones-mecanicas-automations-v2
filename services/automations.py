@@ -299,14 +299,12 @@ class FacebookAutomationService:
                                 return await post_analyser.run(raw_html=article.inner_html())
 
                             response = async_to_sync(generate_response)()
-                            # response = async_to_sync(post_analyser.run)(raw_html=article.inner_html())
-                            # response = await post_analyser.run(raw_html=article.inner_html())
                             if response.is_relevant:
                                 textarea.click()
                                 article.page.keyboard.type(response.promotional_message)
                                 article.page.keyboard.press('Enter')
                         except Exception as e:
-                            pass
+                            print(e)
                         count = articles_locator.count()
                         i += 1
                 except Exception as e:
