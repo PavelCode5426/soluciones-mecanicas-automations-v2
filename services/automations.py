@@ -261,7 +261,7 @@ class FacebookAutomationService:
                 exception = e
             return page.screenshot(quality=80, type='jpeg'), exception
 
-    async def group_lead_explorer(self, group: FacebookGroup, limit=100):
+    def group_lead_explorer(self, group: FacebookGroup, limit=100):
         self.refresh_user()
         group.refresh_from_db()
         if group.active and self.user.active:
@@ -296,14 +296,13 @@ class FacebookAutomationService:
                         post_analyser = FacebookPostAnalyzerAgent()
                         try:
                             async def generate_response():
-                                return await post_analyser.run(raw_html=article.inner_html())
+                                response = await post_analyser.run(raw_html=article.inner_html())
+                                if response.is_relevant:
+                                    textarea.click()
+                                    article.page.keyboard.type(response.promotional_message)
+                                    article.page.keyboard.press('Enter')
 
-                            # response = async_to_sync(generate_response)()
-                            response = await post_analyser.run(raw_html=article.inner_html())
-                            if response.is_relevant:
-                                textarea.click()
-                                article.page.keyboard.type(response.promotional_message)
-                                article.page.keyboard.press('Enter')
+                            asyncio.run(generate_response())
                         except Exception as e:
                             print(e)
                         count = articles_locator.count()
