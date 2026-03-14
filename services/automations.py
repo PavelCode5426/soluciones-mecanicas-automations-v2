@@ -261,7 +261,7 @@ class FacebookAutomationService:
                 exception = e
             return page.screenshot(quality=80, type='jpeg'), exception
 
-    def group_lead_explorer(self, group: FacebookGroup, limit=100):
+    async def group_lead_explorer(self, group: FacebookGroup, limit=100):
         self.refresh_user()
         group.refresh_from_db()
         if group.active and self.user.active:
@@ -298,7 +298,8 @@ class FacebookAutomationService:
                             async def generate_response():
                                 return await post_analyser.run(raw_html=article.inner_html())
 
-                            response = async_to_sync(generate_response)()
+                            # response = async_to_sync(generate_response)()
+                            response = await post_analyser.run(raw_html=article.inner_html())
                             if response.is_relevant:
                                 textarea.click()
                                 article.page.keyboard.type(response.promotional_message)
