@@ -3,6 +3,7 @@ import random
 import re
 import time
 
+from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -293,9 +294,9 @@ class FacebookAutomationService:
 
                         textarea = article.get_by_role('textbox')
                         post_analyser = FacebookPostAnalyzerAgent()
-                        loop = asyncio.get_running_loop()
                         try:
-                            response = loop.run_until_complete(post_analyser.run(raw_html=article.inner_html()))
+                            response = async_to_sync(post_analyser.run)(raw_html=article.inner_html())
+                            # response = await post_analyser.run(raw_html=article.inner_html())
                             if response.is_relevant:
                                 textarea.click()
                                 article.page.keyboard.type(response.promotional_message)
