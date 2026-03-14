@@ -271,7 +271,7 @@ class FacebookAutomationService:
                     page.goto(group.url, wait_until='commit')
 
                     count = 0
-                    while count <= 1:
+                    while count <= 5:
                         articles_locator = page.locator("div[aria-posinset]")
                         count = articles_locator.count()
                         if count > 0:
