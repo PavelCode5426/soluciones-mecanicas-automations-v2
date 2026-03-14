@@ -54,7 +54,7 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     image.short_description = 'Image'
 
     def add_to_queue(self, request, query):
-        user = FacebookProfile.objects.first()
+        user = FacebookProfile.objects.filter(active=True).first()
         total_items = enqueue_posts(user, posts=query.all())
         self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
 
