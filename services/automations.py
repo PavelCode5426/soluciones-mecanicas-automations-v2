@@ -3,6 +3,7 @@ import random
 import re
 import time
 
+import nest_asyncio
 from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
@@ -21,12 +22,15 @@ def get_playwright() -> PlaywrightContextManager:
 
 
 def run_async(coro):
-    new_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(new_loop)
+    nest_asyncio.apply()
+    new_loop = asyncio.get_event_loop()
+    # new_loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(new_loop)
     try:
         return new_loop.run_until_complete(coro)
     finally:
-        new_loop.close()
+        pass
+        # new_loop.close()
 
 
 class FacebookPostExtractor:
