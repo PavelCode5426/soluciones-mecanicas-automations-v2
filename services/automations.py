@@ -295,7 +295,8 @@ class FacebookAutomationService:
                         textarea = article.get_by_role('textbox')
                         post_analyser = FacebookPostAnalyzerAgent()
                         try:
-                            response = async_to_sync(post_analyser.run)(raw_html=article.inner_html())
+                            response = async_to_sync(lambda: post_analyser.run(raw_html=article.inner_html()))()
+                            # response = async_to_sync(post_analyser.run)(raw_html=article.inner_html())
                             # response = await post_analyser.run(raw_html=article.inner_html())
                             if response.is_relevant:
                                 textarea.click()
