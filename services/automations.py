@@ -291,25 +291,21 @@ class FacebookAutomationService:
                         except Exception:
                             pass
 
+                        textarea = article.get_by_role('textbox')
+                        post_analyser = FacebookPostAnalyzerAgent()
                         loop = asyncio.get_running_loop()
                         try:
-                            loop.run_until_complete(self.__analyzer_facebook_post(article))
+                            response = loop.run_until_complete(post_analyser.run(raw_html=article.inner_html()))
+                            if response.is_relevant:
+                                textarea.click()
+                                article.page.keyboard.type(response.promotional_message)
+                                article.page.keyboard.press('Enter')
                         except Exception as e:
                             pass
                         count = articles_locator.count()
                         i += 1
                 except Exception as e:
                     pass
-
-    async def __analyzer_facebook_post(self, article):
-        textarea = article.get_by_role('textbox')
-        post_analyser = FacebookPostAnalyzerAgent()
-        response = await post_analyser.run(raw_html=article.inner_html())
-
-        if response.is_relevant:
-            textarea.click()
-            article.page.keyboard.type(response.promotional_message)
-            article.page.keyboard.press('Enter')
 
     def save_session(self, browser: BrowserContext):
         self.user.context = browser.storage_state()
