@@ -2,7 +2,7 @@ import random
 
 from django_q.tasks import async_task
 
-from facebook.models import FacebookGroup, FacebookProfile, FacebookPost
+from facebook.models import FacebookGroup, FacebookProfile, FacebookPost, FacebookLeadExplorer
 from services.automations import FacebookAutomationService
 
 
@@ -55,3 +55,19 @@ def enqueue_active_facebook_posts():
     for user in users:
         total_items += enqueue_posts(user, posts)
     return f"Agendadas {total_items} publicaciones"
+
+
+def enqueue_lead_explorer(explorer: FacebookLeadExplorer):
+    service = FacebookAutomationService(explorer.profile)
+    group = explorer.group_category.groups.filter(active=True).order_by('?').first()
+
+    task_name = f"Leads Explorer {group.name}"
+    group_name = f'facebook_leads_explorer_{group.id}'
+    async_task(service.group_lead_explorer, group, 100, task_name=task_name, group=group_name)
+
+
+def enqueue_active_lead_explorers():
+    leads_explorers = FacebookLeadExplorer.objects.filter(active=True).order_by('?').all()
+    for explorer in leads_explorers:
+        enqueue_lead_explorer(explorer)
+    return "OK"

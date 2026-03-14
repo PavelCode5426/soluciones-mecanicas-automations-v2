@@ -47,3 +47,10 @@ class AgentsConfig(models.Model):
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     system_prompt = models.TextField(null=True, blank=True)
+
+
+class FacebookLeadExplorer(models.Model):
+    description = models.TextField(null=True, blank=True)
+    profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
+    group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT)
+    active = models.BooleanField(default=True)

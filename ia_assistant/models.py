@@ -73,6 +73,41 @@ class FunctionTool(models.Model):
         return self.name
 
 
+class Document(models.Model):
+    METADATA_SCHEMA = {
+        'type': 'dict',
+        'keys': {},
+        'additionalProperties': True
+    }
+
+    name = models.CharField(max_length=250)
+    description = models.TextField(null=True, blank=True)
+    text = models.TextField(null=True, blank=True)
+    metadata = JSONField(schema=METADATA_SCHEMA)
+
+
+class QueryEngine(models.Model):
+    EXTRA_KWARGS_SCHEMA = {
+        'type': 'dict',
+        'keys': {},
+        'additionalProperties': True
+    }
+    SENTENCE_SPLITTER_SCHEMA = {
+        'type': 'dict',
+        'keys': {
+            'chunk_size': {'type': 'number', 'default': 512},
+        },
+        'additionalProperties': True
+    }
+
+    embed_model = models.ForeignKey(OllamaLLM, related_name='embed_queryengine', on_delete=models.PROTECT, null=True,
+                                    blank=True)
+    llm = models.ForeignKey(OllamaLLM, related_name='llm_queryengine', on_delete=models.PROTECT, null=True, blank=True)
+    documents = models.ManyToManyField(Document)
+    sentence_splitter = JSONField(schema=SENTENCE_SPLITTER_SCHEMA)
+    extra_kwargs = JSONField(schema=EXTRA_KWARGS_SCHEMA)
+
+
 class RAGApplication(models.Model):
     JSON_SCHEMA = {
         'type': 'object',

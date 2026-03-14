@@ -6,7 +6,7 @@ from llama_index.core.workflow import Context
 
 from ia_assistant.factories import create_agent_workflow, create_function_agent
 from ia_assistant.models import AgentWorkflow, RAGApplication, Agent
-from services import WAHAService
+from services.whatsapp import WAHAService
 
 AGENT_WORKFLOWS_FUNTIONS = {}
 

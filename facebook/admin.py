@@ -5,8 +5,8 @@ from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, AgentsConfig
-from facebook.tasks import download_groups_task, enqueue_posts
+from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, FacebookLeadExplorer
+from facebook.tasks import download_groups_task, enqueue_posts, enqueue_lead_explorer
 
 
 # Register your models here.
@@ -74,6 +74,19 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
 
 
 admin.site.unregister(OrmQ)
+
+
+@admin.register(FacebookLeadExplorer)
+class FacebookLeadExplorerAdmin(admin.ModelAdmin):
+    list_display = ['profile', 'group_category']
+    actions = ['add_to_queue']
+
+    def add_to_queue(self, request, query):
+        active_leads = query.filter(active=True).all()
+        enqueue_lead_explorer(active_leads)
+        self.message_user(request, f"Fueron agendadas {active_leads.count()}  publicaciones", level=messages.SUCCESS)
+
+    add_to_queue.short_description = 'Comenzar a explorar'
 
 
 class NewQueueAdmin(QueueAdmin):
