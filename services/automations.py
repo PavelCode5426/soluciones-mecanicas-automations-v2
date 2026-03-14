@@ -20,6 +20,15 @@ def get_playwright() -> PlaywrightContextManager:
     return sync_playwright()
 
 
+def run_async(coro):
+    new_loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(new_loop)
+    try:
+        return new_loop.run_until_complete(coro)
+    finally:
+        new_loop.close()
+
+
 class FacebookPostExtractor:
     """
     Extractor de datos de una publicación de Facebook usando Beautiful Soup.
@@ -295,14 +304,11 @@ class FacebookAutomationService:
                         textarea = article.get_by_role('textbox')
                         post_analyser = FacebookPostAnalyzerAgent()
                         try:
-                            async def generate_response():
-                                response = await post_analyser.run(raw_html=article.inner_html())
-                                if response.is_relevant:
-                                    textarea.click()
-                                    article.page.keyboard.type(response.promotional_message)
-                                    article.page.keyboard.press('Enter')
-
-                            asyncio.run(generate_response())
+                            response = run_async(post_analyser.run(raw_html=article.inner_html()))
+                            if response.is_relevant:
+                                textarea.click()
+                                article.page.keyboard.type(response.promotional_message)
+                                article.page.keyboard.press('Enter')
                         except Exception as e:
                             print(e)
                         count = articles_locator.count()
