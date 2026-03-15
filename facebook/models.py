@@ -22,7 +22,7 @@ class FacebookGroupCategory(models.Model):
     groups = models.ManyToManyField(FacebookGroup, related_name='categories')
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.profile})"
 
 
 class FacebookProfile(models.Model):
