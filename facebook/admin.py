@@ -73,12 +73,6 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     readonly_fields = ["image"]
     filter_horizontal = ['categories']
 
-    # def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
-    #     extra_context = extra_context or {}
-    #     extra_context['show_save_and_continue'] = True
-    #     extra_context['show_save_and_add_another'] = False
-    #     extra_context['show_save'] = True
-    #     return super().changeform_view(request, object_id, form_url, extra_context=extra_context)
 
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
