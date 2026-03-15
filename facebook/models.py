@@ -3,6 +3,7 @@ from django.db import models
 
 # Create your models here.
 class FacebookGroup(models.Model):
+    profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True, on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
     screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
@@ -32,6 +33,7 @@ class FacebookProfile(models.Model):
 
 
 class FacebookPost(models.Model):
+    profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
     title = models.CharField(max_length=250)
     text = models.TextField()
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)

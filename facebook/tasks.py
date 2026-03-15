@@ -1,5 +1,6 @@
 import random
 
+from django.db.models import QuerySet
 from django_q.tasks import async_task
 
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost, FacebookLeadExplorer
@@ -12,24 +13,26 @@ def download_groups_task(user):
 
     for group in groups:
         FacebookGroup.objects.update_or_create(defaults={"name": group['name']},
-                                               create_defaults=group, url=group['url'])
+                                               create_defaults=group, url=group['url'], profile=user)
 
     return groups
 
 
 def check_profile_status():
-    users = FacebookProfile.objects.all()
+    users = FacebookProfile.objects.filter(active=True).all()
     for user in users:
         service = FacebookAutomationService(user)
         async_task(service.check_status, task_name=f'check_status', group='check_status', cluster='high_priority')
     return "Comprobación de estado agendada correctamente"
 
 
-def enqueue_posts(user: FacebookProfile, posts: list[FacebookPost]):
-    service = FacebookAutomationService(user)
-    for_enqueue = []
+def enqueue_posts(posts: QuerySet[FacebookPost]):
+    total_items = 0
     for post in posts:
+        service = FacebookAutomationService(post.profile)
         groups = FacebookGroup.objects.filter(active=True, categories__posts=post).order_by('?').all()
+        for_enqueue = []
+
         if post.distribution_count:
             groups = groups[:post.distribution_count]
         for group in groups:
@@ -39,21 +42,18 @@ def enqueue_posts(user: FacebookProfile, posts: list[FacebookPost]):
                 kwargs=dict(task_name=task_name, group=f'facebook_post_{post.id}')
             ))
 
-    total_items = len(for_enqueue)
-    random.shuffle(for_enqueue)
-    for task in for_enqueue:
-        async_task(service.create_post, *task['args'], **task['kwargs'])
+        random.shuffle(for_enqueue)
+        for task in for_enqueue:
+            async_task(service.create_post, *task['args'], **task['kwargs'])
+
+        total_items += len(for_enqueue)
 
     return total_items
 
 
 def enqueue_active_facebook_posts():
-    # if Task.objects.filter(group='enqueue_active_facebook_posts', attempt_count=0).count() == 0:
-    total_items = 0
-    users = FacebookProfile.objects.all()
-    posts = FacebookPost.objects.filter(active=True).order_by('?').all()
-    for user in users:
-        total_items += enqueue_posts(user, posts)
+    posts = FacebookPost.objects.select_related('profile').filter(active=True).order_by('?').all()
+    total_items = enqueue_posts(posts)
     return f"Agendadas {total_items} publicaciones"
 
 

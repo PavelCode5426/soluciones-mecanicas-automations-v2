@@ -26,7 +26,7 @@ class FacebookUserAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
-    list_display = ("name", "url", "active", "error_at",)
+    list_display = ("name", "profile", "url", "active", "error_at",)
     readonly_fields = ("image",)
 
     def image(self, obj):
@@ -43,8 +43,8 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'published_count', 'updated_at', 'active')
-    actions = ['add_to_queue']
+    list_display = ('title', 'profile', 'published_count', 'updated_at', 'active')
+    actions = ['add_to_queue', 'disable_posts', 'enable_posts']
     readonly_fields = ["image"]
     filter_horizontal = ['categories']
 
@@ -54,8 +54,7 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     image.short_description = 'Image'
 
     def add_to_queue(self, request, query):
-        user = FacebookProfile.objects.filter(active=True).first()
-        total_items = enqueue_posts(user, posts=query.all())
+        total_items = enqueue_posts(query.all())
         self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
 
     add_to_queue.short_description = 'Agendar publicaciones'
