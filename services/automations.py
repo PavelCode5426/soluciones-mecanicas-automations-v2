@@ -12,7 +12,7 @@ from django.db.models import F
 from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright, BrowserContext
 
-from facebook.models import FacebookPost
+from facebook.models import FacebookPost, FacebookLeadExplorer
 from facebook.models import FacebookProfile, FacebookGroup
 from ia_assistant.agents.workflows import FacebookPostAnalyzerAgent
 
@@ -160,30 +160,30 @@ class FacebookPostExtractor:
 
 
 class FacebookAutomationService:
-    def __init__(self, user: FacebookProfile):
-        self.user = user
+    def __init__(self, profile: FacebookProfile):
+        self.profile = profile
 
     def check_status(self):
-        self.refresh_user()
-        if self.user.active:
+        self.refresh_profile()
+        if self.profile.active:
             with (get_playwright() as pw):
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
-                self.user.active = not bool(page.locator('text=Iniciar sesión').count())
-        self.user.save(update_fields=['active'])
-        return self.user.active
+                self.profile.active = not bool(page.locator('text=Iniciar sesión').count())
+        self.profile.save(update_fields=['active'])
+        return self.profile.active
 
-    def refresh_user(self):
-        self.user.refresh_from_db()
+    def refresh_profile(self):
+        self.profile.refresh_from_db()
 
     def get_browser(self, pw: Playwright):
-        context = pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.user.context)
+        context = pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.profile.context)
         context.set_default_timeout(settings.PLAYWRIGHT['timeout'])
         return context
 
     def get_all_groups(self):
-        self.refresh_user()
+        self.refresh_profile()
         with get_playwright() as pw:
             browser = self.get_browser(pw)
             page = browser.new_page()
@@ -212,10 +212,10 @@ class FacebookAutomationService:
             return groups
 
     def create_post(self, group: FacebookGroup, post: FacebookPost):
-        self.refresh_user()
+        self.refresh_profile()
         group.refresh_from_db()
         post.refresh_from_db()
-        if post.active and group.active and self.user.active:
+        if post.active and group.active and self.profile.active:
             screenshot, exception = self.__publish_group_post(group.url, post)
             file_name = f"{group}_screenshot.jpeg".lower()
             group.screenshot.delete(False)
@@ -265,7 +265,7 @@ class FacebookAutomationService:
                 # page.keyboard.type(post.text)
                 page.keyboard.insert_text(post.text)
                 page.keyboard.insert_text('\n' * 2)
-                page.keyboard.insert_text(self.user.posts_footer)
+                page.keyboard.insert_text(self.profile.posts_footer)
                 time.sleep(random.randint(30, 60))
 
                 page.click('[aria-label="Publicar"]')
@@ -279,10 +279,13 @@ class FacebookAutomationService:
         self.save_session(updated_session)
         return screenshot, exception
 
-    def group_lead_explorer(self, group: FacebookGroup, limit=100):
-        self.refresh_user()
-        group.refresh_from_db()
-        if group.active and self.user.active:
+    def group_lead_explorer(self, explorer: FacebookLeadExplorer):
+        self.refresh_profile()
+        explorer.refresh_from_db()
+        if explorer.active and self.profile.active:
+            leads_found = 0
+            group = explorer.group_category.groups.filter(active=True).order_by('?').first()
+
             with get_playwright() as pw:
                 try:
                     browser = self.get_browser(pw)
@@ -298,7 +301,7 @@ class FacebookAutomationService:
                         time.sleep(5)
 
                     i = 0
-                    while i < count and i < limit:
+                    while i < count and i < explorer.limit:
                         article = articles_locator.nth(i)
                         article.scroll_into_view_if_needed()
                         article.wait_for(state="visible")
@@ -318,13 +321,17 @@ class FacebookAutomationService:
                                 textarea.click()
                                 article.page.keyboard.type(response.promotional_message)
                                 article.page.keyboard.press('Enter')
+                                leads_found += 1
                         except Exception as e:
                             print(e)
                         count = articles_locator.count()
                         i += 1
                 except Exception as e:
-                    pass
+                    print(e)
+
+            explorer.leads_found = F('lead_found') + leads_found
+            explorer.save()
 
     def save_session(self, storage_state):
-        self.user.context = storage_state
-        self.user.save()
+        self.profile.context = storage_state
+        self.profile.save()

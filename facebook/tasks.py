@@ -59,11 +59,9 @@ def enqueue_active_facebook_posts():
 
 def enqueue_lead_explorer(explorer: FacebookLeadExplorer):
     service = FacebookAutomationService(explorer.profile)
-    group = explorer.group_category.groups.filter(active=True).order_by('?').first()
-
-    task_name = f"Leads Explorer {group.name}"
-    group_name = f'facebook_leads_explorer_{group.id}'
-    async_task(service.group_lead_explorer, group, 25, task_name=task_name, group=group_name)
+    task_name = f"Leads Explorer {explorer.profile}"
+    group_name = f'facebook_leads_explorer_{explorer.profile}'
+    async_task(service.group_lead_explorer, explorer, task_name=task_name, group=group_name)
 
 
 def enqueue_active_lead_explorers():

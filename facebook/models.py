@@ -3,7 +3,8 @@ from django.db import models
 
 # Create your models here.
 class FacebookGroup(models.Model):
-    profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True, on_delete=models.PROTECT)
+    profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True,
+                                on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
     screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
@@ -15,7 +16,8 @@ class FacebookGroup(models.Model):
 
 
 class FacebookGroupCategory(models.Model):
-    profile = models.ForeignKey('FacebookProfile', related_name='group_categories', null=True, blank=True, on_delete=models.PROTECT)
+    profile = models.ForeignKey('FacebookProfile', related_name='group_categories', null=True, blank=True,
+                                on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     groups = models.ManyToManyField(FacebookGroup, related_name='categories')
 
@@ -56,4 +58,6 @@ class FacebookLeadExplorer(models.Model):
     description = models.TextField(null=True, blank=True)
     profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
     group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT)
+    limit = models.IntegerField(default=100)
+    leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
