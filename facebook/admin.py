@@ -73,23 +73,6 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     readonly_fields = ["image"]
     filter_horizontal = ['categories']
 
-    def get_fields(self, request, obj=None):
-        fields = super().get_fields(request, obj)
-        if obj is None:
-            fields.remove('categories')
-        return fields
-
-    # def formfield_for_manytomany(self, db_field, request, **kwargs):
-    #     if db_field.name == "categories":
-    #         obj_id = request.resolver_match.kwargs.get('object_id')
-    #         if obj_id:
-    #             try:
-    #                 post = FacebookPost.objects.get(pk=obj_id)
-    #                 kwargs["queryset"] = FacebookGroupCategory.objects.filter(profile_id=post.profile_id)
-    #             except FacebookGroupCategory.DoesNotExist:
-    #                 pass
-    #     return super().formfield_for_manytomany(db_field, request, **kwargs)
-
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
 
