@@ -11,7 +11,7 @@ from facebook.tasks import download_groups_task, enqueue_posts, enqueue_lead_exp
 
 # Register your models here.
 @admin.register(FacebookProfile)
-class FacebookUserAdmin(admin.ModelAdmin):
+class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ('name',)
     actions = ['sync_facebook_groups']
 
@@ -26,8 +26,9 @@ class FacebookUserAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
-    list_display = ("name", "profile", "url", "active", "error_at",)
-    readonly_fields = ("image",)
+    list_display = ["name", "profile", "url", "active", "error_at"]
+    list_filter = ["profile"]
+    readonly_fields = ["image"]
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
@@ -38,12 +39,15 @@ class FacebookGroudAdmin(admin.ModelAdmin):
 @admin.register(FacebookGroupCategory)
 class FacebookGroupCategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'profile')
+    list_filter = ["profile"]
     filter_horizontal = ['groups']
 
 
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'profile', 'published_count', 'updated_at', 'active')
+    search_fields = ['title', 'text']
+    list_display = ['title', 'profile', 'published_count', 'updated_at', 'active']
+    list_filter = ["profile"]
     actions = ['add_to_queue', 'disable_posts', 'enable_posts']
     readonly_fields = ["image"]
     filter_horizontal = ['categories']
@@ -78,6 +82,7 @@ admin.site.unregister(OrmQ)
 @admin.register(FacebookLeadExplorer)
 class FacebookLeadExplorerAdmin(admin.ModelAdmin):
     list_display = ['profile', 'group_category']
+    list_filter = ["profile"]
     actions = ['add_to_queue']
 
     def add_to_queue(self, request, query):
