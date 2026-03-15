@@ -37,7 +37,7 @@ class FacebookGroudAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroupCategory)
 class FacebookGroupCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ('name', 'profile')
     filter_horizontal = ['groups']
 
 
