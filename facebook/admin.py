@@ -8,6 +8,10 @@ from django_q.tasks import async_task
 from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, FacebookLeadExplorer
 from facebook.tasks import download_groups_task, enqueue_posts, enqueue_lead_explorer
 
+admin.site.site_header = "Panel de Administración"
+admin.site.site_title = "Sinergia Marketing Automations"
+admin.site.index_title = "Bienvenido al Panel"
+
 
 # Register your models here.
 @admin.register(FacebookProfile)
@@ -42,6 +46,23 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
     list_filter = ["profile"]
     filter_horizontal = ['groups']
 
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('groups')
+        return fields
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "groups":
+            obj_id = request.resolver_match.kwargs.get('object_id')
+            if obj_id:
+                try:
+                    category = FacebookGroupCategory.objects.get(pk=obj_id)
+                    kwargs["queryset"] = FacebookGroup.objects.filter(profile=category.profile)
+                except FacebookGroupCategory.DoesNotExist:
+                    pass
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
+
 
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
@@ -51,6 +72,29 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     actions = ['add_to_queue', 'disable_posts', 'enable_posts']
     readonly_fields = ["image"]
     filter_horizontal = ['categories']
+
+    # def changeform_view(self, request, object_id=None, form_url='', extra_context=None):
+    #     extra_context = extra_context or {}
+    #     extra_context['show_save_and_continue'] = True
+    #     extra_context['show_save_and_add_another'] = False
+    #     extra_context['show_save'] = True
+    #     return super().changeform_view(request, object_id, form_url, extra_context=extra_context)
+
+    def get_fields(self, request, obj=None):
+        fields = super().get_fields(request, obj)
+        if obj is None:
+            fields.remove('categories')
+        return fields
+
+    def formfield_for_manytomany(self, db_field, request, **kwargs):
+        if db_field.name == "categories":
+            obj_id = request.resolver_match.kwargs.get('object_id')
+            if obj_id:
+                try:
+                    kwargs["queryset"] = FacebookGroupCategory.objects.filter(profile_id=obj_id)
+                except FacebookGroupCategory.DoesNotExist:
+                    pass
+        return super().formfield_for_manytomany(db_field, request, **kwargs)
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
