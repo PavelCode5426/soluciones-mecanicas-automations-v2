@@ -4,7 +4,6 @@ import re
 import time
 
 import nest_asyncio
-from asgiref.sync import async_to_sync
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.base import ContentFile
