@@ -233,6 +233,7 @@ class FacebookAutomationService:
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
+
         with (get_playwright() as pw):
             try:
                 browser = self.get_browser(pw)
@@ -269,10 +270,14 @@ class FacebookAutomationService:
 
                 page.click('[aria-label="Publicar"]')
                 page.locator('span', has_text='Publicando').wait_for(state='hidden')
-                self.save_session(browser)
             except Exception as e:
                 exception = e
-            return page.screenshot(quality=80, type='jpeg'), exception
+
+            screenshot = page.screenshot(quality=80, type='jpeg')
+            updated_session = browser.storage_state()
+
+        self.save_session(updated_session)
+        return screenshot, exception
 
     def group_lead_explorer(self, group: FacebookGroup, limit=100):
         self.refresh_user()
@@ -320,6 +325,6 @@ class FacebookAutomationService:
                 except Exception as e:
                     pass
 
-    def save_session(self, browser: BrowserContext):
-        self.user.context = browser.storage_state()
+    def save_session(self, storage_state):
+        self.user.context = storage_state
         self.user.save()

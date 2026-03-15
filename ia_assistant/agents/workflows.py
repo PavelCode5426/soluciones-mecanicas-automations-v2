@@ -77,14 +77,15 @@ Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el
 
 """
 
-    def __init__(self, llm=None, *args, **kwargs) -> None:
+    def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = llm or Ollama(
+        self.llm = Ollama(
             model='llama3.2:3b',
-            # model='deepseek-r1:1.5b',
             base_url='https://ia.pavelcode5426.duckdns.org',
             context_window=50_000,
             request_timeout=1500, json_mode=True)
+
+        self.lead_description = lead_description
 
     @step
     def start_workflow(self, ev: StartEvent) -> PostParsedEvent:
