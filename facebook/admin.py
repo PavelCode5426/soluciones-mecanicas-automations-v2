@@ -5,7 +5,8 @@ from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, FacebookLeadExplorer
+from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, FacebookLeadExplorer, \
+    FacebookHistory
 from facebook.tasks import download_groups_task, enqueue_posts, enqueue_lead_explorer
 
 admin.site.site_header = "Panel de Administración"
@@ -70,8 +71,19 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     list_display = ['title', 'profile', 'published_count', 'updated_at', 'active']
     list_filter = ["profile"]
     actions = ['add_to_queue', 'disable_posts', 'enable_posts']
-    readonly_fields = ["image"]
+    readonly_fields = ["image", "published_count", "created_at", "updated_at"]
     filter_horizontal = ['categories']
+    fieldsets = [
+        ("Detalles de la publicación", {
+            "fields": ["profile", 'title', 'text', 'file', 'image', 'categories']
+        }),
+        ("Estados de la publicación", {
+            "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
+        }),
+        ("Indicadores de la publicación", {
+            "fields": ['published_count', "created_at", "updated_at"]
+        })
+    ]
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
@@ -105,6 +117,36 @@ class FacebookLeadExplorerAdmin(admin.ModelAdmin):
     list_display = ['profile', 'group_category']
     list_filter = ["profile"]
     actions = ['add_to_queue']
+
+    def add_to_queue(self, request, query):
+        active_leads = query.filter(active=True).all()
+        for explorer in active_leads:
+            enqueue_lead_explorer(explorer)
+        self.message_user(request, f"Fueron agendadas {active_leads.count()}  publicaciones", level=messages.SUCCESS)
+
+    add_to_queue.short_description = 'Comenzar a explorar'
+
+
+@admin.register(FacebookHistory)
+class FacebookLeadExplorerAdmin(admin.ModelAdmin):
+    list_display = ["title", "profile", "active"]
+    list_filter = ["profile"]
+    fieldsets = [
+        ("Detalles de la historia", {
+            "fields": ['profile', 'title', 'file', 'image']
+        }),
+        ("Estados de la historia", {
+            "fields": ['active', 'from_date', 'until_date']
+        }),
+        ("Indicadores de la historia", {
+            "fields": ['published_count', "created_at", "updated_at"]
+        })
+    ]
+
+    def image(self, obj):
+        return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
+
+    image.short_description = 'Image'
 
     def add_to_queue(self, request, query):
         active_leads = query.filter(active=True).all()

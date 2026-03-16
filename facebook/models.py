@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.timezone import now
 
 
 # Create your models here.
@@ -42,16 +43,19 @@ class FacebookPost(models.Model):
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
+    from_date = models.DateField(null=True, blank=True, default=now)
+    until_date = models.DateField(null=True, blank=True)
+
     published_count = models.BigIntegerField(default=0)
     distribution_count = models.IntegerField(default=0)
+    frequency = models.DecimalField(default=0, decimal_places=2, max_digits=4, choices=[
+        (2, "Publicar cada 2h"),
+        (4, "Publicar cada 4h"),
+        (8, "Publicar cada 8h"),
+    ])
+
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
-
-
-class AgentsConfig(models.Model):
-    name = models.CharField(max_length=250)
-    description = models.TextField(null=True, blank=True)
-    system_prompt = models.TextField(null=True, blank=True)
 
 
 class FacebookLeadExplorer(models.Model):
@@ -61,3 +65,17 @@ class FacebookLeadExplorer(models.Model):
     limit = models.IntegerField(default=100)
     leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
+
+
+class FacebookHistory(models.Model):
+    profile = models.ForeignKey(FacebookProfile, related_name='histories', on_delete=models.PROTECT)
+    title = models.CharField(max_length=250)
+    file = models.ImageField(upload_to='facebook_histories', null=True, blank=True)
+    active = models.BooleanField(default=True)
+
+    from_date = models.DateField(null=True, blank=True, default=now)
+    until_date = models.DateField(null=True, blank=True)
+    published_count = models.BigIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)

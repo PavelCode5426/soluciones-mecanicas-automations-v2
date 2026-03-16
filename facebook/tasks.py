@@ -1,6 +1,7 @@
 import random
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
+from django.utils.timezone import now
 from django_q.tasks import async_task
 
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPost, FacebookLeadExplorer
@@ -52,7 +53,9 @@ def enqueue_posts(posts: QuerySet[FacebookPost]):
 
 
 def enqueue_active_facebook_posts():
-    posts = FacebookPost.objects.select_related('profile').filter(active=True).order_by('?').all()
+    posts = FacebookPost.objects.select_related('profile') \
+        .filter(active=True, from_date__lte=now()) \
+        .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True)).order_by('?').all()
     total_items = enqueue_posts(posts)
     return f"Agendadas {total_items} publicaciones"
 
