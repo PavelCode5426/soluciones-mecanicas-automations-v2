@@ -70,6 +70,7 @@ class FacebookLeadExplorer(models.Model):
 class FacebookHistory(models.Model):
     profile = models.ForeignKey(FacebookProfile, related_name='histories', on_delete=models.PROTECT)
     title = models.CharField(max_length=250)
+    text = models.TextField(blank=True, null=True)
     file = models.ImageField(upload_to='facebook_histories', null=True, blank=True)
     active = models.BooleanField(default=True)
 
