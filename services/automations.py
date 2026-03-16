@@ -254,7 +254,11 @@ class FacebookAutomationService:
 
                 # page.get_by_text('Crear publicación').wait_for(state='visible')
                 text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                # text_area.wait_for(state='visible')
+                attempt = 3
+                while attempt > 0:
+                    if not text_area.is_visible():
+                        write_btn.click()
+                    attempt -= 1
                 text_area.click()
 
                 if post.file:
