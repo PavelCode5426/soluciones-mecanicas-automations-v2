@@ -247,18 +247,19 @@ class FacebookAutomationService:
                 # page.get_by_text('Publicar').click()
                 # page.get_by_text("Publicando").wait_for(state='hidden')
 
-                page.wait_for_load_state(state='load')
-                write_btn = page.get_by_text('Escribe algo')
+                page.wait_for_load_state(state='networkidle')
+                write_btn = page.get_by_role('button').get_by_text('Escribe algo')
                 write_btn.wait_for(state='visible')
                 write_btn.click()
 
+                page.get_by_role('dialog').wait_for(state='visible')
                 # page.get_by_text('Crear publicación').wait_for(state='visible')
                 text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                attempt = 3
-                while attempt > 0:
-                    if not text_area.is_visible():
-                        write_btn.click()
-                    attempt -= 1
+                # attempt = 3
+                # while attempt > 0:
+                #     if not text_area.is_visible():
+                #         write_btn.click()
+                #     attempt -= 1
                 text_area.click()
 
                 if post.file:
