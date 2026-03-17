@@ -237,7 +237,7 @@ class FacebookAutomationService:
             try:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
-                page.goto(url, wait_until='networkidle')
+                page.goto(url, wait_until='load')
 
                 # page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
                 # page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
