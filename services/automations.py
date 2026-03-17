@@ -246,7 +246,7 @@ class FacebookAutomationService:
                 # page.keyboard.type(post.text)
                 # page.get_by_text('Publicar').click()
                 # page.get_by_text("Publicando").wait_for(state='hidden')
-                write_btn = page.get_by_role('button').get_by_text('Escribe algo')
+                write_btn = page.get_by_text('Escribe algo')
                 write_btn.wait_for(state='visible')
                 write_btn.click()
 
