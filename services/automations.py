@@ -237,7 +237,7 @@ class FacebookAutomationService:
             try:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
-                page.goto(url)
+                page.goto(url, wait_until='networkidle')
 
                 # page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
                 # page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
@@ -246,33 +246,29 @@ class FacebookAutomationService:
                 # page.keyboard.type(post.text)
                 # page.get_by_text('Publicar').click()
                 # page.get_by_text("Publicando").wait_for(state='hidden')
-
-                page.wait_for_load_state(state='networkidle')
                 write_btn = page.get_by_role('button').get_by_text('Escribe algo')
                 write_btn.wait_for(state='visible')
                 write_btn.click()
 
-                page.get_by_role('dialog').wait_for(state='visible')
-                # page.get_by_text('Crear publicación').wait_for(state='visible')
-                text_area = page.locator('[aria-placeholder*="Crea una publicación"]')
-                # attempt = 3
-                # while attempt > 0:
-                #     if not text_area.is_visible():
-                #         write_btn.click()
-                #     attempt -= 1
-                text_area.click()
+                dialog = page.get_by_role('dialog')
+                dialog.wait_for(state='visible')
+
+                publicar_btn = dialog.get_by_role('button').get_by_text('Publicar')
+                publicar_btn.wait_for(state='visible')
 
                 if post.file:
                     file_input = page.locator('input[type="file"][multiple]')
                     file_input.set_input_files(files=[post.file.path])
 
-                # page.keyboard.type(post.text)
+                # page.keyboard.type(post.title)
+                # page.keyboard.press('Enter')
                 page.keyboard.insert_text(post.text)
-                page.keyboard.insert_text('\n' * 2)
+                page.keyboard.press('Enter')
+                page.keyboard.press('Enter')
                 page.keyboard.insert_text(self.profile.posts_footer)
                 time.sleep(random.randint(30, 60))
 
-                page.click('[aria-label="Publicar"]')
+                publicar_btn.click()
                 page.locator('span', has_text='Publicando').wait_for(state='hidden')
             except Exception as e:
                 exception = e
