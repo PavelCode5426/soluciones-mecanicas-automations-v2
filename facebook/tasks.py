@@ -61,6 +61,7 @@ def enqueue_active_facebook_posts():
              .all())
 
     total_items = enqueue_posts(posts)
+
     return f"Agendadas {total_items} publicaciones"
 
 
