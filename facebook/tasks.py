@@ -58,7 +58,7 @@ def enqueue_active_facebook_posts():
              .filter(active=True, from_date__lte=now())
              .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True)).order_by('?')
              .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour != 0, BooleanField(default=False)))
-             .all())
+             .filter(can_publish=True).all())
 
     total_items = enqueue_posts(posts)
 
