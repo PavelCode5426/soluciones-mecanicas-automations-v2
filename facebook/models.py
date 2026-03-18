@@ -48,7 +48,7 @@ class FacebookPost(models.Model):
 
     published_count = models.BigIntegerField(default=0)
     distribution_count = models.IntegerField(default=0)
-    frequency = models.DecimalField(default=0, decimal_places=2, max_digits=4, choices=[
+    frequency = models.IntegerField(default=0, choices=[
         (2, "Publicar cada 2h"),
         (4, "Publicar cada 4h"),
         (8, "Publicar cada 8h"),
