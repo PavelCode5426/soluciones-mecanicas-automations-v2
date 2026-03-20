@@ -1,6 +1,6 @@
 import random
 
-from django.db.models import QuerySet, Q, ExpressionWrapper, F, BooleanField
+from django.db.models import QuerySet, Q, ExpressionWrapper, F, BooleanField, DecimalField
 from django.utils.timezone import now
 from django_q.tasks import async_task
 
@@ -57,11 +57,10 @@ def enqueue_active_facebook_posts():
     posts = (FacebookPost.objects.select_related('profile')
              .filter(active=True, from_date__lte=now())
              .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True)).order_by('?')
-             .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour != 0, BooleanField(default=False)))
-             .filter(can_publish=True).all())
+             .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour, DecimalField()))
+             .filter(can_publish=0).all())
 
     total_items = enqueue_posts(posts)
-
     return f"Agendadas {total_items} publicaciones"
 
 

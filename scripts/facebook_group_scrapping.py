@@ -3,23 +3,24 @@ import random
 import time
 from pathlib import Path
 
-from ia_assistant.agents.workflows import FacebookPostAnalyzerAgent
-from services.automations import get_playwright
+from playwright.sync_api import sync_playwright
+
+from scripts.automations import FacebookPostAnalyzerAgent, run_async
 
 state_file = Path(__file__).parent.joinpath("states/facebook.json")
 timeout = 60 * 100000
 
-comment_template = "Hola {name}, cansad@ de publicar y compartir a diario? 🚀 Automatiza con nosotros y consigue resultados comprobados. Nuestro sistema publica de forma automática en múltiples grupos de Facebook y Revolico, aumentando el alcance de tu negocio sin esfuerzo. Contáctanos al +5354266836 o al +5355579761. Somos un equipo especializado en software y marketing para emprendedores y grandes empresas. 📞 ¡Solicita una demostración gratuita hoy mismo y descubre cómo podemos hacer crecer tu negocio sin complicaciones!"
-
-with get_playwright() as pw:
-    browser = pw.chromium.launch(headless=False, slow_mo=500, timeout=timeout).new_context(
-        storage_state=str(state_file))
+with sync_playwright() as pw:
+    device = pw.devices['iPhone 12']
+    browser = pw.chromium.launch(headless=False, slow_mo=1500, timeout=timeout).new_context(
+        storage_state=str(state_file),
+        viewport={"width": 390, "height": 644},
+        record_video_dir="videos/", record_video_size={"width": 390, "height": 644})
 
     page = browser.new_page()
     group_url = [
         # GRUPO DE VENTAS DE 360
-        # "https://www.facebook.com/groups/614763077230692/",
-        "https://www.facebook.com/groups/128790920317347/"
+        "https://www.facebook.com/groups/614763077230692/",
     ]
     page.goto(random.choice(group_url), timeout=timeout, wait_until='commit')
 
@@ -53,6 +54,7 @@ with get_playwright() as pw:
 
         async def analyzer_facebook_post():
             textarea = article.get_by_role('textbox')
+
             post_analyser = FacebookPostAnalyzerAgent()
             response = await post_analyser.run(raw_html=post_html)
 
@@ -62,11 +64,7 @@ with get_playwright() as pw:
                 page.keyboard.press('Enter')
 
 
-        loop = asyncio.get_running_loop()
-        try:
-            loop.run_until_complete(analyzer_facebook_post())
-        except Exception as e:
-            pass
+        run_async(analyzer_facebook_post())
         # page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
         count = articles_locator.count()
         browser.storage_state(path=state_file)

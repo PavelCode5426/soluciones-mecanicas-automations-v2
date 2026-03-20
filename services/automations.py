@@ -9,7 +9,7 @@ from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
 from django.utils.timezone import now
-from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright, BrowserContext
+from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
 from facebook.models import FacebookPost, FacebookLeadExplorer
 from facebook.models import FacebookProfile, FacebookGroup
