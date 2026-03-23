@@ -228,7 +228,7 @@ class FacebookAutomationService:
 
             group.save()
             post.published_count = F('published_count') + 1
-            post.save()
+            post.save(update_fields=['published_count'])
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
@@ -330,8 +330,8 @@ class FacebookAutomationService:
                     print(e)
 
             explorer.leads_found = F('leads_found') + leads_found
-            explorer.save()
+            explorer.save(update_fields=['leads_found'])
 
     def save_session(self, storage_state):
         self.profile.context = storage_state
-        self.profile.save()
+        self.profile.save(update_fields=['context'])
