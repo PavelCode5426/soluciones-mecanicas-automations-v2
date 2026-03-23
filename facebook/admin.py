@@ -17,7 +17,7 @@ admin.site.index_title = "Bienvenido al Panel"
 # Register your models here.
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
-    list_display = ('name',)
+    list_display = ['name', 'active']
     actions = ['sync_facebook_groups']
 
     def sync_facebook_groups(self, request, queryset):

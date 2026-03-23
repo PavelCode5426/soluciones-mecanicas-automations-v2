@@ -1,0 +1,11 @@
+{% extends 'admin/change_list.html' %}
+{% load admin_list %}
+
+{% block object-tools-items %}
+    <li>
+        <a href="{% url 'admin:facebook_facebookprofile_update_profiles' %}" class="button-primary">
+            Actualizar contextos
+        </a>
+    </li>
+    {{ block.super }}
+{% endblock %}
