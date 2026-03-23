@@ -329,7 +329,7 @@ class FacebookAutomationService:
                 except Exception as e:
                     print(e)
 
-            explorer.leads_found = F('lead_found') + leads_found
+            explorer.leads_found = F('leads_found') + leads_found
             explorer.save()
 
     def save_session(self, storage_state):
