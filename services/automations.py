@@ -260,7 +260,7 @@ class FacebookAutomationService:
                     time.sleep(15)
                 # dialog.wait_for(state='visible')
 
-                publicar_btn = dialog.get_by_text('Publicar')
+                publicar_btn = dialog.locator('[aria-label="Publicar"]')
                 publicar_btn.wait_for(state='visible')
 
                 if post.file:
