@@ -16,6 +16,7 @@ services:
       DATABASE_NAME: soluciones_mecanicas_automations
       DATABASE_USER: soluciones_mecanicas
       DATABASE_PASSWORD: S0luc10n3s*
+      PLAYWRIGHT_DOWNLOAD_HOST: 'https://playwright.azureedge.net'
     volumes:
       - storage:/code/storage
     networks:
