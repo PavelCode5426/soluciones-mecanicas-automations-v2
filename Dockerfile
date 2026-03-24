@@ -15,7 +15,6 @@ RUN  apt-get update && apt-get install -y --no-install-recommends supervisor && 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN playwright install-deps
-RUN playwright install
 RUN HTTPS_PROXY=http://38.145.220.40:8446 playwright install
 
 COPY . .
