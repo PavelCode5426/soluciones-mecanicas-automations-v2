@@ -16,7 +16,6 @@ services:
       DATABASE_NAME: soluciones_mecanicas_automations
       DATABASE_USER: soluciones_mecanicas
       DATABASE_PASSWORD: S0luc10n3s*
-      HTTPS_PROXY: 'http://38.145.220.40:8446'
     volumes:
       - storage:/code/storage
     networks:
