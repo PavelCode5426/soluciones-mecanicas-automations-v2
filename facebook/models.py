@@ -20,7 +20,7 @@ class FacebookGroupCategory(models.Model):
     profile = models.ForeignKey('FacebookProfile', related_name='group_categories', null=True, blank=True,
                                 on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
-    groups = models.ManyToManyField(FacebookGroup, related_name='categories')
+    groups = models.ManyToManyField(FacebookGroup, related_name='categories', blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.profile})"

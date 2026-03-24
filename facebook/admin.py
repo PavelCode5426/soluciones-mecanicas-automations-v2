@@ -43,9 +43,12 @@ class FacebookGroudAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroupCategory)
 class FacebookGroupCategoryAdmin(admin.ModelAdmin):
-    list_display = ('name', 'profile')
+    list_display = ['name', 'profile', 'total_groups']
     list_filter = ["profile"]
     filter_horizontal = ['groups']
+
+    def total_groups(self, obj):
+        return obj.groups.count()
 
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
