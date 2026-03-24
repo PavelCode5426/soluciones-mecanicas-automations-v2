@@ -12,17 +12,15 @@ WORKDIR /code
 RUN pip install --upgrade pip
 RUN  apt-get update && apt-get install -y --no-install-recommends supervisor && rm -rf /var/lib/apt/lists/*
 
-RUN pip install playwright
-RUN playwright install-deps
-#https://databay.com/free-proxy-list/http
-RUN HTTPS_PROXY=http://38.145.220.40:8446 playwright install
-
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN playwright install-deps
+RUN playwright install
+RUN HTTPS_PROXY=http://38.145.220.40:8446 playwright install
+
 COPY . .
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 
 EXPOSE 8000
