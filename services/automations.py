@@ -330,11 +330,11 @@ class FacebookAutomationService:
                                 article.page.keyboard.press('Enter')
                                 leads_found += 1
                         except Exception as e:
-                            print(e)
+                            print(f"Lead explorer error: {e}")
                         count = articles_locator.count()
                         i += 1
                 except Exception as e:
-                    print(e)
+                    print(f"Lead explorer error: {e}")
 
             explorer.leads_found = F('leads_found') + leads_found
             explorer.save(update_fields=['leads_found'])
