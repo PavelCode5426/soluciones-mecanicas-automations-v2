@@ -169,8 +169,17 @@ class FacebookAutomationService:
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
-                self.profile.active = not bool(page.locator('text=Iniciar sesión').count())
-        self.profile.save(update_fields=['active'])
+                active = not bool(page.locator('text=Iniciar sesión').count())
+                self.profile.active = active
+                if active:
+                    dialog = page.get_by_role('dialog')
+                    if dialog.is_visible():
+                        close_btn = dialog.locator('[aria-label*="Cerrar"]')
+                        close_btn.wait_for(state='visible')
+                        close_btn.click()
+                    storage_state = browser.storage_state()
+                    self.profile.context = storage_state
+        self.profile.save(update_fields=['active', 'context'])
         return self.profile.active
 
     def refresh_profile(self):
