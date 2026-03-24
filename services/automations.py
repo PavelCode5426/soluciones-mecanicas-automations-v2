@@ -272,16 +272,17 @@ class FacebookAutomationService:
                 publicar_btn = dialog.locator('[aria-label="Publicar"]')
                 publicar_btn.wait_for(state='visible')
 
+                # page.keyboard.type(post.title)
+                # page.keyboard.press('Enter')
+                page.keyboard.type(post.text)
+                page.keyboard.press('Enter')
+                page.keyboard.press('Enter')
+                page.keyboard.insert_text(self.profile.posts_footer)
+
                 if post.file:
                     file_input = page.locator('input[type="file"][multiple]')
                     file_input.set_input_files(files=[post.file.path])
 
-                # page.keyboard.type(post.title)
-                # page.keyboard.press('Enter')
-                page.keyboard.insert_text(post.text)
-                page.keyboard.press('Enter')
-                page.keyboard.press('Enter')
-                page.keyboard.insert_text(self.profile.posts_footer)
                 time.sleep(random.randint(30, 60))
 
                 publicar_btn.click()
