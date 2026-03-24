@@ -6,6 +6,8 @@ services:
     restart: always
     build:
       context: .
+      args:
+        PLAYWRIGHT_PROXY: 'http://181.41.201.85:3128'
       dockerfile: Dockerfile
     image: soluciones-mecanicas-automations:v2
     environment:

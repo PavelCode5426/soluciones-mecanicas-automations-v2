@@ -253,7 +253,7 @@ class FacebookAutomationService:
                 dialog = page.get_by_role('dialog')
                 dialog.wait_for(state='visible')
 
-                publicar_btn = dialog.get_by_role('button').get_by_text('Publicar')
+                publicar_btn = dialog.get_by_text('Publicar')
                 publicar_btn.wait_for(state='visible')
 
                 if post.file:

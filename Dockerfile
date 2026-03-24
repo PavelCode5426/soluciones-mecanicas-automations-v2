@@ -1,5 +1,7 @@
 FROM python:3.11
 
+ARG PLAYWRIGHT_PROXY
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 ENV DEBUG FALSE
@@ -16,7 +18,12 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN playwright install-deps
 #https://databay.com/free-proxy-list/http
-RUN HTTPS_PROXY=http://181.41.201.85:3128 playwright install
+RUN if [ -n "$PLAYWRIGHT_PROXY" ]; then \
+      HTTPS_PROXY=$PLAYWRIGHT_PROXY playwright install; \
+    else \
+      playwright install; \
+    fi
+
 
 COPY . .
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
