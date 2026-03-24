@@ -16,7 +16,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN playwright install-deps
 #https://databay.com/free-proxy-list/http
-RUN HTTPS_PROXY=http://45.136.198.40:3128 playwright install
+RUN HTTPS_PROXY=http://181.41.201.85:3128 playwright install
 
 COPY . .
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
