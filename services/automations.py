@@ -228,7 +228,7 @@ class FacebookAutomationService:
 
             group.save()
             post.published_count = F('published_count') + 1
-            post.save(update_fields=['published_count'])
+            post.save(update_fields=['published_count', 'updated_at'])
 
     def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
         exception = None
@@ -251,7 +251,14 @@ class FacebookAutomationService:
                 write_btn.click()
 
                 dialog = page.get_by_role('dialog')
-                dialog.wait_for(state='visible')
+                attempts = 3
+                while attempts > 0:
+                    write_btn.click()
+                    attempts -= 1
+                    if dialog.is_visible():
+                        break
+                    time.sleep(15)
+                # dialog.wait_for(state='visible')
 
                 publicar_btn = dialog.get_by_text('Publicar')
                 publicar_btn.wait_for(state='visible')
