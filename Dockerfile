@@ -18,6 +18,7 @@ RUN playwright install-deps
 RUN HTTPS_PROXY=http://38.145.220.40:8446 playwright install
 
 COPY requirements.txt .
+RUN pip install -r requirements.txt
 COPY . .
 COPY supervisor.conf /etc/supervisor/conf.d/supervisor.conf
 COPY entrypoint.sh /entrypoint.sh
