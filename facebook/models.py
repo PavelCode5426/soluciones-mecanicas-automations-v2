@@ -38,7 +38,8 @@ class FacebookProfile(models.Model):
 
 class FacebookPost(models.Model):
     profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
-    title = models.CharField(max_length=250)
+    name = models.CharField(max_length=250)
+    title = models.CharField(max_length=250, null=True, blank=True)
     text = models.TextField()
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
     hashtags = models.TextField(null=True, blank=True)

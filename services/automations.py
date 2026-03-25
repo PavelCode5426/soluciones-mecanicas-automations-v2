@@ -273,7 +273,7 @@ class FacebookAutomationService:
                 publicar_btn.wait_for(state='visible')
                 time.sleep(10)
 
-                # page.keyboard.type(post.title)
+                page.keyboard.type(post.title)
                 page.keyboard.press('Enter')
                 page.keyboard.insert_text(post.text)
                 page.keyboard.press('Enter')

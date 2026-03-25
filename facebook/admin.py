@@ -70,15 +70,15 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookPost)
 class FacebookFacebookPostAdmin(admin.ModelAdmin):
-    search_fields = ['title', 'text']
-    list_display = ['title', 'profile', 'published_count', 'updated_at', 'active']
+    search_fields = ['name', 'text']
+    list_display = ['name', 'profile', 'published_count', 'updated_at', 'active']
     list_filter = ["profile"]
     actions = ['add_to_queue', 'disable_posts', 'enable_posts']
     readonly_fields = ["image", "published_count", "created_at", "updated_at"]
     filter_horizontal = ['categories']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["profile", 'title', 'text','hashtags', 'file', 'image', 'categories']
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', 'categories']
         }),
         ("Estados de la publicación", {
             "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
