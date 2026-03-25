@@ -78,7 +78,7 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     filter_horizontal = ['categories']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["profile", 'title', 'text', 'file', 'image', 'categories']
+            "fields": ["profile", 'title', 'text','hashtags', 'file', 'image', 'categories']
         }),
         ("Estados de la publicación", {
             "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
