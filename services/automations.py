@@ -262,10 +262,10 @@ class FacebookAutomationService:
                 dialog = page.get_by_role('dialog')
                 attempts = 3
                 while attempts > 0:
-                    write_btn.click()
-                    attempts -= 1
                     if dialog.is_visible():
                         break
+                    write_btn.click()
+                    attempts -= 1
                     time.sleep(15)
                 # dialog.wait_for(state='visible')
 
@@ -274,7 +274,7 @@ class FacebookAutomationService:
                 time.sleep(10)
 
                 # page.keyboard.type(post.title)
-                # page.keyboard.press('Enter')
+                page.keyboard.press('Enter')
                 page.keyboard.insert_text(post.text)
                 page.keyboard.press('Enter')
                 page.keyboard.press('Enter')
