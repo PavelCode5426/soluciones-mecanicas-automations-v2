@@ -41,6 +41,7 @@ class FacebookPost(models.Model):
     title = models.CharField(max_length=250)
     text = models.TextField()
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
+    hashtags = models.TextField(null=True, blank=True)
     categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
     from_date = models.DateField(null=True, blank=True, default=now)

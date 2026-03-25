@@ -279,6 +279,14 @@ class FacebookAutomationService:
                 page.keyboard.press('Enter')
                 page.keyboard.press('Enter')
                 page.keyboard.insert_text(self.profile.posts_footer)
+                page.keyboard.press('Enter')
+                page.keyboard.press('Enter')
+
+                hashtags = post.hashtags.split("\n")
+                for hastag in hashtags:
+                    page.keyboard.type(hastag.strip(), delay=600)
+                    page.keyboard.press('Enter')
+                    page.keyboard.press("Space")
 
                 if post.file:
                     file_input = page.locator('input[type="file"][multiple]')
