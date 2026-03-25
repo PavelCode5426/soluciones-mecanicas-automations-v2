@@ -259,14 +259,14 @@ class FacebookAutomationService:
                 write_btn.wait_for(state='visible')
                 write_btn.click()
 
-                dialog = page.get_by_role('dialog')
                 attempts = 3
+                dialog = page.get_by_role('dialog')
                 while attempts > 0:
                     if dialog.is_visible():
                         break
+                    time.sleep(5)
                     write_btn.click()
                     attempts -= 1
-                    time.sleep(15)
                 # dialog.wait_for(state='visible')
 
                 publicar_btn = dialog.locator('[aria-label="Publicar"]')
