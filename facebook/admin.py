@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
-from django.utils.timezone import now
+from django.utils.timezone import now, timedelta
 from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
@@ -170,7 +170,7 @@ class NewQueueAdmin(QueueAdmin):
     clear_queue.short_description = 'Vaciar todas las tareas.'
 
     def execute_now(self, request, query):
-        count = query.update(lock=now())
+        count = query.update(lock=now() + timedelta(minutes=1))
         self.message_user(request, f"{count} registros marcados como activos.", level=messages.SUCCESS)
 
     execute_now.short_description = 'Actualizar fecha de ejecucion de las tareas seleccionadas.'
