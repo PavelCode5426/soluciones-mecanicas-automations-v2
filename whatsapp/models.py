@@ -6,9 +6,9 @@ from core.models import WeekDay
 
 # Create your models here.
 class WhatsAppAccount(models.Model):
-    name = models.CharField()
-    chat_id = models.CharField()
-    session = models.CharField()
+    name = models.CharField(max_length=250)
+    chat_id = models.CharField(max_length=250)
+    session = models.CharField(max_length=250)
 
     can_use_webhook = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
@@ -25,8 +25,8 @@ class WhatsAppAccount(models.Model):
 
 class WhatsAppGroup(models.Model):
     account = models.ForeignKey(WhatsAppAccount, related_name='groups', on_delete=models.PROTECT)
-    name = models.CharField(editable=False)
-    chat_id = models.CharField(editable=False)
+    name = models.CharField(editable=False,max_length=250)
+    chat_id = models.CharField(editable=False,max_length=250)
     is_locked = models.BooleanField(default=False, editable=False)
     is_ephemeral = models.BooleanField(default=False, editable=False)
     participant_count = models.IntegerField(editable=False)
@@ -44,9 +44,9 @@ class WhatsAppGroup(models.Model):
 
 
 class WhatsAppContact(models.Model):
-    chat_id = models.CharField(editable=False)
-    name = models.CharField(blank=True, null=True)
-    push_name = models.CharField(editable=False, blank=True, null=True)
+    chat_id = models.CharField(editable=False,max_length=250)
+    name = models.CharField(blank=True, null=True,max_length=250)
+    push_name = models.CharField(editable=False, blank=True, null=True,max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='contacts', on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -61,7 +61,7 @@ class WhatsAppContact(models.Model):
 
 
 class WhatsAppStatus(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=250)
     caption = models.TextField(blank=True)
     message_type = models.CharField(
         choices=[
@@ -69,7 +69,7 @@ class WhatsAppStatus(models.Model):
             ('image', 'Image'),
             ('video', 'Video'),
             ('audio', 'Audio'),
-        ], default='text'
+        ], default='text',max_length=10
     )
     file = models.FileField(upload_to='whatsapp_status', blank=True)
     account = models.ForeignKey(WhatsAppAccount, related_name='status', on_delete=models.PROTECT)
@@ -90,7 +90,7 @@ class WhatsAppStatus(models.Model):
 
 
 class WhatsAppDistributionList(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='distribution_lists', on_delete=models.PROTECT)
     contacts = models.ManyToManyField(WhatsAppContact, related_name='distribution_lists', blank=True)
     groups = models.ManyToManyField(WhatsAppGroup, related_name='distribution_lists', blank=True)
@@ -105,7 +105,7 @@ class WhatsAppDistributionList(models.Model):
 
 
 class WhatsAppMessage(models.Model):
-    name = models.CharField()
+    name = models.CharField(max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='messages', on_delete=models.PROTECT)
     message_type = models.CharField(
         choices=[
@@ -114,7 +114,7 @@ class WhatsAppMessage(models.Model):
             ('video', 'Video'),
             ('file', 'File'),
             ('audio', 'Audio'),
-        ], default='text'
+        ], default='text',max_length=10
     )
 
     message = models.TextField(blank=True, null=True)
