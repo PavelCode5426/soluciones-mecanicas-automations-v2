@@ -5,16 +5,16 @@ from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPost, FacebookLeadExplorer, \
-    FacebookHistory
-from facebook.tasks import download_groups_task, enqueue_posts, enqueue_lead_explorer
+from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPostCampaign, \
+    FacebookLeadExplorer, \
+    FacebookHistory, FacebookScheduledPost
+from facebook.tasks import syncronize_profile_groups, enqueue_facebook_campaign, enqueue_lead_explorer
 
 admin.site.site_header = "Panel de Administración"
 admin.site.site_title = "Sinergia Marketing Automations"
 admin.site.index_title = "Bienvenido al Panel"
 
 
-# Register your models here.
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
@@ -23,7 +23,8 @@ class FacebookProfileAdmin(admin.ModelAdmin):
     def sync_facebook_groups(self, request, queryset):
         users = queryset.all()
         for user in users:
-            async_task(download_groups_task, user, task_name=f"download_{user}_groups".lower(), cluster='high_priority')
+            async_task(syncronize_profile_groups, user, task_name=f"download_{user}_groups".lower(),
+                       cluster='high_priority')
         self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
 
     sync_facebook_groups.short_description = 'Actualizar grupos del perfil'
@@ -68,36 +69,16 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-@admin.register(FacebookPost)
-class FacebookFacebookPostAdmin(admin.ModelAdmin):
+class FacebookPostAdmin(admin.ModelAdmin):
     search_fields = ['name', 'text']
-    list_display = ['name', 'profile', 'published_count', 'updated_at', 'active']
     list_filter = ["profile"]
-    actions = ['add_to_queue', 'disable_posts', 'enable_posts']
-    readonly_fields = ["image", "published_count", "created_at", "updated_at"]
-    filter_horizontal = ['categories']
-    fieldsets = [
-        ("Detalles de la publicación", {
-            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', 'categories']
-        }),
-        ("Estados de la publicación", {
-            "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
-        }),
-        ("Indicadores de la publicación", {
-            "fields": ['published_count', "created_at", "updated_at"]
-        })
-    ]
+    actions = ['disable_posts', 'enable_posts']
+    readonly_fields = ["image", "created_at", "updated_at"]
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
 
     image.short_description = 'Image'
-
-    def add_to_queue(self, request, query):
-        total_items = enqueue_posts(query.all())
-        self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
-
-    add_to_queue.short_description = 'Agendar publicaciones'
 
     def disable_posts(self, request, queryset):
         total_items = queryset.update(active=False)
@@ -112,7 +93,42 @@ class FacebookFacebookPostAdmin(admin.ModelAdmin):
     enable_posts.short_description = 'Activar publicaciones'
 
 
-admin.site.unregister(OrmQ)
+@admin.register(FacebookPostCampaign)
+class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
+    list_display = ['name', 'profile', 'updated_at', 'active']
+    readonly_fields = FacebookPostAdmin.readonly_fields + ["published_count"]
+
+    filter_horizontal = ['categories']
+    fieldsets = [
+        ("Detalles de la publicación", {
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', "categories"]
+        }),
+        ("Panificador de la publicación", {
+            "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
+        }),
+        ("Indicadores de la publicación", {
+            "fields": ['published_count', "created_at", "updated_at"]
+        })
+    ]
+
+    def add_to_queue(self, request, query):
+        total_items = enqueue_facebook_campaign(query.all())
+        self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
+
+    add_to_queue.short_description = 'Agendar campaña publicitaria'
+
+
+@admin.register(FacebookScheduledPost)
+class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
+    list_display = ['name', 'profile', 'updated_at', 'active']
+    fieldsets = [
+        ("Detalles de la publicación", {
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image']
+        }),
+        ("Panificador de la publicación", {
+            "fields": ['active', 'publish_at']
+        }),
+    ]
 
 
 @admin.register(FacebookLeadExplorer)
@@ -131,15 +147,16 @@ class FacebookLeadExplorerAdmin(admin.ModelAdmin):
 
 
 @admin.register(FacebookHistory)
-class FacebookLeadExplorerAdmin(admin.ModelAdmin):
+class FacebookHistoryAdmin(admin.ModelAdmin):
     list_display = ["title", "profile", "active"]
     list_filter = ["profile"]
+    filter_horizontal = ['weekdays']
     fieldsets = [
         ("Detalles de la historia", {
             "fields": ['profile', 'title', 'file', 'image']
         }),
         ("Estados de la historia", {
-            "fields": ['active', 'from_date', 'until_date']
+            "fields": ['active', 'publish_at', 'from_date', 'until_date', 'weekdays']
         }),
         ("Indicadores de la historia", {
             "fields": ['published_count', "created_at", "updated_at"]
@@ -150,14 +167,6 @@ class FacebookLeadExplorerAdmin(admin.ModelAdmin):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
 
     image.short_description = 'Image'
-
-    def add_to_queue(self, request, query):
-        active_leads = query.filter(active=True).all()
-        for explorer in active_leads:
-            enqueue_lead_explorer(explorer)
-        self.message_user(request, f"Fueron agendadas {active_leads.count()}  publicaciones", level=messages.SUCCESS)
-
-    add_to_queue.short_description = 'Comenzar a explorar'
 
 
 class NewQueueAdmin(QueueAdmin):
@@ -176,4 +185,5 @@ class NewQueueAdmin(QueueAdmin):
     execute_now.short_description = 'Actualizar fecha de ejecucion de las tareas seleccionadas.'
 
 
+admin.site.unregister(OrmQ)
 admin.site.register(OrmQ, NewQueueAdmin)

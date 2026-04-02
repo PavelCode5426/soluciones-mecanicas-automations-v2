@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.timezone import now
 
+from core.models import WeekDay
+
 
 # Create your models here.
 class FacebookGroup(models.Model):
@@ -15,6 +17,10 @@ class FacebookGroup(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Grupo"
+        verbose_name_plural = "Grupos"
+
 
 class FacebookGroupCategory(models.Model):
     profile = models.ForeignKey('FacebookProfile', related_name='group_categories', null=True, blank=True,
@@ -24,6 +30,10 @@ class FacebookGroupCategory(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.profile})"
+
+    class Meta:
+        verbose_name = "Tipo de Grupo"
+        verbose_name_plural = "Tipos de Grupos"
 
 
 class FacebookProfile(models.Model):
@@ -35,16 +45,39 @@ class FacebookProfile(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Cuentas"
+        verbose_name_plural = "Cuentas"
 
-class FacebookPost(models.Model):
-    profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
+
+class AbstractFacebookPost(models.Model):
+    profile = models.ForeignKey(FacebookProfile, null=True, blank=True, on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     title = models.CharField(max_length=250, null=True, blank=True)
-    text = models.TextField()
+    text = models.TextField(blank=True, null=True)
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
     hashtags = models.TextField(null=True, blank=True)
-    categories = models.ManyToManyField(FacebookGroupCategory, related_name='posts')
     active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        abstract = True
+
+
+class FacebookScheduledPost(AbstractFacebookPost):
+    profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
+    publish_at = models.DateTimeField(null=True, blank=True, default=now)
+
+    class Meta:
+        verbose_name = "Publicación"
+        verbose_name_plural = "Publicaciones"
+
+
+class FacebookPostCampaign(AbstractFacebookPost):
+    profile = models.ForeignKey(FacebookProfile, related_name='campaigns', null=True, blank=True,
+                                on_delete=models.PROTECT)
+    categories = models.ManyToManyField(FacebookGroupCategory, related_name='campaigns', blank=True)
     from_date = models.DateField(null=True, blank=True, default=now)
     until_date = models.DateField(null=True, blank=True)
 
@@ -56,8 +89,9 @@ class FacebookPost(models.Model):
         (8, "Publicar cada 8h"),
     ])
 
-    created_at = models.DateTimeField(auto_now_add=True, editable=False)
-    updated_at = models.DateTimeField(auto_now=True, editable=False)
+    class Meta:
+        verbose_name = "Campaña"
+        verbose_name_plural = "Campañas"
 
 
 class FacebookLeadExplorer(models.Model):
@@ -68,6 +102,10 @@ class FacebookLeadExplorer(models.Model):
     leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
 
+    class Meta:
+        verbose_name = "Agente Comercial"
+        verbose_name_plural = "Agentes Comerciales"
+
 
 class FacebookHistory(models.Model):
     profile = models.ForeignKey(FacebookProfile, related_name='histories', on_delete=models.PROTECT)
@@ -76,9 +114,15 @@ class FacebookHistory(models.Model):
     file = models.ImageField(upload_to='facebook_histories', null=True, blank=True)
     active = models.BooleanField(default=True)
 
+    publish_at = models.TimeField(null=True, blank=True)
     from_date = models.DateField(null=True, blank=True, default=now)
     until_date = models.DateField(null=True, blank=True)
+    weekdays = models.ManyToManyField(WeekDay, related_name='facebook_histories', blank=False)
     published_count = models.BigIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        verbose_name = "Historia"
+        verbose_name_plural = "Historias"

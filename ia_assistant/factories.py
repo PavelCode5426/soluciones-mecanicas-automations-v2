@@ -2,6 +2,7 @@ import importlib
 
 from llama_index.core.agent import FunctionAgent, AgentWorkflow
 from llama_index.core.tools import FunctionTool
+from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.llms.ollama import Ollama
 
 from ia_assistant import models
@@ -9,6 +10,10 @@ from ia_assistant import models
 
 def create_llm(model: models.OllamaLLM):
     return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
+
+
+def create_embedding_model(model: models.OllamaLLM):
+    return OllamaEmbedding(model_name=model.name, base_url=model.base_url)
 
 
 def create_function_agent(agent: models.Agent):

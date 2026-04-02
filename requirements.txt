@@ -129,3 +129,6 @@ whitenoise==6.11.0
 wrapt==1.17.3
 yarl==1.22.0
 zope.interface==8.2
+
+chromadb~=1.5.5
+huggingface_hub~=1.8.0

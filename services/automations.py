@@ -1,19 +1,17 @@
 import asyncio
 import random
-import re
 import time
 
 import nest_asyncio
-from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
 from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
-from facebook.models import FacebookPost, FacebookLeadExplorer
+from facebook.models import FacebookPostCampaign, FacebookLeadExplorer, FacebookScheduledPost, AbstractFacebookPost
 from facebook.models import FacebookProfile, FacebookGroup
-from ia_assistant.agents.workflows import FacebookPostAnalyzerAgent
+from services.agents import FacebookPostAnalyzerAgent
 
 
 def get_playwright() -> PlaywrightContextManager:
@@ -30,132 +28,6 @@ def run_async(coro):
     finally:
         pass
         # new_loop.close()
-
-
-class FacebookPostExtractor:
-    """
-    Extractor de datos de una publicación de Facebook usando Beautiful Soup.
-    Recibe un objeto Tag de BeautifulSoup que representa un post individual.
-    NOTA: No puede hacer clic en 'Ver más', por lo que el mensaje puede estar truncado.
-    """
-
-    def __init__(self, post_html):
-        self.post = BeautifulSoup(post_html, "html.parser")
-
-    def extract_author(self) -> dict:
-        """
-        Extrae nombre, URL del perfil y URL del avatar del autor.
-        """
-        author = {"name": None, "profile_url": None, "avatar_url": None}
-
-        # Buscar contenedor del nombre (data-ad-rendering-role="profile_name")
-        profile_container = self.post.find('div', attrs={'data-ad-rendering-role': 'profile_name'})
-        if profile_container:
-            link = profile_container.find('a')
-            if link:
-                author["name"] = link.get_text(strip=True)
-                author["profile_url"] = link.get('href')
-
-        # Avatar: buscar dentro del primer <svg> <image>
-        svg_image = self.post.find('svg').find('image') if self.post.find('svg') else None
-        if svg_image:
-            author["avatar_url"] = svg_image.get('xlink:href')
-
-        return author
-
-    def extract_timestamp(self) -> str:
-        """
-        Extrae el texto de timestamp relativo buscando spans con patrones de tiempo.
-        """
-        # Buscar spans que contengan dígitos seguido de espacio y min/h/d/s...
-        # Nota: Beautiful Soup no soporta :has-text, así que recorremos todos los spans
-        for span in self.post.find_all('span'):
-            text = span.get_text(strip=True)
-            if re.search(r'\d+\s*(min|h|d|s|min\.|h\.)', text):
-                return text
-
-    def extract_message(self) -> str:
-        message_div = self.post.find('div', attrs={'data-ad-rendering-role': 'story_message'})
-        if not message_div:
-            return ""
-        return message_div.get_text(separator='\n', strip=True)
-
-        # message_container = self.post.find('div', attrs={'data-ad-rendering-role': 'story_message'})
-        # if message_container:
-        #     # Extraer todas las líneas con dir="auto"
-        #     lines = message_container.find_all('div', attrs={'dir': 'auto'})
-        #     full_text = "\n".join([line.get_text(strip=True) for line in lines])
-        #     return full_text
-
-    def extract_images(self) -> list:
-        """
-        Devuelve lista de URLs de imágenes de la publicación (excluye avatar).
-        """
-        image_urls = []
-        # Buscar imágenes cuyo src contenga "scontent" (dominio de CDN de FB)
-        images = self.post.find_all('img', src=re.compile(r'scontent'))
-        for img in images:
-            src = img.get('src')
-            # Excluir avatares (por tamaño pequeño) y duplicados
-            if src and 's40x40' not in src and src not in image_urls:
-                image_urls.append(src)
-        return image_urls
-
-    def extract_reactions(self) -> int:
-        """
-        Intenta obtener el número de reacciones buscando en aria-label o texto cercano.
-        """
-        # Buscar elemento con aria-label que contenga "Me gusta" y extraer números
-        reaction_elem = self.post.find(attrs={'aria-label': re.compile(r'Me gusta')})
-        if reaction_elem:
-            label = reaction_elem.get('aria-label', '')
-            numbers = re.findall(r'\d+', label)
-            if numbers:
-                return int(numbers[0])
-
-        # Alternativa: buscar botón de like y luego en el padre
-        like_button = self.post.find('div', attrs={'aria-label': 'Me gusta'})
-        if like_button and like_button.parent:
-            text = like_button.parent.get_text(strip=True)
-            numbers = re.findall(r'\d+', text)
-            if numbers:
-                return int(numbers[0])
-
-    def extract_comments_count(self) -> int:
-        """
-        Intenta obtener el número de comentarios.
-        """
-        comment_button = self.post.find('div', attrs={'aria-label': 'Dejar un comentario'})
-        if comment_button and comment_button.parent:
-            text = comment_button.parent.get_text(strip=True)
-            numbers = re.findall(r'\d+', text)
-            if numbers:
-                return int(numbers[0])
-
-    def extract_shares_count(self) -> int:
-        """
-        Intenta obtener el número de veces compartido.
-        """
-        share_button = self.post.find('div', attrs={'aria-label': re.compile(r'Envía la publicación')})
-        if share_button and share_button.parent:
-            text = share_button.parent.get_text(strip=True)
-            numbers = re.findall(r'\d+', text)
-            if numbers:
-                return int(numbers[0])
-
-    def extract_all(self) -> dict:
-        """
-        Ejecuta todas las extracciones y devuelve un diccionario completo.
-        """
-        return {
-            "author": self.extract_author(),
-            # "timestamp": self.extract_timestamp(),
-            "message": self.extract_message(),
-            # "images": self.extract_images(),
-            # "reactions": self.extract_reactions(),
-            # "comments": self.extract_comments_count(),
-            # "shares": self.extract_shares_count(),
-        }
 
 
 class FacebookAutomationService:
@@ -219,91 +91,6 @@ class FacebookAutomationService:
             page.close()
             return groups
 
-    def create_post(self, group: FacebookGroup, post: FacebookPost):
-        self.refresh_profile()
-        group.refresh_from_db()
-        post.refresh_from_db()
-        if post.active and group.active and self.profile.active:
-            screenshot, exception = self.__publish_group_post(group.url, post)
-            file_name = f"{group}_screenshot.jpeg".lower()
-            group.screenshot.delete(False)
-            group.screenshot.save(file_name, ContentFile(screenshot), False)
-
-            group.error_at = None
-            if exception:
-                group.error_at = now()
-                group.save()
-                raise exception
-
-            group.save()
-            post.published_count = F('published_count') + 1
-            post.save(update_fields=['published_count', 'updated_at'])
-
-    def __publish_group_post(self, url, post: FacebookPost) -> (bytes, Exception | None):
-        exception = None
-
-        with (get_playwright() as pw):
-            try:
-                browser = self.get_browser(pw)
-                page = browser.new_page()
-                page.goto(url, wait_until='load')
-
-                # page.get_by_text('Escribe algo').click(timeout=settings.PLAYWRIGHT['timeout'])
-                # page.get_by_role('textbox').click(timeout=settings.PLAYWRIGHT['timeout'])
-                # file_input = page.locator('input[type="file"][multiple]')
-                # file_input.set_input_files(files=[post.file.path])
-                # page.keyboard.type(post.text)
-                # page.get_by_text('Publicar').click()
-                # page.get_by_text("Publicando").wait_for(state='hidden')
-                write_btn = page.get_by_text('Escribe algo')
-                write_btn.wait_for(state='visible')
-                write_btn.click()
-
-                attempts = 3
-                dialog = page.get_by_role('dialog')
-                while attempts > 0:
-                    if dialog.is_visible():
-                        break
-                    time.sleep(5)
-                    write_btn.click()
-                    attempts -= 1
-                # dialog.wait_for(state='visible')
-
-                publicar_btn = dialog.locator('[aria-label="Publicar"]')
-                publicar_btn.wait_for(state='visible')
-                time.sleep(10)
-
-                page.keyboard.type(post.title)
-                page.keyboard.press('Enter')
-                page.keyboard.insert_text(post.text)
-                page.keyboard.press('Enter')
-                page.keyboard.press('Enter')
-                page.keyboard.insert_text(self.profile.posts_footer)
-                page.keyboard.press('Enter')
-                page.keyboard.press('Enter')
-
-                hashtags = post.hashtags.split("\n")
-                for hastag in hashtags:
-                    page.keyboard.type(hastag.strip(), delay=600)
-                    page.keyboard.press('Enter')
-                    page.keyboard.press("Space")
-
-                if post.file:
-                    file_input = page.locator('input[type="file"][multiple]')
-                    file_input.set_input_files(files=[post.file.path])
-
-                time.sleep(random.randint(30, 60))
-                publicar_btn.click()
-                page.locator('span', has_text='Publicando').wait_for(state='hidden')
-            except Exception as e:
-                exception = e
-
-            screenshot = page.screenshot(quality=80, type='jpeg')
-            updated_session = browser.storage_state()
-
-        self.save_session(updated_session)
-        return screenshot, exception
-
     def group_lead_explorer(self, explorer: FacebookLeadExplorer):
         self.refresh_profile()
         explorer.refresh_from_db()
@@ -341,12 +128,14 @@ class FacebookAutomationService:
                         textarea = article.get_by_role('textbox')
                         post_analyser = FacebookPostAnalyzerAgent()
                         try:
+
                             response = run_async(post_analyser.run(raw_html=article.inner_html()))
                             if response.is_relevant:
                                 textarea.click()
-                                article.page.keyboard.type(response.promotional_message)
-                                article.page.keyboard.press('Enter')
+                                page.keyboard.type(response.promotional_message)
+                                page.keyboard.press('Enter')
                                 leads_found += 1
+
                         except Exception as e:
                             print(f"Lead explorer error: {e}")
                         count = articles_locator.count()
@@ -360,3 +149,111 @@ class FacebookAutomationService:
     def save_session(self, storage_state):
         self.profile.context = storage_state
         self.profile.save(update_fields=['context'])
+
+    def publish_new_campaign(self, group: FacebookGroup, post: FacebookPostCampaign):
+        self.refresh_profile()
+        group.refresh_from_db()
+        post.refresh_from_db()
+        if post.active and group.active and self.profile.active:
+            screenshot, exception = self.__publish_campaign(group.url, post)
+            file_name = f"{group}_screenshot.jpeg".lower()
+            group.screenshot.delete(False)
+            group.screenshot.save(file_name, ContentFile(screenshot), False)
+
+            group.error_at = None
+            if exception:
+                group.error_at = now()
+                group.save()
+                raise exception
+
+            group.save()
+            post.published_count = F('published_count') + 1
+            post.save(update_fields=['published_count', 'updated_at'])
+
+    def publish_new_post(self, post: FacebookScheduledPost):
+        self.refresh_profile()
+        post.refresh_from_db()
+        if post.active and self.profile.active:
+            screenshot, exception = self.__publish_post(post)
+
+    def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):
+        exception = None
+
+        with (get_playwright() as pw):
+            try:
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+
+                page.goto(group_url, wait_until='load')
+                open_dialog_button = page.get_by_text('Escribe algo')
+
+                self.__write_post(page, open_dialog_button, post)
+            except Exception as e:
+                exception = e
+
+            screenshot = page.screenshot(quality=80, type='jpeg')
+            updated_session = browser.storage_state()
+
+        self.save_session(updated_session)
+        return screenshot, exception
+
+    def __publish_post(self, post: FacebookScheduledPost) -> (bytes, Exception | None):
+        exception = None
+
+        with (get_playwright() as pw):
+            try:
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+
+                page.goto('https://facebook.com', wait_until='load')
+                open_dialog_button = page.get_by_text('¿Qué estás pensando')
+
+                self.__write_post(page, open_dialog_button, post)
+            except Exception as e:
+                exception = e
+
+            screenshot = page.screenshot(quality=80, type='jpeg')
+            updated_session = browser.storage_state()
+
+        self.save_session(updated_session)
+        return screenshot, exception
+
+    def __write_post(self, page, open_dialog_button, post: AbstractFacebookPost):
+        open_dialog_button.wait_for(state='visible')
+        open_dialog_button.click()
+
+        attempts = 3
+        dialog = page.get_by_role('dialog')
+        while attempts > 0:
+            if dialog.is_visible():
+                break
+            time.sleep(5)
+            open_dialog_button.click()
+            attempts -= 1
+
+        publish_button = dialog.locator('[aria-label="Publicar"]')
+        publish_button.wait_for(state='visible')
+        time.sleep(10)
+
+        page.keyboard.type(post.title)
+        page.keyboard.press('Enter')
+        page.keyboard.insert_text(post.text)
+        page.keyboard.press('Enter')
+        page.keyboard.press('Enter')
+        page.keyboard.insert_text(self.profile.posts_footer)
+        page.keyboard.press('Enter')
+        page.keyboard.press('Enter')
+
+        hashtags = post.hashtags.split("\n")
+        for hastag in hashtags:
+            page.keyboard.type(hastag.strip(), delay=300)
+            page.keyboard.press('Enter')
+            page.keyboard.press("Space")
+
+        if post.file:
+            file_input = page.locator('input[type="file"][multiple]')
+            file_input.set_input_files(files=[post.file.path])
+
+        time.sleep(random.randint(30, 60))
+        publish_button.click()
+        page.locator('span', has_text='Publicando').wait_for(state='hidden')

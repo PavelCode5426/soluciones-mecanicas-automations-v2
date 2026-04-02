@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from facebook.models import FacebookGroup, FacebookPost
+from facebook.models import FacebookGroup, FacebookPostCampaign
 
 
 class GroupSerializer(serializers.ModelSerializer):
@@ -17,5 +17,5 @@ class FacebookPostSerializer(serializers.ModelSerializer):
         return GroupSerializer(FacebookGroup.objects.filter(categories__posts=obj).all(), many=True).data
 
     class Meta:
-        model = FacebookPost
+        model = FacebookPostCampaign
         exclude = ['categories']

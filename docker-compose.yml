@@ -7,7 +7,7 @@ services:
     build:
       context: .
       args:
-        PLAYWRIGHT_PROXY: 'http://181.41.201.85:3128'
+        PLAYWRIGHT_PROXY: 'http://pavelcode5426:pavelcode5426@pavelcode5426.duckdns.org:8888'
       dockerfile: Dockerfile
     image: soluciones-mecanicas-automations:v2
     environment:

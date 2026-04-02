@@ -9,7 +9,7 @@ from llama_index.core.response_synthesizers import ResponseMode
 from llama_index.core.tools import QueryEngineTool, FunctionTool
 from llama_index.llms.ollama import Ollama
 
-from facebook.models import FacebookPost
+from facebook.models import FacebookPostCampaign
 from ia_assistant import models
 from ia_assistant.factories import create_function_agent
 
@@ -33,7 +33,7 @@ class SolucionesHeviaIAService:
             vector_index = load_index_from_storage(storage_context)
         else:
             documents = []
-            posts = FacebookPost.objects.filter(active=True).all()
+            posts = FacebookPostCampaign.objects.filter(active=True).all()
             for post in posts:
                 documents.append(Document(text=post.text))
             vector_index = VectorStoreIndex.from_documents(documents)

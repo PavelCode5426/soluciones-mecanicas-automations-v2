@@ -14,8 +14,9 @@ with sync_playwright() as pw:
     device = pw.devices['iPhone 12']
     browser = pw.chromium.launch(headless=False, slow_mo=1500, timeout=timeout).new_context(
         storage_state=str(state_file),
-        viewport={"width": 390, "height": 644},
-        record_video_dir="videos/", record_video_size={"width": 390, "height": 644})
+        # viewport={"width": 390, "height": 644},
+        # record_video_dir="videos/", record_video_size={"width": 390, "height": 644}
+    )
 
     page = browser.new_page()
     group_url = [
@@ -53,14 +54,15 @@ with sync_playwright() as pw:
 
 
         async def analyzer_facebook_post():
-            textarea = article.get_by_role('textbox')
+            textarea = article.get_by_text("Comentar como")
 
             post_analyser = FacebookPostAnalyzerAgent()
-            response = await post_analyser.run(raw_html=post_html)
-
-            if response.is_relevant:
+            # response = await post_analyser.run(raw_html=post_html)
+            # if response.is_relevant:
+            if True:
                 textarea.click()
-                page.keyboard.type(response.promotional_message)
+                # page.keyboard.type(response.promotional_message)
+                page.keyboard.type("Hola")
                 page.keyboard.press('Enter')
 
 

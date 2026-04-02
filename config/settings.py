@@ -50,8 +50,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_jsonform",
+    "core",
     "facebook",
-    "ia_assistant"
+    "whatsapp",
+    # "ia_assistant"
 ]
 
 MIDDLEWARE = [
@@ -63,6 +65,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    'crum.CurrentRequestUserMiddleware',
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -166,10 +169,9 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAdminUser"],
     # "DATETIME_FORMAT": "%Y-%m-%d %H:%M",
     # "TIME_FORMAT": "%H:%M",
-    "PAGE_SIZE": 50,
-    "EXCEPTION_HANDLER": "config.exceptions.custom_exception_handler",
+    "EXCEPTION_HANDLER": "core.exceptions.custom_exception_handler",
     "DEFAULT_FILTER_BACKENDS": [
-        # "django_filters.rest_framework.DjangoFilterBackend",
+        "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
@@ -199,6 +201,13 @@ Q_CLUSTER = {
     },
 }
 
+WAHA_SERVER_URL = 'https://whatsapp.pavelcode5426.duckdns.org'
+WAHA_USERNAME = 'pavelcode5426'
+WAHA_PASSWORD = 'pavelcode5426'
+WAHA_APIKEY = 'admin'
+
 IA_OLLAMA_HOST = env("IA_OLLAMA_HOST", default='https://ia.pavelcode5426.duckdns.org')
-IA_TIMEOUT = 500
-IA_POST_PERSISTEN = MEDIA_ROOT / "query_engine"
+LLAMAINDEX_TIMEOUT = 500
+LLAMAINDEX_PERSISTENCE_DIR = MEDIA_ROOT / "llama_index"
+LLAMAINDEX_CONTEXTSTORE_DIR = LLAMAINDEX_PERSISTENCE_DIR / "contextstore"
+CHROMADB_PERSISTENCE_DIR = LLAMAINDEX_PERSISTENCE_DIR / "chromadb"

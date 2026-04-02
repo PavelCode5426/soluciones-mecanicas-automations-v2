@@ -5,7 +5,7 @@ from django.core.cache import cache
 from llama_index.core.workflow import Context
 
 from ia_assistant.factories import create_agent_workflow, create_function_agent
-from ia_assistant.models import AgentWorkflow, RAGApplication, Agent
+from ia_assistant.models import AgentWorkflow, RAGApplication
 from services.whatsapp import WAHAService
 
 AGENT_WORKFLOWS_FUNTIONS = {}
@@ -43,7 +43,7 @@ def reply_whatsapp_message(rag_name, message, account_id):
         ctx = Context(agent_workflow, previous_context=previus_context)
         typing_task = ___keep_typing_loop_task(whatsapp_service, account_id)
         try:
-            async with asyncio.timeout(settings.IA_TIMEOUT):
+            async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
                 response = await agent_workflow.run(message, ctx=ctx)
                 whatsapp_service.send_text(account_id, str(response))
                 """"

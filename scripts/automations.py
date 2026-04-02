@@ -1,14 +1,14 @@
-from typing import Optional
+import asyncio
 import re
+from typing import Optional
 
 import nest_asyncio
 from bs4 import BeautifulSoup
+from huggingface_hub import InferenceClient
 from llama_index.core import PromptTemplate
-from llama_index.core.output_parsers import PydanticOutputParser
 from llama_index.core.workflow import Workflow, Event, step, StartEvent, StopEvent
 from llama_index.llms.ollama import Ollama
-from pydantic import BaseModel, Field
-import asyncio
+from pydantic import BaseModel, Field, HttpUrl
 
 
 def run_async(coro):
@@ -168,63 +168,27 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 class FacebookPostAnalyzerAgent(Workflow):
     agent_prompt = """"
-Eres Pavel, especialista en automatización de marketing. Tu teléfono de contacto es **+50735591** y debes incluirlo SIEMPRE en el mensaje promocional.
+    Eres Pavel, experto en automatización de marketing. Teléfono: **+50735591** (inclúyelo siempre).
 
-Te voy a dar un mensaje publicado en Facebook. Tu tarea es analizarlo y generar una salida en JSON con tres campos:
+Analiza el mensaje y devuelve JSON con:
 
-- `is_relevant`: booleano. `true` si el mensaje contiene **cualquier intención comercial**, incluyendo:
-  * Venta de productos (ej. teléfonos, electrodomésticos, ropa, comida, etc.)
-  * Promoción de servicios (ej. reparaciones, clases, asesorías)
-  * Ofertas, liquidaciones, descuentos
-  * Personas buscando compradores para artículos nuevos o usados
-  * Negocios promocionando sus productos
-  * Cualquier frase como "vendo", "se vende", "oferta", "aprovecha", "promoción", "remate", "liquidación"
-  * Personas que claramente tienen un negocio o emprendimiento aunque no digan "vendo" explícitamente
+- `is_relevant`: true si hay intención comercial (venta de productos/servicios, ofertas, negocios, emprendimientos). false solo si es personal sin relación comercial (saludos, opiniones, temas no comerciales).
 
-  `false` solo si el mensaje está vacío, es nulo, o es completamente personal sin relación con ventas (ej. "feliz cumpleaños", "qué opinan de...", temas políticos, familiares, etc.)
+- `justification`: breve explicación. Si es relevante, menciona qué vende (o "producto/servicio" si no está claro).
 
-- `justification`: texto corto explicando por qué es relevante o no. Si es relevante, menciona qué producto/servicio detectaste.
+- `promotional_message`: 
+  * Si es relevante: saluda, menciona lo que vende, explica que publicar manualmente es tedioso y sin marketing se pierden ventas. Ofrece tu sistema automatizado (publicaciones, anuncios, indicadores) para que llegue a más gente sin esfuerzo. Invita a conversar e incluye tu teléfono.
+  * Si no es relevante: ofrece tus servicios de forma general: "Si vendes algo o tienes un negocio, puedo automatizar tus publicaciones. Llámame al 50735591."
 
-- `promotional_message`: tu respuesta al autor.  
-  * **Si `is_relevant` es `true`**, redacta un mensaje personalizado que:
-    1. Salude al autor (si puedes extraer el nombre, úsalo; si no, "Hola").
-    2. Mencione específicamente lo que está vendiendo (ej. "veo que estás vendiendo un teléfono").
-    3. Conecte con el problema: publicar anuncios uno por uno es tedioso, requiere estar pendiente y sin conocimientos de marketing se pierden ventas.
-    4. Ofrezca tu sistema automatizado: él se olvida de publicar, tú te encargas de todo (publicaciones, anuncios, segmentación) y le entregas indicadores de resultados.
-    5. Destaque que con tu sistema sus anuncios llegan a más personas interesadas, sin que él tenga que esforzarse.
-    6. Termine con invitación a conversar y tu teléfono.
-  * **Si `is_relevant` es `false`**, escribe un mensaje amigable ofreciendo tus servicios de forma general: "Si tienes un negocio o vendes algo, yo puedo ayudarte a automatizar tus publicaciones y aumentar ventas sin esfuerzo. Llámame al 50735591. Saludos, Pavel."
+**Importante:** sé inclusivo. Cualquier indicio de venta = relevante. Usa términos genéricos si el mensaje es vago. Devuelve solo JSON.
 
-**Reglas de comunicación importantes (aplica en el mensaje promocional):**
-- Habla de la **incomodidad de publicar a diario** o de hacerlo sin un conocimiento sólido de marketing, lo que genera estrés y malos resultados.
-- Resalta la **ventaja de que tu sistema lo haga por ellos**, eliminando esa carga y aportando **indicadores claros** (alcance, interacciones, conversiones) para que el cliente vea el progreso.
-- Usa un tono empático y profesional, mostrando que entiendes sus dificultades y que tienes la solución.
-- No inventes cosas al mensaje del publicador, si no es claro en lo que vende el mensaje promocional debe ser generico pero con la intención de cambiale los habitos.
-
-**Importante:** Devuelve solo el JSON, sin texto adicional, sin comillas triples ni etiquetas. Ejemplo de formato:
-
-{
-  "is_relevant": true,
-  "justification": "El usuario está vendiendo ropa",
-  "promotional_message": "Hola [nombre], veo que estás promocionando ropa. Publicar a diario puede ser agotador, sobre todo si no tienes experiencia en marketing. Por eso, te propongo algo: yo tengo un sistema automatizado que se encarga de todo por ti. Publica, optimiza y te entrega indicadores claros de resultados. Así te olvidas del estrés y te concentras en tu negocio, mientras yo te ayudo a vender más. ¿Qué te parece si conversamos? Puedes llamarme al +53 50735591 o escribirme. Saludos, Pavel."
-}
-
-Nombre del publicador: {facebook_profile}
-Mensaje a analizar: {facebook_post}
-
-
-Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el prompt para que reconozca **cualquier anuncio de venta** como relevante, aunque no mencione explícitamente necesidades de marketing. Aquí tienes la versión mejorada:
-
+Nombre: {facebook_profile}
+Mensaje: {facebook_post}
 """
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(
-            model='llama3.2:3b',
-            base_url='https://ia.pavelcode5426.duckdns.org',
-            context_window=50_000,
-            request_timeout=1500, json_mode=True)
-
+        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org',request_timeout=500)
         self.lead_description = lead_description
 
     @step
@@ -236,8 +200,7 @@ Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el
     @step
     async def make_decision(self, ev: PostParsedEvent) -> AnalyzerResponseEvent:
         post_data = ev.post_data
-        output_parser = PydanticOutputParser(FacebookPostAnalyzerOutputFormat)
-        template_prompt = PromptTemplate(self.agent_prompt, output_parser=output_parser)
+        template_prompt = PromptTemplate(self.agent_prompt)
 
         facebook_profile = post_data.get('author').get('name')
         facebook_post = post_data.get('message')
@@ -246,10 +209,46 @@ Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        response = self.llm.predict(template_prompt, facebook_post=facebook_post, facebook_profile=facebook_profile)
-        result = output_parser.parse(response)
-        return AnalyzerResponseEvent(
-            is_relevant=result.is_relevant,
-            justification=result.justification,
-            promotional_message=result.promotional_message
+        response = self.llm.structured_predict(
+            FacebookPostAnalyzerOutputFormat, template_prompt,
+            facebook_post=facebook_post, facebook_profile=facebook_profile
         )
+        return AnalyzerResponseEvent(
+            is_relevant=response.is_relevant,
+            justification=response.justification,
+            promotional_message=response.promotional_message
+        )
+
+
+class FacebookPossibleFriend(BaseModel):
+    """Modelo para representar un posible amigo en Facebook"""
+    profile_url: HttpUrl = Field(description="URL completa del perfil de usuario de Facebook")
+    avatar: HttpUrl = Field(description="URL de la imagen de perfil del usuario")
+    name: str = Field(description="Nombre completo del usuario mostrado en el perfil", min_length=1)
+    common_friends: Optional[int] = Field(description="Número de amigos en común con el usuario actual", ge=0)
+
+
+class FacebookAccountAgent:
+    llm: Ollama
+    inference_client: InferenceClient
+
+    def __init__(self, llm: Ollama, inference_client) -> None:
+        self.llm = llm
+        self.inference_client = inference_client
+
+    def could_be_friend(self, html_content):
+        promp_template = PromptTemplate(
+            """
+           Extract information about a Facebook possible friend from the following HTML content.
+           HTML:
+           {html_content}
+            """
+        )
+
+        info = self.llm.structured_predict(FacebookPossibleFriend, promp_template, html_content=html_content)
+        is_nsfw = self.is_nsfw_image(info.avatar)
+        return info
+
+    def is_nsfw_image(self, image) -> bool:
+        output = self.inference_client.image_classification(image, model="Falconsai/nsfw_image_detection")[0]
+        return output.label == 'normal' and output.score > 0.85

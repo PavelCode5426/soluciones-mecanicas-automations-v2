@@ -1,106 +1,88 @@
 import requests
 
-from ia_assistant.models import RAGApplication
-
 
 class WAHAService:
-    """
-    Wrapper para la API WAHA, envia mensajes via WhatsApp
-
-    Raises:
-        ConfigurationDoesNotExistException: No existe el archivo de configuración
-        ErrorContactingMessagingAPIException: Problemas al contactar la API WAHA
-
-    Returns:
-        _type_: _description_
-    """
-
-    @classmethod
-    def initialize_using_rag(cls, rag: RAGApplication):
-        return WAHAService(
-            server_url=rag.config.get('waha_base_url'),
-            server_username=rag.config.get('waha_username'),
-            server_password=rag.config.get('waha_password'),
-            server_api_key=rag.config.get('waha_api_key'),
-        )
-
-    def __init__(self, server_url: str, server_api_key=None, server_username=None, server_password=None):
+    def __init__(self, server_url: str, session: str = "default", api_key=None, username=None, password=None):
+        self._session = session
         self._auth = None
         self._api_url = server_url
-        self._headers = {'X-Api-Key': server_api_key}
-        if server_username and server_password:
-            self._auth = (server_username, server_password)
+        self._headers = {'X-Api-Key': api_key}
+        if username and password:
+            self._auth = (username, password)
+
+    def __get_session_config(self, webhook_url: str):
+        return dict(webhooks=[
+            {
+                "url": webhook_url,
+                "events": ["message", "session.status"],
+                "retries": {
+                    "delaySeconds": 2,
+                    "attempts": 5,
+                    "policy": "linear"
+                }
+            }
+        ])
+
+    def create_session(self, webhook_url=None):
+        response = requests.post(
+            f"{self._api_url}/api/sessions", headers=self._headers, auth=self._auth,
+            data={"name": self._session, "config": self.__get_session_config()}
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def update_session(self, webhook_url: str = None):
+        data = {"name": self._session}
+        if webhook_url:
+            data.setdefault("config", self.__get_session_config(webhook_url))
+
+        response = requests.put(
+            f"{self._api_url}/api/sessions/{self._session}", headers=self._headers, auth=self._auth, data=data)
+        response.raise_for_status()
+        return response.json()
+
+    def get_profile_info(self):
+        response = requests.get(
+            f"{self._api_url}/api/{self._session}/profile",
+            headers=self._headers, auth=self._auth,
+        )
+        response.raise_for_status()
+        return response.json()
 
     def check_exist(self, phone_number: str) -> dict:
-        """
-        Verifica si el número telefónico está registrado en WhatsApp
-
-        Args:
-            phone_number (str): Número telefónico del cliente
-
-        Returns:
-            bool: True | False
-        """
         response = requests.get(
             f"{self._api_url}/api/contacts/check-exists",
             headers=self._headers,
             auth=self._auth,
-            params={"phone": phone_number, "session": "default"},
+            params={"phone": phone_number, "session": self._session},
             timeout=10,
         )
         response.raise_for_status()
         return response.json()
 
     def start_typing(self, chat_id: str) -> int:
-        """
-        WhatsApp comienzo de escritura
-
-        Args:
-            phone_number (str): Número telefónico del cliente
-
-        Returns:
-            int: HTTP código de estado
-        """
         response = requests.post(
             f"{self._api_url}/api/startTyping",
             auth=self._auth,
             headers=self._headers,
-            data={"chatId": chat_id, "session": "default"},
+            data={"chatId": chat_id, "session": self._session},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
 
     def stop_typing(self, chat_id: str) -> int:
-        """
-        WhatsApp detener la escrituea
-
-        Args:
-            phone_number (str): Número telefónico del cliente
-
-        Returns:
-            int: HTTP código de estado
-        """
         response = requests.post(
             f"{self._api_url}/api/stopTyping",
             auth=self._auth,
             headers=self._headers,
-            data={"chatId": chat_id, "session": "default"},
+            data={"chatId": chat_id, "session": self._session},
             timeout=10,
         )
         response.raise_for_status()
         return response.status_code
 
     def send_text(self, chat_id: str, message: str) -> int:
-        """
-        WhatsApp envío de mensaje
-        Args:
-            phone_number (str): Número telefónico del cliente
-            message (str): Mensaje a enviar
-
-        Returns:
-            int: HTTP código de estado
-        """
         response = requests.post(
             f"{self._api_url}/api/sendText",
             headers=self._headers,
@@ -110,7 +92,7 @@ class WAHAService:
                 "reply_to": None,
                 "text": message,
                 "linkPreview": True,
-                "session": "default",
+                "session": self._session,
             },
             timeout=10,
         )
@@ -118,28 +100,80 @@ class WAHAService:
         return response.status_code
 
     def send_image(self, chat_id: str, image_url: str, caption: str) -> int:
-        """
-        WhatsApp enviar imagen
-
-        Args:
-            phone_number (str): Número telefónico del cliente
-            image_url (str): Imagen a enviar
-            caption (str): Texto que acompaña a la imagen
-        Returns:
-            int: HTTP código de estado
-        """
-
         response = requests.post(
             f"{self._api_url}/api/sendImage",
-            headers=self._headers,
-            auth=self._auth,
+            headers=self._headers, auth=self._auth,
             data={
                 "chatId": chat_id,
                 "image": image_url,
                 "caption": caption,
-                "session": "default",
+                "session": self._session,
             },
-            timeout=10,
         )
         response.raise_for_status()
         return response.status_code
+
+    def get_all_groups(self):
+        response = requests.get(
+            f"{self._api_url}/api/{self._session}/groups",
+            headers=self._headers, auth=self._auth,
+            params={"exclude": ['participants']}
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_all_contacts(self):
+        response = requests.get(
+            f"{self._api_url}/api/contacts/all",
+            headers=self._headers, auth=self._auth,
+            params={"session": self._session}
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def refresh_groups(self):
+        response = requests.post(
+            f"{self._api_url}/api/{self._session}/groups/refresh",
+            headers=self._headers, auth=self._auth,
+        )
+        response.raise_for_status()
+
+    def get_group_participants(self, group_id):
+        response = requests.get(
+            f"{self._api_url}/api/{self._session}/groups/{group_id}/participants",
+            headers=self._headers, auth=self._auth,
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def create_text_status(self, data):
+        response = requests.post(
+            f'{self._api_url}/api/{self._session}/status/text/',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response
+
+    def create_video_status(self, data):
+        response = requests.post(
+            f'{self._api_url}/api/{self._session}/status/video',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response
+
+    def create_voice_status(self, data):
+        response = requests.post(
+            f'{self._api_url}/api/{self._session}/status/voice',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response
+
+    def create_image_status(self, data):
+        response = requests.post(
+            f'{self._api_url}/api/{self._session}/status/image',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response
