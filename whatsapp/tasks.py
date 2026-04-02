@@ -64,10 +64,9 @@ def publish_whatsapp_status(status: WhatsAppStatus):
             mimetype = status.message_type
             file_status = {
                 "file": {
-                    "mimetype": mimetype,
+                    "mimetype": get_file_mimetype(status.file),
                     "data": base64.b64encode(status.file.read()).decode('utf-8'),
                 },
-                "convert": True,
                 "caption": caption,
                 "backgroundColor": backgroundColor
             }

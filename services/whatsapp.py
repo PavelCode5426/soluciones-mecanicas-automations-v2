@@ -152,7 +152,7 @@ class WAHAService:
             headers=self._headers, auth=self._auth, json=data
         )
         response.raise_for_status()
-        return response
+        return response.json()
 
     def create_video_status(self, data):
         response = requests.post(
@@ -160,7 +160,7 @@ class WAHAService:
             headers=self._headers, auth=self._auth, json=data
         )
         response.raise_for_status()
-        return response
+        return response.json()
 
     def create_voice_status(self, data):
         response = requests.post(
@@ -168,7 +168,7 @@ class WAHAService:
             headers=self._headers, auth=self._auth, json=data
         )
         response.raise_for_status()
-        return response
+        return response.json()
 
     def create_image_status(self, data):
         response = requests.post(
@@ -176,4 +176,4 @@ class WAHAService:
             headers=self._headers, auth=self._auth, json=data
         )
         response.raise_for_status()
-        return response
+        return response.json()

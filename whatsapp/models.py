@@ -25,8 +25,8 @@ class WhatsAppAccount(models.Model):
 
 class WhatsAppGroup(models.Model):
     account = models.ForeignKey(WhatsAppAccount, related_name='groups', on_delete=models.PROTECT)
-    name = models.CharField(editable=False,max_length=250)
-    chat_id = models.CharField(editable=False,max_length=250)
+    name = models.CharField(editable=False, max_length=250)
+    chat_id = models.CharField(editable=False, max_length=250)
     is_locked = models.BooleanField(default=False, editable=False)
     is_ephemeral = models.BooleanField(default=False, editable=False)
     participant_count = models.IntegerField(editable=False)
@@ -44,9 +44,9 @@ class WhatsAppGroup(models.Model):
 
 
 class WhatsAppContact(models.Model):
-    chat_id = models.CharField(editable=False,max_length=250)
-    name = models.CharField(blank=True, null=True,max_length=250)
-    push_name = models.CharField(editable=False, blank=True, null=True,max_length=250)
+    chat_id = models.CharField(editable=False, max_length=250)
+    name = models.CharField(blank=True, null=True, max_length=250)
+    push_name = models.CharField(editable=False, blank=True, null=True, max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='contacts', on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
@@ -69,7 +69,7 @@ class WhatsAppStatus(models.Model):
             ('image', 'Image'),
             ('video', 'Video'),
             ('audio', 'Audio'),
-        ], default='text',max_length=10
+        ], default='text', max_length=10
     )
     file = models.FileField(upload_to='whatsapp_status', blank=True)
     account = models.ForeignKey(WhatsAppAccount, related_name='status', on_delete=models.PROTECT)
@@ -114,7 +114,7 @@ class WhatsAppMessage(models.Model):
             ('video', 'Video'),
             ('file', 'File'),
             ('audio', 'Audio'),
-        ], default='text',max_length=10
+        ], default='text', max_length=10
     )
 
     message = models.TextField(blank=True, null=True)
