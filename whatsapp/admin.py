@@ -1,5 +1,6 @@
 from django.contrib import admin, messages
 from django.utils.html import format_html
+from django_q.tasks import async_task
 from rest_framework.reverse import reverse
 
 from whatsapp.factories import create_whatsapp_service
@@ -110,12 +111,17 @@ class WhatsAppStatusAdmin(admin.ModelAdmin):
         }),
     ]
 
-    @admin.action(description='Publicar estado')
+    @admin.action(description='Publicar estados')
     def publish_status(self, request, queryset):
         status = queryset.filter(active=True).all()
 
         for status in status:
-            publish_whatsapp_status(status)
+            async_task(
+                publish_whatsapp_status, status,
+                task_name=f'create_whatsapp_status_{status.pk}',
+                group='whatsapp_status',
+                cluster='high_priority',
+            )
         self.message_user(request, f'{status} publicados correctamente', level=messages.SUCCESS)
 
     def file_preview(self, obj):

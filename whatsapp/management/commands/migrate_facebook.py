@@ -15,11 +15,15 @@ class Command(BaseCommand):
         for post in facebook_post:
             message_type = get_message_type(post.file)
             WhatsAppStatus.objects.update_or_create(
-                defaults={"caption": post.text, "file": post.file},
+                defaults={
+                    "caption": post.text, "file": post.file,
+                    "message_type": message_type
+                },
                 create_defaults={
                     "name": post.name,
                     "caption": post.text,
                     "file": post.file,
+                    "message_type": message_type
                 },
                 account=account,
                 name=post.name,
@@ -30,7 +34,6 @@ class Command(BaseCommand):
                     "message": post.text, "file": post.file,
                     "frequency": post.frequency,
                     "message_type": message_type
-
                 },
                 create_defaults={
                     "name": post.name,
