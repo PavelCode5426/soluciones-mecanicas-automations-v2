@@ -103,7 +103,7 @@ def send_whatsapp_message(message: WhatsAppMessage):
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
             contacts = distribution_list.contacts.filter(active=True).all()
-            groups = distribution_list.groups.filter(active=True, is_locked=False).all()
+            groups = distribution_list.groups.filter(active=True).all()
             contacts_and_groups.extend([g.chat_id for g in groups])
             contacts_and_groups.extend([c.chat_id for c in contacts])
 
