@@ -154,7 +154,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin):
     list_filter = ['account', 'active', 'message_type']
     readonly_fields = ['published_count', 'file_preview']
     filter_horizontal = ['weekdays', 'distribution_lists']
-    actions = ['activar_mensajes', 'desactivar_mensajes']
+    actions = ['activar_mensajes', 'desactivar_mensajes', 'send_messages']
 
     fieldsets = [
         ("Información del mensaje", {
@@ -204,16 +204,15 @@ class WhatsAppMessageAdmin(admin.ModelAdmin):
         obj.save()
 
     @admin.action(description='Enviar los mensajes seleccionados.')
-    def publish_status(self, request, queryset):
-        messages = (queryset.filter(active=True, from_date__lte=now())
-                    .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
-                    .all())
+    def send_messages(self, request, queryset):
+        _messages = (queryset.filter(active=True).all())
 
-        for message in messages:
+        for message in _messages:
+            # send_whatsapp_message(message)
             async_task(
                 send_whatsapp_message, message,
                 task_name=f'send_whatsapp_message_{message.pk}',
-                group='whatsapp_messages_status',
+                group='send_whatsapp_message',
                 cluster='high_priority',
             )
-        self.message_user(request, f'Agendados correctamente {len(messages)} mensajes', level=messages.SUCCESS)
+        self.message_user(request, f'Agendados correctamente {len(_messages)} mensajes', level=messages.SUCCESS)

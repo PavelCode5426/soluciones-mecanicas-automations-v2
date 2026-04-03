@@ -92,43 +92,38 @@ def send_whatsapp_message(message: WhatsAppMessage):
     if message.active:
         service = create_whatsapp_service(message.account)
         caption = message.message
-        typing_timer = 60
+        typing_timer = max(10, int(len(caption) * 0.5))
+        file = {
+            "mimetype": get_file_mimetype(message.file),
+            "data": base64.b64encode(message.file.read()).decode('utf-8'),
+        } if message.file else None
 
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
             contacts = distribution_list.contacts.filter(active=True).all()
             groups = distribution_list.groups.filter(active=True, is_locked=False).all()
-            contacts_and_groups.extend(*[c.chat_id for c in contacts], *[g.chat_id for g in groups])
+            contacts_and_groups.extend([g.chat_id for g in groups])
+            contacts_and_groups.extend([c.chat_id for c in contacts])
 
         while len(contacts_and_groups) > 0:
             chat_id = contacts_and_groups.pop(0)
             typing_task = keep_typing_loop_task(service, chat_id)
-            sended_message = None
-
             try:
                 time.sleep(typing_timer)
-                if message.file:
+                if file:
                     mimetype = message.message_type
-                    file_message = {
-                        "chatId": chat_id,
-                        "reply_to": None,
-                        "file": {
-                            "mimetype": get_file_mimetype(message.file),
-                            "data": base64.b64encode(message.file.read()).decode('utf-8'),
-                        },
-                        "caption": caption,
-                    }
+                    file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
 
                     if 'video' in mimetype:
-                        sended_message = service.send_video_message(file_message)
+                        service.send_video_message(file_message)
                     elif 'audio' in mimetype:
-                        sended_message = service.send_voice_message(file_message)
+                        service.send_voice_message(file_message)
                     elif 'image' in mimetype:
-                        sended_message = service.send_image_message(file_message)
+                        service.send_image_message(file_message)
                     elif 'file' in mimetype:
-                        sended_message = service.send_file_message(file_message)
+                        service.send_file_message(file_message)
                 else:
-                    sended_message = service.send_text_message({
+                    service.send_text_message({
                         "chatId": chat_id,
                         "reply_to": None,
                         "text": caption,
@@ -137,8 +132,8 @@ def send_whatsapp_message(message: WhatsAppMessage):
                     })
             finally:
                 typing_task.cancel()
-                forward_amount = 16
-                while forward_amount > 0:
-                    chat_id = contacts_and_groups.pop(0)
-                    service.forward_message(chat_id, sended_message['_data']['Info']['Chat'])
-                    forward_amount -= 1
+            # forward_amount = 16
+            # while forward_amount > 0:
+            #     chat_id = contacts_and_groups.pop(0)
+            #     service.forward_message(chat_id, sended_message['id'])
+            #     forward_amount -= 1

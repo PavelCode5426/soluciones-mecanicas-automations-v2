@@ -99,6 +99,9 @@ class WhatsAppDistributionList(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
+    def __str__(self):
+        return f"{self.name} - {self.account}"
+
     class Meta:
         verbose_name = 'Lista de Distribución'
         verbose_name_plural = 'Listas de Distribución'
@@ -131,7 +134,7 @@ class WhatsAppMessage(models.Model):
     ])
 
     publish_at = models.TimeField(null=True, blank=True)
-    weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=False)
+    weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
     published_count = models.BigIntegerField(default=0)
 
     active = models.BooleanField(default=True)

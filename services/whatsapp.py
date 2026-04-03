@@ -197,7 +197,7 @@ class WAHAService:
     def forward_message(self, chat_id: str, message_id: str):
         response = requests.post(
             f'{self._api_url}/api/forwardMessage',
-            headers=self._headers, auth=self._auth, json={
+            headers=self._headers, auth=self._auth, data={
                 "session": self._session, "chatId": chat_id, "messageId": message_id
             }
         )
