@@ -2,9 +2,9 @@ from django.db.models import Q
 from django.utils.timezone import now
 from django_q.tasks import async_task
 
-from whatsapp.models import WhatsAppStatus, WhatsAppAccount
+from whatsapp.models import WhatsAppStatus, WhatsAppAccount, WhatsAppMessage
 from whatsapp.tasks import publish_whatsapp_status, syncronize_whatsapp_account_groups, \
-    syncronize_whatsapp_account_contacts
+    syncronize_whatsapp_account_contacts, send_whatsapp_message
 
 
 def update_whatsapp_contacts_and_groups():
@@ -29,3 +29,19 @@ def enqueue_active_status():
             cluster='high_priority',
         )
     return f"Programados {whatsapp_status.count()} estados de whatsapp"
+
+
+def enqueue_active_messages():
+    messages = (WhatsAppMessage.objects.select_related('account')
+                .filter(active=True, from_date__lte=now())
+                .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
+                .all())
+
+    for message in messages:
+        async_task(
+            send_whatsapp_message, message,
+            task_name=f'send_whatsapp_message_{message.pk}',
+            group='whatsapp_messages_status',
+            cluster='high_priority',
+        )
+    return f"Programados {messages.count()} mensajes de whatsapp"

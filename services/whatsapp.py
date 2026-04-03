@@ -1,3 +1,5 @@
+import asyncio
+
 import requests
 
 
@@ -82,37 +84,6 @@ class WAHAService:
         response.raise_for_status()
         return response.status_code
 
-    def send_text(self, chat_id: str, message: str) -> int:
-        response = requests.post(
-            f"{self._api_url}/api/sendText",
-            headers=self._headers,
-            auth=self._auth,
-            json={
-                "chatId": chat_id,
-                "reply_to": None,
-                "text": message,
-                "linkPreview": True,
-                "session": self._session,
-            },
-            timeout=10,
-        )
-        response.raise_for_status()
-        return response.status_code
-
-    def send_image(self, chat_id: str, image_url: str, caption: str) -> int:
-        response = requests.post(
-            f"{self._api_url}/api/sendImage",
-            headers=self._headers, auth=self._auth,
-            data={
-                "chatId": chat_id,
-                "image": image_url,
-                "caption": caption,
-                "session": self._session,
-            },
-        )
-        response.raise_for_status()
-        return response.status_code
-
     def get_all_groups(self):
         response = requests.get(
             f"{self._api_url}/api/{self._session}/groups",
@@ -174,6 +145,61 @@ class WAHAService:
         response = requests.post(
             f'{self._api_url}/api/{self._session}/status/image',
             headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def send_text_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendText',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def send_video_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendVideo',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def send_voice_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendVoice',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def send_image_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendImage',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def send_file_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendFile',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def forward_message(self, chat_id: str, message_id: str):
+        response = requests.post(
+            f'{self._api_url}/api/forwardMessage',
+            headers=self._headers, auth=self._auth, json={
+                "session": self._session, "chatId": chat_id, "messageId": message_id
+            }
         )
         response.raise_for_status()
         return response.json()

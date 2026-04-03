@@ -1,5 +1,7 @@
 from django.contrib import admin, messages
+from django.db.models import Q
 from django.utils.html import format_html
+from django.utils.timezone import now
 from django_q.tasks import async_task
 from rest_framework.reverse import reverse
 
@@ -8,7 +10,7 @@ from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
     WhatsAppMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts, \
-    publish_whatsapp_status
+    publish_whatsapp_status, send_whatsapp_message
 
 
 # Register your models here.
@@ -111,18 +113,20 @@ class WhatsAppStatusAdmin(admin.ModelAdmin):
         }),
     ]
 
-    @admin.action(description='Publicar estados')
+    @admin.action(description='Publicar los estados seleccionados.')
     def publish_status(self, request, queryset):
-        status = queryset.filter(active=True).all()
+        statuses = (queryset.filter(active=True, from_date__lte=now())
+                    .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
+                    .all())
 
-        for status in status:
+        for status in statuses:
             async_task(
                 publish_whatsapp_status, status,
                 task_name=f'create_whatsapp_status_{status.pk}',
                 group='whatsapp_status',
                 cluster='high_priority',
             )
-        self.message_user(request, f'{status} publicados correctamente', level=messages.SUCCESS)
+        self.message_user(request, f'Agendados correctamente {len(statuses)} estados ', level=messages.SUCCESS)
 
     def file_preview(self, obj):
         message_type = obj.message_type
@@ -148,7 +152,6 @@ class WhatsAppMessageAdmin(admin.ModelAdmin):
     search_fields = ['name', 'message']
     list_display = ['name', 'account', 'message_type', 'active', 'published_count']
     list_filter = ['account', 'active', 'message_type']
-    list_editable = ['active']
     readonly_fields = ['published_count', 'file_preview']
     filter_horizontal = ['weekdays', 'distribution_lists']
     actions = ['activar_mensajes', 'desactivar_mensajes']
@@ -172,12 +175,12 @@ class WhatsAppMessageAdmin(admin.ModelAdmin):
         }),
     ]
 
-    @admin.action(description='Activar mensajes seleccionados')
+    @admin.action(description='Activar mensajes los seleccionados.')
     def activar_mensajes(self, request, queryset):
         updated = queryset.update(active=True)
         self.message_user(request, f'{updated} mensaje(s) activado(s).')
 
-    @admin.action(description='Desactivar mensajes seleccionados')
+    @admin.action(description='Desactivar mensajes los seleccionados.')
     def desactivar_mensajes(self, request, queryset):
         updated = queryset.update(active=False)
         self.message_user(request, f'{updated} mensaje(s) desactivado(s).')
@@ -199,3 +202,18 @@ class WhatsAppMessageAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.message_type = 'text' if not obj.file else get_message_type(obj.file)
         obj.save()
+
+    @admin.action(description='Enviar los mensajes seleccionados.')
+    def publish_status(self, request, queryset):
+        messages = (queryset.filter(active=True, from_date__lte=now())
+                    .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
+                    .all())
+
+        for message in messages:
+            async_task(
+                send_whatsapp_message, message,
+                task_name=f'send_whatsapp_message_{message.pk}',
+                group='whatsapp_messages_status',
+                cluster='high_priority',
+            )
+        self.message_user(request, f'Agendados correctamente {len(messages)} mensajes', level=messages.SUCCESS)

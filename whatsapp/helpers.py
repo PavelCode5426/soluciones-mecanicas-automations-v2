@@ -1,5 +1,8 @@
+import asyncio
 import mimetypes
 import os
+
+from services.whatsapp import WAHAService
 
 
 def get_file_mimetype(file):
@@ -48,3 +51,15 @@ def get_message_type(file):
     if minetype in ['application']:
         return 'file'
     return minetype
+
+
+def keep_typing_loop_task(service: WAHAService, chat_id):
+    async def __keep_typing():
+        try:
+            while True:
+                service.start_typing(chat_id)
+                await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            service.stop_typing(chat_id)
+
+    return asyncio.create_task(__keep_typing())
