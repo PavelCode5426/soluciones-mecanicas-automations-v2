@@ -63,7 +63,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
 class WhatsAppGroupAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['name', 'account', 'participant_count', 'active']
-    readonly_fields = ['name', 'chat_id', 'participant_count']
+    readonly_fields = ['name', 'chat_id', 'participant_count', 'is_locked', 'is_ephemeral']
     list_filter = ['account']
 
 
