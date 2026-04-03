@@ -53,13 +53,13 @@ def get_message_type(file):
     return minetype
 
 
-def keep_typing_loop_task(service: WAHAService, chat_id):
+def keep_presence_loop_task(service: WAHAService, chat_id, presence):
     async def __keep_typing():
         try:
             while True:
-                service.start_typing(chat_id)
+                service.set_chat_presence(chat_id, presence)
                 await asyncio.sleep(5)
         except asyncio.CancelledError:
-            service.stop_typing(chat_id)
+            service.set_chat_presence(chat_id, "paused")
 
     return asyncio.create_task(__keep_typing())

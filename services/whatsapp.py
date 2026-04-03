@@ -1,5 +1,3 @@
-import asyncio
-
 import requests
 
 
@@ -57,7 +55,6 @@ class WAHAService:
             headers=self._headers,
             auth=self._auth,
             params={"phone": phone_number, "session": self._session},
-            timeout=10,
         )
         response.raise_for_status()
         return response.json()
@@ -68,7 +65,6 @@ class WAHAService:
             auth=self._auth,
             headers=self._headers,
             data={"chatId": chat_id, "session": self._session},
-            timeout=10,
         )
         response.raise_for_status()
         return response.status_code
@@ -79,7 +75,16 @@ class WAHAService:
             auth=self._auth,
             headers=self._headers,
             data={"chatId": chat_id, "session": self._session},
-            timeout=10,
+        )
+        response.raise_for_status()
+        return response.status_code
+
+    def set_chat_presence(self, chat_id: str, presence: str) -> int:
+        response = requests.post(
+            f"{self._api_url}/api/{self._session}/presence",
+            auth=self._auth,
+            headers=self._headers,
+            data={"chatId": chat_id, "presence": presence, "session": self._session}
         )
         response.raise_for_status()
         return response.status_code

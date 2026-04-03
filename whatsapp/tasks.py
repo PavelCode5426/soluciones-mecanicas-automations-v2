@@ -1,7 +1,7 @@
 import base64
 import time
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.helpers import get_file_mimetype, keep_typing_loop_task
+from whatsapp.helpers import get_file_mimetype, keep_presence_loop_task
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage
 
 
@@ -93,10 +93,12 @@ def send_whatsapp_message(message: WhatsAppMessage):
         service = create_whatsapp_service(message.account)
         caption = message.message
         typing_timer = max(10, int(len(caption) * 0.5))
+        mimetype = message.message_type
         file = {
             "mimetype": get_file_mimetype(message.file),
             "data": base64.b64encode(message.file.read()).decode('utf-8'),
         } if message.file else None
+        message_presence = "recording" if 'audio' in mimetype else "typing"
 
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
@@ -107,13 +109,11 @@ def send_whatsapp_message(message: WhatsAppMessage):
 
         while len(contacts_and_groups) > 0:
             chat_id = contacts_and_groups.pop(0)
-            typing_task = keep_typing_loop_task(service, chat_id)
+            typing_task = keep_presence_loop_task(service, chat_id, message_presence)
             try:
                 time.sleep(typing_timer)
                 if file:
-                    mimetype = message.message_type
                     file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
-
                     if 'video' in mimetype:
                         service.send_video_message(file_message)
                     elif 'audio' in mimetype:
