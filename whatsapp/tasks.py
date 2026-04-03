@@ -107,6 +107,7 @@ def send_whatsapp_message(message: WhatsAppMessage):
             contacts_and_groups.extend([g.chat_id for g in groups])
             contacts_and_groups.extend([c.chat_id for c in contacts])
 
+        all_chats = list(*contacts_and_groups)
         while len(contacts_and_groups) > 0:
             chat_id = contacts_and_groups.pop(0)
             service.set_chat_presence(chat_id, message_presence)
@@ -130,4 +131,4 @@ def send_whatsapp_message(message: WhatsAppMessage):
                     "linkPreviewHighQuality": False
                 })
             service.set_chat_presence(chat_id, 'paused')
-        return contacts_and_groups
+        return all_chats
