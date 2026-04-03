@@ -101,13 +101,14 @@ def send_whatsapp_message(message: WhatsAppMessage):
         message_presence = "recording" if 'audio' in mimetype else "typing"
 
         contacts_and_groups = []
+        all_chats = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
             contacts = distribution_list.contacts.filter(active=True).all()
             groups = distribution_list.groups.filter(active=True).all()
             contacts_and_groups.extend([g.chat_id for g in groups])
             contacts_and_groups.extend([c.chat_id for c in contacts])
 
-        all_chats = list(*contacts_and_groups)
+        all_chats.extend(contacts_and_groups)
         while len(contacts_and_groups) > 0:
             chat_id = contacts_and_groups.pop(0)
             service.set_chat_presence(chat_id, message_presence)
