@@ -39,7 +39,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
         obj.save()
 
         syncronize_whatsapp_account_groups(obj)
-        syncronize_whatsapp_account_contacts(obj)
+        # syncronize_whatsapp_account_contacts(obj)
         # webhook_path = reverse('whatsapp:webhook', args=[obj.session])
         # service.update_session(webhook_url=request.build_absolute_uri(webhook_path))
 
@@ -91,6 +91,14 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
             fields.remove('groups')
             fields.remove('contacts')
         return fields
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+
+        if obj and obj.pk:
+            form.base_fields['groups'].queryset = WhatsAppGroup.objects.filter(account=obj.account).all()
+            form.base_fields['contacts'].queryset = WhatsAppContact.objects.filter(account=obj.account).all()
+        return form
 
 
 @admin.register(WhatsAppStatus)
