@@ -1,14 +1,15 @@
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from whatsapp.models import WhatsAppAccount
+from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup
 
 
 # Create your views here.
 class WhatsAppMessageWebhookView(GenericAPIView):
-    lookup_field = 'name'
-    lookup_url_kwarg = 'application_name'
+    lookup_field = 'session'
+    lookup_url_kwarg = 'session'
     queryset = WhatsAppAccount.objects.filter(active=True)
 
     def post(self, request, *args, **kwargs):
@@ -23,5 +24,30 @@ class WhatsAppMessageWebhookView(GenericAPIView):
                 message = payload.get('body')
                 # async_task(reply_whatsapp_message, rag.name, message, from_id, group='ia_assistant',
                 #            task_name=f"whatsapp_message_{from_id}".lower(), cluster='high_priority')
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class WhatsAppLeadWebhookView(APIView):
+    def post(self, request, *args, **kwargs):
+        account = WhatsAppAccount.objects.get(active=True, session=request.data.get('session'))
+        payload = request.data.get('payload')
+        info = payload.get('_data').get('Info')
+
+        has_media = payload.get('hasMedia')
+        is_from_me = payload.get('fromMe')
+        is_group = info.get('IsGroup')
+
+        group = WhatsAppGroup.objects.get(chat_id=info.get('Chat'))
+        sender = info.get('Sender')
+        sender_name = info.get('PushName')
+        message = payload.get('body')
+        media_url = None if not has_media else payload.get('media').get('url')
+
+        if is_group and not is_from_me:
+            WhatsAppLead.objects.create(
+                account=account, group=group, message=message,
+                chat_id=sender, media_url=media_url, chat_name=sender_name,
+            )
 
         return Response(status=status.HTTP_200_OK)

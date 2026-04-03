@@ -60,6 +60,22 @@ class WhatsAppContact(models.Model):
         verbose_name_plural = 'Contactos'
 
 
+class WhatsAppLead(models.Model):
+    chat_id = models.CharField(editable=False, max_length=250)
+    chat_name = models.CharField(editable=False, max_length=250)
+    message = models.TextField(editable=False)
+    media_url = models.URLField(editable=False, blank=True, null=True)
+    group = models.ForeignKey(WhatsAppGroup, related_name='leads', on_delete=models.PROTECT, null=True)
+    account = models.ForeignKey(WhatsAppAccount, related_name='leads', on_delete=models.PROTECT)
+    processed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, editable=False)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    class Meta:
+        verbose_name = 'Posible Cliente'
+        verbose_name_plural = 'Posibles Clientes'
+
+
 class WhatsAppStatus(models.Model):
     name = models.CharField(max_length=250)
     caption = models.TextField(blank=True)

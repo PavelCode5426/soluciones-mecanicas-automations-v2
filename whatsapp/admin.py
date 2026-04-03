@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
-    WhatsAppMessage
+    WhatsAppMessage, WhatsAppLead
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts, \
     publish_whatsapp_status, send_whatsapp_message
 
@@ -40,8 +40,9 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
 
         syncronize_whatsapp_account_groups(obj)
         # syncronize_whatsapp_account_contacts(obj)
-        # webhook_path = reverse('whatsapp:webhook', args=[obj.session])
-        # service.update_session(webhook_url=request.build_absolute_uri(webhook_path))
+        webhook_path = reverse('whatsapp:lead-webhook')
+        webhook_url = request.build_absolute_uri(webhook_path) if obj.can_use_webhook else None
+        service.update_session(webhook_url=webhook_url)
 
     @admin.action(description='Actualizar grupos de la cuenta')
     def sync_whatsapp_groups(self, request, queryset):
@@ -64,6 +65,12 @@ class WhatsAppGroupAdmin(admin.ModelAdmin):
     list_display = ['name', 'account', 'participant_count', 'active']
     readonly_fields = ['name', 'chat_id', 'participant_count']
     list_filter = ['account']
+
+
+@admin.register(WhatsAppLead)
+class WhatsAppLeadAdmin(admin.ModelAdmin):
+    list_display = ['chat_name', 'chat_id', 'group', 'created_at']
+    list_filter = ['account', 'processed']
 
 
 @admin.register(WhatsAppContact)

@@ -4,5 +4,6 @@ from whatsapp import views
 app_name = 'whatsapp'
 
 urlpatterns = [
-    path(r'whatsapp-message/<str:application_name>', views.WhatsAppMessageWebhookView.as_view(), name='webhook'),
+    path(r'webhook/<str:session>', views.WhatsAppMessageWebhookView.as_view(), name='message-webhook'),
+    path(r'leads-explorer', views.WhatsAppLeadWebhookView.as_view(), name='lead-webhook'),
 ]
