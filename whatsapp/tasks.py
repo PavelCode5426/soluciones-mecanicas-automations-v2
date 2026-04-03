@@ -130,3 +130,4 @@ def send_whatsapp_message(message: WhatsAppMessage):
                     "linkPreviewHighQuality": False
                 })
             service.set_chat_presence(chat_id, 'paused')
+        return contacts_and_groups
