@@ -61,8 +61,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppGroup)
 class WhatsAppGroupAdmin(admin.ModelAdmin):
     search_fields = ['name']
-    list_display = ['name', 'participant_count', 'active']
-    list_editable = ['active']
+    list_display = ['name', 'account', 'participant_count', 'active']
     readonly_fields = ['name', 'chat_id', 'participant_count']
     list_filter = ['account']
 
@@ -70,8 +69,7 @@ class WhatsAppGroupAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppContact)
 class WhatsAppContactAdmin(admin.ModelAdmin):
     search_fields = ['name', 'chat_id']
-    list_display = ['name', 'active']
-    list_editable = ['active']
+    list_display = ['name', 'account', 'active']
     readonly_fields = ['chat_id']
     list_filter = ['account']
 
@@ -82,7 +80,6 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
     filter_horizontal = ['groups', 'contacts']
-    list_editable = ['active']
     readonly_fields = ['account']
 
     def get_readonly_fields(self, request, obj=None):
