@@ -70,6 +70,7 @@ class WhatsAppGroupAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppLead)
 class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
+    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url']
     list_filter = ['account', 'processed']
 
 
