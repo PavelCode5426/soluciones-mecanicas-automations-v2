@@ -109,31 +109,24 @@ def send_whatsapp_message(message: WhatsAppMessage):
 
         while len(contacts_and_groups) > 0:
             chat_id = contacts_and_groups.pop(0)
-            typing_task = keep_presence_loop_task(service, chat_id, message_presence)
-            try:
-                time.sleep(typing_timer)
-                if file:
-                    file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
-                    if 'video' in mimetype:
-                        service.send_video_message(file_message)
-                    elif 'audio' in mimetype:
-                        service.send_voice_message(file_message)
-                    elif 'image' in mimetype:
-                        service.send_image_message(file_message)
-                    elif 'file' in mimetype:
-                        service.send_file_message(file_message)
-                else:
-                    service.send_text_message({
-                        "chatId": chat_id,
-                        "reply_to": None,
-                        "text": caption,
-                        "linkPreview": False,
-                        "linkPreviewHighQuality": False
-                    })
-            finally:
-                typing_task.cancel()
-            # forward_amount = 16
-            # while forward_amount > 0:
-            #     chat_id = contacts_and_groups.pop(0)
-            #     service.forward_message(chat_id, sended_message['id'])
-            #     forward_amount -= 1
+            service.set_chat_presence(chat_id, message_presence)
+            time.sleep(typing_timer)
+            if file:
+                file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
+                if 'video' in mimetype:
+                    service.send_video_message(file_message)
+                elif 'audio' in mimetype:
+                    service.send_voice_message(file_message)
+                elif 'image' in mimetype:
+                    service.send_image_message(file_message)
+                elif 'file' in mimetype:
+                    service.send_file_message(file_message)
+            else:
+                service.send_text_message({
+                    "chatId": chat_id,
+                    "reply_to": None,
+                    "text": caption,
+                    "linkPreview": False,
+                    "linkPreviewHighQuality": False
+                })
+            service.set_chat_presence(chat_id, 'paused')
