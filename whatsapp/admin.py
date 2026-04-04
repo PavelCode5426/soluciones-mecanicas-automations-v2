@@ -8,9 +8,9 @@ from rest_framework.reverse import reverse
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
-    WhatsAppMessage, WhatsAppLead, WhatsAppAutoReplay
+    WhatsAppMessage, WhatsAppLead, WhatsAppAutoReplyMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts, \
-    publish_whatsapp_status, send_whatsapp_message
+    publish_whatsapp_status, enqueue_whatsapp_message
 
 
 class PreviewFileMixin:
@@ -56,7 +56,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
 
         syncronize_whatsapp_account_groups(obj)
         # syncronize_whatsapp_account_contacts(obj)
-        webhook_path = reverse('whatsapp:lead-webhook')
+        webhook_path = reverse('whatsapp:webhook')
         webhook_url = request.build_absolute_uri(webhook_path) if obj.can_use_webhook else None
         service.update_session(webhook_url=webhook_url)
 
@@ -151,9 +151,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
         for status in statuses:
             async_task(
                 publish_whatsapp_status, status,
-                task_name=f'create_whatsapp_status_{status.pk}',
-                group='whatsapp_status',
-                cluster='high_priority',
+                task_name=f'create_whatsapp_status_{status.pk}', group='whatsapp_status', cluster='high_priority',
             )
         self.message_user(request, f'Agendados correctamente {len(statuses)} estados ', level=messages.SUCCESS)
 
@@ -209,18 +207,12 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
         _messages = (queryset.filter(active=True).all())
 
         for message in _messages:
-            # send_whatsapp_message(message)
-            async_task(
-                send_whatsapp_message, message,
-                task_name=f'send_whatsapp_message_{message.pk}',
-                group='send_whatsapp_message',
-                cluster='high_priority',
-            )
+            enqueue_whatsapp_message(message)
         self.message_user(request, f'Agendados correctamente {len(_messages)} mensajes', level=messages.SUCCESS)
 
 
-@admin.register(WhatsAppAutoReplay)
-class WhatsAppAutoReplayAdmin(admin.ModelAdmin, PreviewFileMixin):
+@admin.register(WhatsAppAutoReplyMessage)
+class WhatsAppAutoReplyMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     list_display = ['name', 'trigger_message', 'message_type', 'account', 'active', 'created_at']
     list_filter = ['message_type', 'active', 'account']
     search_fields = ['name', 'trigger_message', 'message']

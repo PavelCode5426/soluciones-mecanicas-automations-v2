@@ -1,10 +1,12 @@
 import base64
 import time
 
+from django_q.tasks import async_task
+
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
-    WhatsAppAutoReplay
+    WhatsAppAutoReplyMessage
 
 
 def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
@@ -89,57 +91,9 @@ def publish_whatsapp_status(status: WhatsAppStatus):
             })
 
 
-def send_whatsapp_message(message: WhatsAppMessage):
+def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str):
     message.refresh_from_db()
-    if message.active:
-        service = create_whatsapp_service(message.account)
-        caption = message.message
-        typing_timer = max(10, int(len(caption) * 0.5))
-        mimetype = message.message_type
-        file = {
-            "mimetype": get_file_mimetype(message.file),
-            "data": base64.b64encode(message.file.read()).decode('utf-8'),
-        } if message.file else None
-        message_presence = "recording" if 'audio' in mimetype else "typing"
-
-        contacts_and_groups = []
-        all_chats = []
-        for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
-            contacts = distribution_list.contacts.filter(active=True).all()
-            groups = distribution_list.groups.filter(active=True).all()
-            contacts_and_groups.extend([g.chat_id for g in groups])
-            contacts_and_groups.extend([c.chat_id for c in contacts])
-
-        all_chats.extend(contacts_and_groups)
-        while len(contacts_and_groups) > 0:
-            chat_id = contacts_and_groups.pop(0)
-            service.set_chat_presence(chat_id, message_presence)
-            time.sleep(typing_timer)
-            if file:
-                file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
-                if 'video' in mimetype:
-                    service.send_video_message(file_message)
-                elif 'audio' in mimetype:
-                    service.send_voice_message(file_message)
-                elif 'image' in mimetype:
-                    service.send_image_message(file_message)
-                elif 'file' in mimetype:
-                    service.send_file_message(file_message)
-            else:
-                service.send_text_message({
-                    "chatId": chat_id,
-                    "reply_to": None,
-                    "text": caption,
-                    "linkPreview": False,
-                    "linkPreviewHighQuality": False
-                })
-            service.set_chat_presence(chat_id, 'paused')
-        return all_chats
-
-
-def send_whatsapp_autoreplay_message(message: WhatsAppAutoReplay, chat_id: str):
-    message.refresh_from_db()
-    if message.active:
+    if message.active and message.account.active:
         service = create_whatsapp_service(message.account)
         caption = message.message
         typing_timer = max(10, int(len(caption) * 0.5))
@@ -182,3 +136,29 @@ def send_whatsapp_autoreplay_message(message: WhatsAppAutoReplay, chat_id: str):
                 "linkPreviewHighQuality": False
             })
         service.set_chat_presence(chat_id, 'paused')
+
+
+def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str):
+    cluster = 'high_priority'
+    group = 'whatsapp_message'
+    task_name = f"send_{message.message_type}_{message.pk}_to_{chat_id}".lower()
+    async_task(send_message, message, chat_id, task_name=task_name, group=group, cluster=cluster)
+
+
+def enqueue_whatsapp_message(message: WhatsAppMessage):
+    message.refresh_from_db()
+    if message.active:
+        contacts_and_groups = []
+        for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
+            contacts = distribution_list.contacts.filter(active=True).all()
+            groups = distribution_list.groups.filter(active=True).all()
+            contacts_and_groups.extend([g.chat_id for g in groups])
+            contacts_and_groups.extend([c.chat_id for c in contacts])
+
+        for chat_id in contacts_and_groups:
+            enqueue_simple_message(message, chat_id)
+
+
+def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_id: str):
+    message.refresh_from_db()
+    enqueue_simple_message(message, chat_id)
