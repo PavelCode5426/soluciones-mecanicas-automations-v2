@@ -156,12 +156,13 @@ def send_whatsapp_autoreplay_message(message: WhatsAppAutoReplay, chat_id: str):
             service.send_list_message({
                 "chatId": chat_id,
                 "reply_to": None,
-                "title": message.title,
-                "description": message.description,
-                "footer": message.footer,
-                "button": message.button_label,
-                "sections": message.sections
-            })
+                "message": {
+                    "title": message.title,
+                    "description": message.description,
+                    "footer": message.footer,
+                    "button": message.button_label,
+                    "sections": message.sections
+                }})
         elif file:
             file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
             if 'video' in mimetype:
