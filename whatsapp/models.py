@@ -177,6 +177,7 @@ class WhatsAppAutoReplay(AbstractWhatsAppMessage):
                         "type": "object",
                         "properties": {
                             "title": {"type": "string"},
+                            "rowId": {"type": "string"},
                             "description": {"type": ["string", "null"]}
                         }
                     }
