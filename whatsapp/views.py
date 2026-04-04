@@ -43,7 +43,7 @@ class WhatsAppLeadWebhookView(APIView):
         is_from_me = payload.get('fromMe')
         is_group = info.get('IsGroup')
 
-        group = WhatsAppGroup.objects.get(chat_id=info.get('Chat'))
+        group = WhatsAppGroup.objects.filter(chat_id=info.get('Chat')).first()
         sender = info.get('Sender')
         sender_name = info.get('PushName')
         message = payload.get('body')
