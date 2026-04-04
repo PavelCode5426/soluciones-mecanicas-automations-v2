@@ -35,6 +35,9 @@ class WhatsAppLeadWebhookView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        print("Payload:")
+        print(request.data)
+
         account = WhatsAppAccount.objects.get(active=True, session=request.data.get('session'))
         payload = request.data.get('payload')
         info = payload.get('_data').get('Info')
