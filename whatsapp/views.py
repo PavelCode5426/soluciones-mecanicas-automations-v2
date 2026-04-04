@@ -57,7 +57,7 @@ class WhatsAppLeadWebhookView(APIView):
             )
         elif not is_from_me:
             auto_message = (WhatsAppAutoReplay.objects
-                            .filter(account=account, trigger_message__icontains=message).first())
+                            .filter(account=account, trigger_message=message).first())
             if auto_message:
                 send_whatsapp_autoreplay_message(auto_message, chat_id=sender)
         return Response(status=status.HTTP_200_OK)
