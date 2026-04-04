@@ -35,9 +35,6 @@ class WhatsAppLeadWebhookView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        print("Payload:")
-        print(request.data)
-
         account = WhatsAppAccount.objects.get(active=True, session=request.data.get('session'))
         payload = request.data.get('payload')
         info = payload.get('_data').get('Info')
@@ -62,5 +59,7 @@ class WhatsAppLeadWebhookView(APIView):
             auto_message = (WhatsAppAutoReplay.objects
                             .filter(account=account, trigger_message=message).first())
             if auto_message:
+                print("Payload:")
+                print(request.data)
                 send_whatsapp_autoreplay_message(auto_message, chat_id=sender)
         return Response(status=status.HTTP_200_OK)
