@@ -152,7 +152,7 @@ def send_whatsapp_autoreplay_message(message: WhatsAppAutoReplay, chat_id: str):
 
         service.set_chat_presence(chat_id, message_presence)
         time.sleep(typing_timer)
-        if message.message_type is 'list':
+        if message.message_type == 'list':
             service.send_list_message({
                 "chatId": chat_id,
                 "reply_to": None,
