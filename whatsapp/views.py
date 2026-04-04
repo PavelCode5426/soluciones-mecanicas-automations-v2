@@ -50,7 +50,7 @@ class WhatsAppLeadWebhookView(APIView):
         media_url = None if not has_media else payload.get('media').get('url').replace("http://localhost:3000",
                                                                                        settings.WAHA_SERVER_URL)
 
-        if is_group and not is_from_me:
+        if is_group and message and not is_from_me:
             WhatsAppLead.objects.create(
                 account=account, group=group, message=message,
                 chat_id=sender, media_url=media_url, chat_name=sender_name,
