@@ -5,7 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup
+from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup, WhatsAppAutoReplay
+from whatsapp.tasks import send_whatsapp_autoreplay_message
 
 
 # Create your views here.
@@ -54,5 +55,9 @@ class WhatsAppLeadWebhookView(APIView):
                 account=account, group=group, message=message,
                 chat_id=sender, media_url=media_url, chat_name=sender_name,
             )
-
+        elif not is_from_me:
+            auto_message = (WhatsAppAutoReplay.objects
+                            .filter(account=account, trigger_message__icontains=message).first())
+            if auto_message:
+                send_whatsapp_autoreplay_message(auto_message, chat_id=sender)
         return Response(status=status.HTTP_200_OK)

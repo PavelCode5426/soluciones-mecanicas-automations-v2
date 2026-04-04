@@ -151,6 +151,15 @@ class WAHAService:
         response.raise_for_status()
         return response.json()
 
+    def send_list_message(self, data: dict):
+        data.setdefault('session', self._session)
+        response = requests.post(
+            f'{self._api_url}/api/sendList',
+            headers=self._headers, auth=self._auth, json=data
+        )
+        response.raise_for_status()
+        return response.json()
+
     def send_text_message(self, data: dict):
         data.setdefault('session', self._session)
         response = requests.post(

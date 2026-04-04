@@ -1,8 +1,10 @@
 import base64
 import time
+
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.helpers import get_file_mimetype, keep_presence_loop_task
-from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage
+from whatsapp.helpers import get_file_mimetype
+from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
+    WhatsAppAutoReplay
 
 
 def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
@@ -54,7 +56,7 @@ def publish_whatsapp_status(status: WhatsAppStatus):
     status.refresh_from_db()
     if status.active:
         service = create_whatsapp_service(status.account)
-        caption = status.caption
+        caption = status.message
         backgroundColor = '#38b42f'
         font = 0
 
@@ -133,3 +135,49 @@ def send_whatsapp_message(message: WhatsAppMessage):
                 })
             service.set_chat_presence(chat_id, 'paused')
         return all_chats
+
+
+def send_whatsapp_autoreplay_message(message: WhatsAppAutoReplay, chat_id: str):
+    message.refresh_from_db()
+    if message.active:
+        service = create_whatsapp_service(message.account)
+        caption = message.message
+        typing_timer = max(10, int(len(caption) * 0.5))
+        mimetype = message.message_type
+        file = {
+            "mimetype": get_file_mimetype(message.file),
+            "data": base64.b64encode(message.file.read()).decode('utf-8'),
+        } if message.file else None
+        message_presence = "recording" if 'audio' in mimetype else "typing"
+
+        service.set_chat_presence(chat_id, message_presence)
+        time.sleep(typing_timer)
+        if message.message_type is 'list':
+            service.send_list_message({
+                "chatId": chat_id,
+                "reply_to": None,
+                "title": message.title,
+                "description": message.description,
+                "footer": message.footer,
+                "button": message.button_label,
+                "sections": message.sections
+            })
+        elif file:
+            file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
+            if 'video' in mimetype:
+                service.send_video_message(file_message)
+            elif 'audio' in mimetype:
+                service.send_voice_message(file_message)
+            elif 'image' in mimetype:
+                service.send_image_message(file_message)
+            elif 'file' in mimetype:
+                service.send_file_message(file_message)
+        else:
+            service.send_text_message({
+                "chatId": chat_id,
+                "reply_to": None,
+                "text": caption,
+                "linkPreview": False,
+                "linkPreviewHighQuality": False
+            })
+        service.set_chat_presence(chat_id, 'paused')
