@@ -145,8 +145,9 @@ def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, 
     async_task(send_message, message, chat_id, task_name=task_name, group=group, cluster=cluster)
 
 
-def enqueue_whatsapp_message(message: WhatsAppMessage):
-    message.refresh_from_db()
+def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
+    if refresh:
+        message.refresh_from_db()
     if message.active:
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():

@@ -4,7 +4,7 @@ from django_q.tasks import async_task
 
 from whatsapp.models import WhatsAppStatus, WhatsAppAccount, WhatsAppMessage
 from whatsapp.tasks import publish_whatsapp_status, syncronize_whatsapp_account_groups, \
-    syncronize_whatsapp_account_contacts, send_whatsapp_message
+    syncronize_whatsapp_account_contacts, enqueue_whatsapp_message
 
 
 def update_whatsapp_contacts_and_groups():
@@ -38,10 +38,5 @@ def enqueue_active_messages():
                 .all())
 
     for message in messages:
-        async_task(
-            send_whatsapp_message, message,
-            task_name=f'send_whatsapp_message_{message.pk}',
-            group='whatsapp_messages_status',
-            cluster='high_priority',
-        )
-    return f"Programados {messages.count()} mensajes de whatsapp"
+        enqueue_whatsapp_message(message, refresh=False)
+    return f"Programados {len(messages)} mensajes de whatsapp"
