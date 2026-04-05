@@ -215,3 +215,22 @@ class WAHAService:
         )
         response.raise_for_status()
         return response.json()
+
+    def chat_messages(self, chat_id: str, filters: dict):
+        filters.setdefault('limit', 10)
+        filters.setdefault('downloadMedia', False)
+        filters.setdefault('merge', True)
+        filters.setdefault('sortOrder', 'asc')
+        filters.setdefault('sortBy', 'timestamp')
+
+        response = requests.get(
+            f"{self._api_url}/api/{self._session}/chats/{chat_id}/messages",
+            headers=self._headers, auth=self._auth,
+            params=filters
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_last_message_timestamp(self, chat_id: str):
+        messages = self.chat_messages(chat_id, {"limit": 2, 'sortOrder': 'desc'})
+        return None if len(messages) == 0 else messages[-1]['timestamp']

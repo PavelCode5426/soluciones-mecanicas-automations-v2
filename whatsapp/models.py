@@ -51,6 +51,8 @@ class WhatsAppAccount(models.Model):
     chat_id = models.CharField(max_length=250)
     session = models.CharField(max_length=250)
 
+    automatic_message = models.ForeignKey('WhatsAppAutoReplyMessage', blank=True, null=True, on_delete=models.PROTECT)
+
     can_use_webhook = models.BooleanField(default=True)
     can_find_leads = models.BooleanField(default=True)
     can_auto_reply = models.BooleanField(default=True)
