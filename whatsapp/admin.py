@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.core.cache import cache
 from django.db.models import Q
 from django.utils.html import format_html
 from django.utils.timezone import now
@@ -53,12 +54,16 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
         obj.name = profile['name']
         obj.chat_id = profile['id']
         obj.save()
+        cache.delete(obj.session)
 
         syncronize_whatsapp_account_groups(obj)
         # syncronize_whatsapp_account_contacts(obj)
-        webhook_path = reverse('whatsapp:webhook')
-        webhook_url = request.build_absolute_uri(webhook_path) if obj.can_use_webhook else None
-        service.update_session(webhook_url=webhook_url)
+        webhooks_urls = []
+        if obj.can_auto_reply:
+            webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:chats-webhook')))
+        if obj.can_find_leads:
+            webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:groups-webhook')))
+        service.update_session(webhooks_urls)
 
     @admin.action(description='Actualizar grupos de la cuenta')
     def sync_whatsapp_groups(self, request, queryset):

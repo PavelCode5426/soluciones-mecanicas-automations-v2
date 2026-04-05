@@ -1,8 +1,10 @@
-from django.urls import path, include
+from django.urls import path
+
 from whatsapp import views
 
 app_name = 'whatsapp'
 
 urlpatterns = [
-    path(r'webhook', views.WhatsAppEventsWebhookView.as_view(), name='webhook'),
+    path(r'chats-webhook', views.WhatsAppChatsWebhookView.as_view(), name='chats-webhook'),
+    path(r'groups-webhook', views.WhatsAppGroupEventWebhook.as_view(), name='groups-webhook'),
 ]

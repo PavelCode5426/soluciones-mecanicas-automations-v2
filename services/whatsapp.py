@@ -10,29 +10,31 @@ class WAHAService:
         if username and password:
             self._auth = (username, password)
 
-    def __get_session_config(self, webhook_url: str = None):
+    def __get_session_config(self, webhook_urls: list[str]):
         data = {"gows": {"storage": {"messages": False, "groups": False, "chats": False, "labels": False}}}
-        if webhook_url:
-            data.setdefault('webhooks', [{
-                "url": webhook_url,
+
+        if len(webhook_urls):
+            webhooks = [{
+                "url": url,
                 "events": ["message", "session.status"],
                 "retries": {
                     "delaySeconds": 2,
                     "attempts": 5,
                     "policy": "linear"
                 }
-            }])
+            } for url in webhook_urls]
+            data['webhooks'] = webhooks
 
         return data
 
-    def create_session(self, webhook_url=None):
-        data = {"name": self._session, "config": self.__get_session_config(webhook_url)}
+    def create_session(self, webhook_urls: list[str]):
+        data = {"name": self._session, "config": self.__get_session_config(webhook_urls)}
         response = requests.post(f"{self._api_url}/api/sessions", headers=self._headers, auth=self._auth, json=data)
         response.raise_for_status()
         return response.json()
 
-    def update_session(self, webhook_url: str = None):
-        data = {"name": self._session, "config": self.__get_session_config(webhook_url)}
+    def update_session(self, webhook_urls: list[str]):
+        data = {"name": self._session, "config": self.__get_session_config(webhook_urls)}
         response = requests.put(f"{self._api_url}/api/sessions/{self._session}", headers=self._headers,
                                 auth=self._auth, json=data)
         response.raise_for_status()
