@@ -91,12 +91,11 @@ def publish_whatsapp_status(status: WhatsAppStatus):
             })
 
 
-def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str):
+def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
     message.refresh_from_db()
     if message.active and message.account.active:
         service = create_whatsapp_service(message.account)
         caption = message.message
-        typing_timer = max(10, int(len(caption) * 0.5))
         mimetype = message.message_type
         file = {
             "mimetype": get_file_mimetype(message.file),
@@ -104,8 +103,13 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
         } if message.file else None
         message_presence = "recording" if 'audio' in mimetype else "typing"
 
-        service.set_chat_presence(chat_id, message_presence)
-        time.sleep(typing_timer)
+        typing_timer = max(10, int(len(caption) * 0.3)) if typing_timeout is None else typing_timeout
+
+        while typing_timer > 0:
+            service.set_chat_presence(chat_id, message_presence)
+            typing_timer -= 5
+            time.sleep(5)
+
         if message.message_type == 'list':
             service.send_list_message({
                 "chatId": chat_id,
@@ -138,11 +142,11 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
         service.set_chat_presence(chat_id, 'paused')
 
 
-def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str):
+def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
     cluster = 'high_priority'
     group = 'whatsapp_message'
     task_name = f"send_{message.message_type}_{message.pk}_to_{chat_id}".lower()
-    async_task(send_message, message, chat_id, task_name=task_name, group=group, cluster=cluster)
+    async_task(send_message, message, chat_id, typing_timeout, task_name=task_name, group=group, cluster=cluster)
 
 
 def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
@@ -162,4 +166,4 @@ def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
 
 def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_id: str):
     message.refresh_from_db()
-    enqueue_simple_message(message, chat_id)
+    enqueue_simple_message(message, chat_id, 10)
