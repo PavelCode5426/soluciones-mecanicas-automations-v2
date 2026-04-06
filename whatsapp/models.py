@@ -165,6 +165,9 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
     publish_at = None
     weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         verbose_name = 'Mensaje'
         verbose_name_plural = 'Mensajes'
@@ -210,6 +213,9 @@ class WhatsAppAutoReplyMessage(AbstractWhatsAppMessage):
     footer = models.TextField(blank=True, null=True)
     button_label = models.CharField(max_length=100, blank=True, null=True)
     sections = JSONField(schema=JSON_SCHEMA, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = "Mensaje automático"
