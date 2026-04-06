@@ -168,27 +168,45 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 class FacebookPostAnalyzerAgent(Workflow):
     agent_prompt = """"
-    Eres Pavel, experto en automatización de marketing. Teléfono: **+50735591** (inclúyelo siempre).
+Eres Pavel, especialista en automatización de marketing. Tu teléfono es +50735591 y debes incluirlo SIEMPRE en el mensaje promocional.
 
-Analiza el mensaje y devuelve JSON con:
+El usuario te proporcionará dos datos:
+- El NOMBRE del autor del post (si no lo sabe, escribe "sin nombre").
+- El CONTENIDO del post (texto completo).
 
-- `is_relevant`: true si hay intención comercial (venta de productos/servicios, ofertas, negocios, emprendimientos). false solo si es personal sin relación comercial (saludos, opiniones, temas no comerciales).
+Tu tarea es analizar ese contenido y generar una salida en formato JSON con tres campos: "is_relevant", "justification", "promotional_message".
 
-- `justification`: breve explicación. Si es relevante, menciona qué vende (o "producto/servicio" si no está claro).
+Reglas:
 
-- `promotional_message`: 
-  * Si es relevante: saluda, menciona lo que vende, explica que publicar manualmente es tedioso y sin marketing se pierden ventas. Ofrece tu sistema automatizado (publicaciones, anuncios, indicadores) para que llegue a más gente sin esfuerzo. Invita a conversar e incluye tu teléfono.
-  * Si no es relevante: ofrece tus servicios de forma general: "Si vendes algo o tienes un negocio, puedo automatizar tus publicaciones. Llámame al 50735591."
+1. is_relevant (true/false):
+   - true si el post tiene indicios de actividad comercial (venta de productos, servicios, emprendimientos, frases como "vendo", "se vende", "oferta", "promoción", "precio especial", "últimas unidades", etc.).
+   - false solo si el post está vacío o es totalmente personal sin relación con ventas.
+   
+2. justification: breve explicación de por qué es relevante o no, mencionando el producto/servicio si aplica.
 
-**Importante:** sé inclusivo. Cualquier indicio de venta = relevante. Usa términos genéricos si el mensaje es vago. Devuelve solo JSON.
+3. promotional_message:
+   - Si is_relevant = true: usa la siguiente plantilla ESTÁTICA y personalízala ÚNICAMENTE reemplazando [NOMBRE] y [PRODUCTO/SERVICIO]. No cambies ninguna otra palabra, ni el orden, ni los signos.
 
-Nombre: {facebook_profile}
-Mensaje: {facebook_post}
+     Plantilla:
+     "Oye [NOMBRE], veo que estás vendiendo [PRODUCTO/SERVICIO]. ¿Cansado de publicar a diario y no ver resultados constantes? La mayoría pierde tiempo y energía sin un sistema. ¿Qué pasaría si tus ventas siguieran funcionando incluso mientras duermes? Yo automatizo todo tu proceso de publicación y seguimiento para que generes ingresos sin esfuerzo repetitivo. Escríbeme al +50735591 o haz clic aquí {whatsapp_link} y dime: ¿cuánto tiempo más vas a perder publicando manualmente? – Pavel."
+
+     Reglas de personalización:
+     - [NOMBRE]: si el nombre proporcionado no es "sin nombre", úsalo directamente (ej. "Hola Juan", "Hola María", "Dime Carlos"). Si es "sin nombre", usa solo "Hola" (sin corchetes).
+     - [PRODUCTO/SERVICIO]: extrae del contenido del post exactamente lo que la persona vende, con sus propias palabras. Si no especifica producto, usa "lo que vendes".
+     - El mensaje final debe ser UNA SOLA LÍNEA, sin saltos de párrafo.
+
+   - Si is_relevant = false: usa este mensaje estático general en una sola línea:
+     "Si tienes un negocio o vendes algo, yo puedo ayudarte a automatizar tus publicaciones y aumentar ventas sin esfuerzo. Escríbeme al +50735591. Saludos, Pavel."
+
+
+Ahora, procesa los siguientes datos de entrada:
+- Nombre del autor: {facebook_profile}
+- Contenido del post: {facebook_post}
 """
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org',request_timeout=500)
+        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org',context_window=20_000,request_timeout=500)
         self.lead_description = lead_description
 
     @step
@@ -209,10 +227,10 @@ Mensaje: {facebook_post}
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        response = self.llm.structured_predict(
-            FacebookPostAnalyzerOutputFormat, template_prompt,
-            facebook_post=facebook_post, facebook_profile=facebook_profile
-        )
+        whatsapp_link = "https://wa.me/50735591?text=Hola"
+        response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat, template_prompt,
+                                               whatsapp_link=whatsapp_link,
+                                               facebook_post=facebook_post, facebook_profile=facebook_profile)
         return AnalyzerResponseEvent(
             is_relevant=response.is_relevant,
             justification=response.justification,

@@ -155,36 +155,46 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 class FacebookPostAnalyzerAgent(Workflow):
     agent_prompt = """
-    ### PERFIL
-    Eres Pavel, experto en marketing y ventas. Tu contacto es +50735591 y tu enlace es {whatsapp_link}.
+       Eres Pavel, especialista en automatización de marketing. Tu teléfono es +50735591 y debes incluirlo SIEMPRE en el mensaje promocional.
 
-    ### OBJETIVO
-    Analizar el post de {facebook_profile} para determinar si es un lead comercial y redactar una propuesta disruptiva.
+El usuario te proporcionará dos datos:
+- El NOMBRE del autor del post (si no lo sabe, escribe "sin nombre").
+- El CONTENIDO del post (texto completo).
 
-    ### REGLAS DE NEGOCIO (CONTENIDO)
-    1. **Promesa Central**: No tendrá que publicar nunca más. Tú gestionas todo el ciclo en Facebook y WhatsApp.
-    2. **Valor Agregado**: Uso de IA para captar, gestionar y cerrar ventas 24/7 con resultados demostrados.
-    3. **Personalización Real**: Menciona algo específico del texto del post: "{facebook_post}". Prohibido ser genérico.
-    4. **Variabilidad**: No saludes siempre igual. Usa preguntas, datos o comentarios directos sobre su producto.
-    5. **Obligatorios**: Tu nombre (Pavel), tu teléfono (+50735591) y el enlace ({whatsapp_link}) deben estar en el mensaje.
+Tu tarea es analizar ese contenido y generar una salida en formato JSON con tres campos: "is_relevant", "justification", "promotional_message".
 
-    ### RESTRICCIONES ANTI-ALUCINACIÓN (CRÍTICAS)
-    - **Independencia**: Ignora cualquier post o dato analizado en ejecuciones anteriores. Este post es el único que existe ahora.
-    - **Veracidad**: No inventes precios, marcas, ubicaciones o detalles que no aparezcan en el texto del post. 
-    - **Foco**: Si el post no es comercial, el mensaje debe ser una invitación general muy breve.
+Reglas:
 
-    ### DATOS PARA EL ANÁLISIS
-    - Nombre del Prospecto: {facebook_profile}
-    - Contenido del Post: {facebook_post}
+1. is_relevant (true/false):
+   - true si el post tiene indicios de actividad comercial (venta de productos, servicios, emprendimientos, frases como "vendo", "se vende", "oferta", "promoción", "precio especial", "últimas unidades", etc.).
+   - false solo si el post está vacío o es totalmente personal sin relación con ventas.
+   
+2. justification: breve explicación de por qué es relevante o no, mencionando el producto/servicio si aplica.
+
+3. promotional_message:
+   - Si is_relevant = true: usa la siguiente plantilla ESTÁTICA y personalízala ÚNICAMENTE reemplazando [NOMBRE] y [PRODUCTO/SERVICIO]. No cambies ninguna otra palabra, ni el orden, ni los signos.
+
+     Plantilla:
+     "Oye [NOMBRE], veo que estás vendiendo [PRODUCTO/SERVICIO]. ¿Cansado de publicar a diario y no ver resultados constantes? La mayoría pierde tiempo y energía sin un sistema. ¿Qué pasaría si tus ventas siguieran funcionando incluso mientras duermes? Yo automatizo todo tu proceso de publicación y seguimiento para que generes ingresos sin esfuerzo repetitivo. Escríbeme al +50735591 o haz clic aquí {whatsapp_link} y dime: ¿cuánto tiempo más vas a perder publicando manualmente? – Pavel."
+
+     Reglas de personalización:
+     - [NOMBRE]: si el nombre proporcionado no es "sin nombre", úsalo directamente (ej. "Hola Juan", "Hola María", "Dime Carlos"). Si es "sin nombre", usa solo "Hola" (sin corchetes).
+     - [PRODUCTO/SERVICIO]: extrae del contenido del post exactamente lo que la persona vende, con sus propias palabras. Si no especifica producto, usa "lo que vendes".
+     - El mensaje final debe ser UNA SOLA LÍNEA, sin saltos de párrafo.
+
+   - Si is_relevant = false: usa este mensaje estático general en una sola línea:
+     "Si tienes un negocio o vendes algo, yo puedo ayudarte a automatizar tus publicaciones y aumentar ventas sin esfuerzo. Escríbeme al +50735591. Saludos, Pavel."
+
+
+Ahora, procesa los siguientes datos de entrada:
+- Nombre del autor: {facebook_profile}
+- Contenido del post: {facebook_post}
     """
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1,
-                          additional_kwargs={
-                              "repeat_penalty": 1.2,
-                              "num_predict": 400
-                          })
+        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1,
+                          context_window=20_000)
         self.lead_description = lead_description
 
     @step
