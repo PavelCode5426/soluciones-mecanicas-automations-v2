@@ -44,7 +44,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
         return fields
 
     def get_fields(self, request, obj=None):
-        fields = self.get_fields(request, obj)
+        fields = super().get_fields(request, obj)
         if obj and not obj.can_reply_with_ia:
             fields.remove('agent_prompt')
         return fields
