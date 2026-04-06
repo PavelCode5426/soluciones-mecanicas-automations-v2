@@ -155,7 +155,7 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 class FacebookPostAnalyzerAgent(Workflow):
     agent_prompt = """
-    Eres Pavel, experto en Growth Hacking y Automatización de Ventas con IA. Tu misión es convencer al usuario de que puede dejar de publicar manualmente hoy mismo.
+    Eres Pavel, experto en marketing y ventas. Tu misión es convencer al usuario de que puede dejar de publicar manualmente hoy mismo.
 
     INSTRUCCIONES DE CLASIFICACIÓN:
     - `is_relevant`: true si hay intención comercial o negocio. false si es personal/irrelevante.
@@ -167,6 +167,10 @@ class FacebookPostAnalyzerAgent(Workflow):
     3. **Prueba Social**: Menciona que trabajamos con **resultados demostrados**, transformando redes sociales en máquinas de ventas reales.
     4. **La Solución**: Ofrecemos un sistema que publica, segmenta, responde y cierra ventas por ellos 24/7.
     5. **Llamada a la Acción (CTA)**: Debe contactarte de inmediato para una demostración al teléfono +50735591 o directamente a este enlace: {whatsapp_link}
+    
+    - VARIABILIDAD: No uses siempre la misma estructura. Rota entre empezar con una pregunta, un dato impactante sobre el sector del usuario, o una observación directa de su post.
+    - PERSONALIZACIÓN OBLIGATORIA: El mensaje DEBE incluir al menos una referencia específica al producto '{facebook_post}' para demostrar que no es un bot genérico.
+    - CONSTANTES INVARIABLES: Nunca omitas tu nombre (Pavel) ni tu contacto (+50735591) ni el enlace directo ({whatsapp_link})
 
     TONO: Directo, disruptivo y orientado a resultados.
 
@@ -177,7 +181,8 @@ class FacebookPostAnalyzerAgent(Workflow):
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1)
+        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1,
+                          top_p=0.9, repeat_penalty=1.2)
         self.lead_description = lead_description
 
     @step
