@@ -210,3 +210,7 @@ class WhatsAppAutoReplyMessage(AbstractWhatsAppMessage):
     footer = models.TextField(blank=True, null=True)
     button_label = models.CharField(max_length=100, blank=True, null=True)
     sections = JSONField(schema=JSON_SCHEMA, blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Mensaje automático"
+        verbose_name_plural = "Mensajes Automáticos"
