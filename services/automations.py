@@ -102,7 +102,7 @@ class FacebookAutomationService:
                 try:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
-                    page.goto("https://www.facebook.com/groups/feed/", wait_until='load')
+                    page.goto(group.url, wait_until='load')
 
                     count = 0
                     while count <= 5:
