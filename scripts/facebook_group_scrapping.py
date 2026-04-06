@@ -19,10 +19,7 @@ with sync_playwright() as pw:
     )
 
     page = browser.new_page()
-    group_url = [
-        # GRUPO DE VENTAS DE 360
-        "https://www.facebook.com/groups/614763077230692/",
-    ]
+    group_url = ["https://www.facebook.com/groups/feed/"]
     page.goto(random.choice(group_url), timeout=timeout, wait_until='commit')
 
     facebook_articles = []
@@ -57,12 +54,10 @@ with sync_playwright() as pw:
             textarea = article.get_by_text("Comentar como")
 
             post_analyser = FacebookPostAnalyzerAgent()
-            # response = await post_analyser.run(raw_html=post_html)
-            # if response.is_relevant:
-            if True:
+            response = await post_analyser.run(raw_html=post_html, )
+            if response.is_relevant:
                 textarea.click()
-                # page.keyboard.type(response.promotional_message)
-                page.keyboard.type("Hola")
+                page.keyboard.type(response.promotional_message)
                 page.keyboard.press('Enter')
 
 

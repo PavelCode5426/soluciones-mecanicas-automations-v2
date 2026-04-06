@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from django.db.models import F
 from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
+from workflows import Context
 
 from facebook.models import FacebookPostCampaign, FacebookLeadExplorer, FacebookScheduledPost, AbstractFacebookPost
 from facebook.models import FacebookProfile, FacebookGroup
@@ -97,12 +98,13 @@ class FacebookAutomationService:
         if explorer.active and self.profile.active:
             leads_found = 0
             group = explorer.group_category.groups.filter(active=True).order_by('?').first()
-
             with get_playwright() as pw:
                 try:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
-                    page.goto(group.url, wait_until='commit')
+                    page.goto("https://www.facebook.com/groups/feed/", wait_until='commit')
+                    post_analyser = FacebookPostAnalyzerAgent()
+                    ctx = Context(post_analyser)
 
                     count = 0
                     while count <= 5:
@@ -126,10 +128,9 @@ class FacebookAutomationService:
                             pass
 
                         textarea = article.get_by_role('textbox')
-                        post_analyser = FacebookPostAnalyzerAgent()
                         try:
 
-                            response = run_async(post_analyser.run(raw_html=article.inner_html()))
+                            response = run_async(post_analyser.run(raw_html=article.inner_html(), ctx=ctx))
                             if response.is_relevant:
                                 textarea.click()
                                 page.keyboard.type(response.promotional_message)

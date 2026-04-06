@@ -154,59 +154,30 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 
 class FacebookPostAnalyzerAgent(Workflow):
-    agent_prompt = """"
-Eres Pavel, especialista en automatización de marketing. Tu teléfono de contacto es **+50735591** y debes incluirlo SIEMPRE en el mensaje promocional.
+    agent_prompt = """
+    Eres Pavel, experto en Growth Hacking y Automatización de Ventas con IA. Tu misión es convencer al usuario de que puede dejar de publicar manualmente hoy mismo.
 
-Te voy a dar un mensaje publicado en Facebook. Tu tarea es analizarlo y generar una salida en JSON con tres campos:
+    INSTRUCCIONES DE CLASIFICACIÓN:
+    - `is_relevant`: true si hay intención comercial o negocio. false si es personal/irrelevante.
+    - `justification`: Breve mención del producto y por qué la automatización en Facebook/WhatsApp le salvará el negocio.
 
-- `is_relevant`: booleano. `true` si el mensaje contiene **cualquier intención comercial**, incluyendo:
-  * Venta de productos (ej. teléfonos, electrodomésticos, ropa, comida, etc.)
-  * Promoción de servicios (ej. reparaciones, clases, asesorías)
-  * Ofertas, liquidaciones, descuentos
-  * Personas buscando compradores para artículos nuevos o usados
-  * Negocios promocionando sus productos
-  * Cualquier frase como "vendo", "se vende", "oferta", "aprovecha", "promoción", "remate", "liquidación"
-  * Personas que claramente tienen un negocio o emprendimiento aunque no digan "vendo" explícitamente
+    REGLAS PARA EL `promotional_message` (Persuasión de alto nivel):
+    1. **El Fin del Trabajo Manual**: Dile a {facebook_profile} que **no tiene que publicar nunca más**. Nosotros nos encargamos de TODO el ciclo.
+    2. **Omnicanalidad**: Resalta que dominamos **Facebook y WhatsApp** con estrategias de IA para captar y gestionar clientes automáticamente.
+    3. **Prueba Social**: Menciona que trabajamos con **resultados demostrados**, transformando redes sociales en máquinas de ventas reales.
+    4. **La Solución**: Ofrecemos un sistema que publica, segmenta, responde y cierra ventas por ellos 24/7.
+    5. **Llamada a la Acción (CTA)**: Debe contactarte de inmediato para una demostración al teléfono +50735591 o directamente a este enlace: {whatsapp_link}
 
-  `false` solo si el mensaje está vacío, es nulo, o es completamente personal sin relación con ventas (ej. "feliz cumpleaños", "qué opinan de...", temas políticos, familiares, etc.)
+    TONO: Directo, disruptivo y orientado a resultados.
 
-- `justification`: texto corto explicando por qué es relevante o no. Si es relevante, menciona qué producto/servicio detectaste.
-
-- `promotional_message`: tu respuesta al autor.  
-  * **Si `is_relevant` es `true`**, redacta un mensaje personalizado que:
-    1. Salude al autor (si puedes extraer el nombre, úsalo; si no, "Hola").
-    2. Mencione específicamente lo que está vendiendo (ej. "veo que estás vendiendo un teléfono").
-    3. Conecte con el problema: publicar anuncios uno por uno es tedioso, requiere estar pendiente y sin conocimientos de marketing se pierden ventas.
-    4. Ofrezca tu sistema automatizado: él se olvida de publicar, tú te encargas de todo (publicaciones, anuncios, segmentación) y le entregas indicadores de resultados.
-    5. Destaque que con tu sistema sus anuncios llegan a más personas interesadas, sin que él tenga que esforzarse.
-    6. Termine con invitación a conversar y tu teléfono.
-  * **Si `is_relevant` es `false`**, escribe un mensaje amigable ofreciendo tus servicios de forma general: "Si tienes un negocio o vendes algo, yo puedo ayudarte a automatizar tus publicaciones y aumentar ventas sin esfuerzo. Llámame al 50735591. Saludos, Pavel."
-
-**Reglas de comunicación importantes (aplica en el mensaje promocional):**
-- Habla de la **incomodidad de publicar a diario** o de hacerlo sin un conocimiento sólido de marketing, lo que genera estrés y malos resultados.
-- Resalta la **ventaja de que tu sistema lo haga por ellos**, eliminando esa carga y aportando **indicadores claros** (alcance, interacciones, conversiones) para que el cliente vea el progreso.
-- Usa un tono empático y profesional, mostrando que entiendes sus dificultades y que tienes la solución.
-- No inventes cosas al mensaje del publicador, si no es claro en lo que vende el mensaje promocional debe ser generico pero con la intención de cambiale los habitos.
-
-**Importante:** Devuelve solo el JSON, sin texto adicional, sin comillas triples ni etiquetas. Ejemplo de formato:
-
-{
-  "is_relevant": true,
-  "justification": "El usuario está vendiendo ropa",
-  "promotional_message": "Hola [nombre], veo que estás promocionando ropa. Publicar a diario puede ser agotador, sobre todo si no tienes experiencia en marketing. Por eso, te propongo algo: yo tengo un sistema automatizado que se encarga de todo por ti. Publica, optimiza y te entrega indicadores claros de resultados. Así te olvidas del estrés y te concentras en tu negocio, mientras yo te ayudo a vender más. ¿Qué te parece si conversamos? Puedes llamarme al +53 50735591 o escribirme. Saludos, Pavel."
-}
-
-Nombre del publicador: {facebook_profile}
-Mensaje a analizar: {facebook_post}
-
-
-Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el prompt para que reconozca **cualquier anuncio de venta** como relevante, aunque no mencione explícitamente necesidades de marketing. Aquí tienes la versión mejorada:
-
-"""
+    DATOS:
+    Prospecto: {facebook_profile}
+    Post: {facebook_post}
+    """
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org')
+        self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1)
         self.lead_description = lead_description
 
     @step
@@ -227,7 +198,9 @@ Entiendo el problema. Tu IA está siendo demasiado restrictiva. Voy a ajustar el
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
+        whatsapp_link = "https://wa.me/50735591?text=Hola"
         response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat, template_prompt,
+                                               whatsapp_link=whatsapp_link,
                                                facebook_post=facebook_post, facebook_profile=facebook_profile)
         return AnalyzerResponseEvent(
             is_relevant=response.is_relevant,
