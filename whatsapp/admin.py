@@ -182,7 +182,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["message", "file", "file_preview"]
         }),
         ("Planificación", {
-            "fields": ["frequency", "publish_at", "from_date", "until_date", "weekdays"]
+            "fields": ["frequency", "from_date", "until_date", "weekdays"]
         }),
         ("Listas de distribución", {
             "fields": ["distribution_lists"]
