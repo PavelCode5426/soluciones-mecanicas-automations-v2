@@ -103,8 +103,6 @@ class FacebookAutomationService:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
                     page.goto("https://www.facebook.com/groups/feed/", wait_until='load')
-                    post_analyser = FacebookPostAnalyzerAgent()
-                    ctx = Context(post_analyser)
 
                     count = 0
                     while count <= 5:
@@ -129,7 +127,7 @@ class FacebookAutomationService:
 
                         textarea = article.get_by_role('textbox')
                         try:
-
+                            post_analyser = FacebookPostAnalyzerAgent()
                             response = run_async(post_analyser.run(raw_html=article.inner_html()))
                             print(response.promotional_message)
                             if response.is_relevant:
