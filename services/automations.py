@@ -131,6 +131,7 @@ class FacebookAutomationService:
                         try:
 
                             response = run_async(post_analyser.run(raw_html=article.inner_html(), ctx=ctx))
+                            print(response.promotional_message)
                             if response.is_relevant:
                                 textarea.click()
                                 page.keyboard.type(response.promotional_message)
