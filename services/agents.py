@@ -182,7 +182,10 @@ class FacebookPostAnalyzerAgent(Workflow):
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.llm = Ollama(model='llama3.2:1b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1,
-                          top_p=0.9, repeat_penalty=1.2)
+                          additional_kwargs={
+                              "repeat_penalty": 1.2,
+                              "num_predict": 400
+                          })
         self.lead_description = lead_description
 
     @step
