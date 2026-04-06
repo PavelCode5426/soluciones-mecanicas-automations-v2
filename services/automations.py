@@ -102,7 +102,7 @@ class FacebookAutomationService:
                 try:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
-                    page.goto("https://www.facebook.com/groups/feed/", wait_until='commit')
+                    page.goto("https://www.facebook.com/groups/feed/", wait_until='load')
                     post_analyser = FacebookPostAnalyzerAgent()
                     ctx = Context(post_analyser)
 
