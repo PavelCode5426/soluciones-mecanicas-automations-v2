@@ -130,7 +130,7 @@ class FacebookAutomationService:
                         textarea = article.get_by_role('textbox')
                         try:
 
-                            response = run_async(post_analyser.run(raw_html=article.inner_html(), ctx=ctx))
+                            response = run_async(post_analyser.run(raw_html=article.inner_html()))
                             print(response.promotional_message)
                             if response.is_relevant:
                                 textarea.click()
