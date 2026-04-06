@@ -43,6 +43,12 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
             fields.remove('session')
         return fields
 
+    def get_fields(self, request, obj=None):
+        fields = self.get_fields(request, obj)
+        if obj and not obj.can_reply_with_ia:
+            fields.remove('agent_prompt')
+        return fields
+
     def save_model(self, request, obj, form, change):
         service = create_whatsapp_service(obj)
         # is_new_account = obj.pk is None
