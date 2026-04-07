@@ -116,7 +116,9 @@ class WhatsAppLead(models.Model):
     media_url = models.URLField(editable=False, blank=True, null=True)
     group = models.ForeignKey(WhatsAppGroup, related_name='leads', on_delete=models.PROTECT, null=True)
     account = models.ForeignKey(WhatsAppAccount, related_name='leads', on_delete=models.PROTECT)
+
     processed = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
@@ -222,3 +224,10 @@ class WhatsAppAutoReplyMessage(AbstractWhatsAppMessage):
     class Meta:
         verbose_name = "Mensaje automático"
         verbose_name_plural = "Mensajes Automáticos"
+
+
+class WhatsAppProcessedLead(WhatsAppLead):
+    class Meta:
+        verbose_name = 'Cliente Procesado'
+        verbose_name_plural = 'Clientes Procesados'
+        proxy = True

@@ -9,7 +9,7 @@ from rest_framework.reverse import reverse
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
-    WhatsAppMessage, WhatsAppLead, WhatsAppAutoReplyMessage
+    WhatsAppMessage, WhatsAppLead, WhatsAppAutoReplyMessage, WhatsAppProcessedLead
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts, \
     publish_whatsapp_status, enqueue_whatsapp_message
 
@@ -97,8 +97,21 @@ class WhatsAppGroupAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppLead)
 class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
-    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url']
+    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
     list_filter = ['account', 'processed']
+
+    def save_model(self, request, obj, form, change):
+        obj.save()
+
+
+@admin.register(WhatsAppProcessedLead)
+class WhatsAppLeadAdmin(admin.ModelAdmin):
+    list_display = ['chat_name', 'chat_id', 'group', 'created_at']
+    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
+    list_filter = ['account']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).filter(processed=True)
 
 
 @admin.register(WhatsAppContact)
