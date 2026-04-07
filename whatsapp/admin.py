@@ -107,8 +107,8 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
         obj.save()
 
     def delete_queryset(self, request, queryset):
-        names = queryset.values_list('chat_id', flat=True).distinct()
-        queryset.filter(chat_id__in=names, processed=False).delete()
+        chat_ids = queryset.values_list('chat_id', flat=True).distinct()
+        self.model.objects.filter(chat_id__in=chat_ids, processed=False).delete()
 
     @admin.action(description='Enviar propuesta al cliente')
     def create_message_for_lead(self, request, queryset):
