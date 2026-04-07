@@ -172,6 +172,10 @@ def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_
     enqueue_simple_message(message, chat_id, 10)
 
 
+import asyncio
+from asgiref.sync import async_to_sync  # Si lo necesitas para otras cosas, pero aquí no
+
+
 def send_message_to_lead(lead: WhatsAppLead):
     lead.refresh_from_db()
     all_messages = WhatsAppLead.objects.select_related('group') \
@@ -188,8 +192,13 @@ def send_message_to_lead(lead: WhatsAppLead):
 
     long_messages = "\n".join(messages)
     all_groups = ", ".join(groups)
-    analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-    response = asyncio.run(analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name))
+
+    async def main():
+        analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
+        return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
+
+    response = asyncio.run(main())
+
     if response.is_relevant:
         create_whatsapp_service(lead.account).send_text_message({
             "chatId": lead.chat_id,
