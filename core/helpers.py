@@ -15,21 +15,22 @@ def run_async(coro):
 
 
 def run_async_safe(coro):
-    nest_asyncio.apply()
-    """Ejecuta una corrutina de forma síncrona, funcionando tanto si hay un bucle corriendo como si no."""
+    """
+    Ejecuta una corrutina de forma síncrona en entornos donde
+    el event loop puede o no existir/estar corriendo.
+    """
     try:
-        loop = asyncio.get_running_loop()
+        # Intentamos obtener el loop actual
+        loop = asyncio.get_event_loop()
     except Exception:
-        return asyncio.run(coro)
-    else:
-        future = asyncio.run_coroutine_threadsafe(coro, loop)
-        return future.result()
+        # Si no hay loop en este hilo (común en Django-Q), creamos uno
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
-
-def run_workflow_sync(coro):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
+    if loop.is_running():
+        # Si el loop ya está corriendo (ej. estamos en un entorno asíncrono)
+        # nest_asyncio permite re-entrar al loop.
+        nest_asyncio.apply()
         return loop.run_until_complete(coro)
-    finally:
-        loop.close()
+    else:
+        return loop.run_until_complete(coro)
