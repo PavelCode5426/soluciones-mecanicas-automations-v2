@@ -1,6 +1,5 @@
-import asyncio
-
 import nest_asyncio
+import asyncio
 
 
 def run_async(coro):
@@ -13,3 +12,14 @@ def run_async(coro):
     finally:
         pass
         # new_loop.close()
+
+
+def run_async_safe(coro):
+    """Ejecuta una corrutina de forma síncrona, funcionando tanto si hay un bucle corriendo como si no."""
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    else:
+        future = asyncio.run_coroutine_threadsafe(coro, loop)
+        return future.result()

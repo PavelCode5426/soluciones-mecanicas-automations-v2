@@ -4,6 +4,7 @@ import time
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 
+from core.helpers import run_async_safe
 from services.agents import WhatsAppLeadAnalyzer
 from services.automations import run_async
 from whatsapp.factories import create_whatsapp_service
@@ -189,7 +190,7 @@ def send_message_to_lead(lead: WhatsAppLead):
     long_messages = "\n".join(messages)
     all_groups = ", ".join(groups)
     analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-    response = run_async(analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name))
+    response = run_async_safe(analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name))
     if response.is_relevant:
         create_whatsapp_service(lead.account).send_text_message({
             "chatId": lead.chat_id,
