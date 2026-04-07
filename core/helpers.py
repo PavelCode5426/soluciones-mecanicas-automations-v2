@@ -15,6 +15,7 @@ def run_async(coro):
 
 
 def run_async_safe(coro):
+    nest_asyncio.apply()
     """Ejecuta una corrutina de forma síncrona, funcionando tanto si hay un bucle corriendo como si no."""
     try:
         loop = asyncio.get_running_loop()
@@ -23,3 +24,12 @@ def run_async_safe(coro):
     else:
         future = asyncio.run_coroutine_threadsafe(coro, loop)
         return future.result()
+
+
+def run_workflow_sync(coro):
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        return loop.run_until_complete(coro)
+    finally:
+        loop.close()
