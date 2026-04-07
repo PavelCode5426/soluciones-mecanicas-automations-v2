@@ -156,7 +156,7 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
 
 class SocialNetworkAnalyzerAgent(Workflow):
     def __init__(self, system_prompt=None, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, timeout=None, **kwargs)
         self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
                           request_timeout=500)
         self.system_prompt = system_prompt
@@ -188,17 +188,15 @@ class FacebookPostAnalyzerAgent(SocialNetworkAnalyzerAgent):
 
 
 class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
-    def __init__(self, system_prompt=None, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
-                          request_timeout=500)
-        self.system_prompt = system_prompt
 
     @step
     def start_workflow(self, ev: StartEvent) -> AnalyzerResponseEvent:
-        messages = ev.get('messages', "")
+        messages = ev.get('messages', None)
         groups = ev.get('groups', "")
         profile = ev.get('profile', "")
+
+        if not messages:
+            return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
         response = self.llm.structured_predict(SocialNetworkPostAnalyzerOutputFormat,
                                                PromptTemplate(self.system_prompt),

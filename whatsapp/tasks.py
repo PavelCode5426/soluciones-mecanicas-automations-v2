@@ -195,9 +195,8 @@ def send_message_to_lead(lead: WhatsAppLead):
     all_groups = ", ".join(groups)
 
     async def main():
-        async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
-            analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-            return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
+        analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
+        return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
 
     response = asyncio.run(main())
 
@@ -209,6 +208,7 @@ def send_message_to_lead(lead: WhatsAppLead):
             "linkPreview": False,
             "linkPreviewHighQuality": False
         })
+        return response.promotional_message
     all_messages.update(processed=True)
 
 
