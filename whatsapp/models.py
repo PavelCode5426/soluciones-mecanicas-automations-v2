@@ -118,6 +118,7 @@ class WhatsAppLead(models.Model):
     group = models.ForeignKey(WhatsAppGroup, related_name='leads', on_delete=models.PROTECT, null=True)
     account = models.ForeignKey(WhatsAppAccount, related_name='leads', on_delete=models.PROTECT)
 
+    message_reply = models.TextField(blank=True, null=True)
     processed = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

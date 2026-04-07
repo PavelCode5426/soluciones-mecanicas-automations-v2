@@ -7,7 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup, WhatsAppAutoReplyMessage
+from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup, WhatsAppAutoReplyMessage, \
+    WhatsAppProcessedLead
 from whatsapp.tasks import enqueue_whatsapp_auto_reply_message
 
 
@@ -94,7 +95,7 @@ class WhatsAppGroupEventWebhook(APIView, WhatsAppWebhookMixins):
 
         if is_group and account.can_find_leads and message and not is_from_me and 'promo' not in sender_name.lower():
             group = WhatsAppGroup.objects.filter(chat_id=chat_id).first()
-            if group:
+            if group and not WhatsAppLead.objects.filter(chat_id=chat_id, processed=True).exists():
                 WhatsAppLead.objects.create(account=account, group=group, message=message,
                                             chat_id=sender, media_url=media_url, chat_name=sender_name)
         return Response(status=status.HTTP_200_OK)

@@ -2,7 +2,6 @@ import asyncio
 import base64
 import time
 
-from django.conf import settings
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 
@@ -10,7 +9,7 @@ from services.agents import WhatsAppLeadAnalyzer
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
-    WhatsAppAutoReplyMessage, WhatsAppLead
+    WhatsAppAutoReplyMessage, WhatsAppLead, WhatsAppProcessedLead
 
 
 def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
@@ -173,10 +172,6 @@ def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_
     enqueue_simple_message(message, chat_id, 10)
 
 
-import asyncio
-from asgiref.sync import async_to_sync  # Si lo necesitas para otras cosas, pero aquí no
-
-
 def send_message_to_lead(lead: WhatsAppLead):
     lead.refresh_from_db()
     all_messages = WhatsAppLead.objects.select_related('group') \
@@ -208,8 +203,11 @@ def send_message_to_lead(lead: WhatsAppLead):
             "linkPreview": False,
             "linkPreviewHighQuality": False
         })
-        return response.promotional_message
-    all_messages.update(processed=True)
+    all_messages.deleted()
+    WhatsAppProcessedLead.objects.create(chat_id=lead.chat_id, account=lead.account, chat_name=lead.chat_name,
+                                         group=lead.group, messages=long_messages,
+                                         message_reply=response.promotional_message, processed=True)
+    return response.promotional_message
 
 
 def enqueue_create_message_for_lead(leads: QuerySet[WhatsAppLead]):
