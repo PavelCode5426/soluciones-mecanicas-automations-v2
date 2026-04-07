@@ -143,7 +143,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
 
 
 def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
-    cluster = 'high_priority'
+    cluster = 'whatsapp'
     group = 'whatsapp_message'
     task_name = f"send_{message.message_type}_{message.pk}_to_{chat_id}".lower()
     async_task(send_message, message, chat_id, typing_timeout, task_name=task_name, group=group, cluster=cluster)

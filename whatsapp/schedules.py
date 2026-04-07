@@ -26,7 +26,7 @@ def enqueue_active_status():
             publish_whatsapp_status, status,
             task_name=f'create_whatsapp_status_{status.pk}',
             group='whatsapp_status',
-            cluster='high_priority',
+            cluster='whatsapp',
         )
     return f"Programados {whatsapp_status.count()} estados de whatsapp"
 

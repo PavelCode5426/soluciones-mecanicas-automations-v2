@@ -198,6 +198,10 @@ Q_CLUSTER = {
             "workers": 1,
             'max_attempts': 3
         },
+        "whatsapp": {
+            "workers": 1,
+            'max_attempts': 3
+        },
     },
 }
 
