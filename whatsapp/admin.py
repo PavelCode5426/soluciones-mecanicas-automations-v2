@@ -103,6 +103,11 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
 
+    def remove_same_name(self, request, queryset):
+        names = queryset.values_list('chat_name', flat=True).distinct()
+        rows = self.model.objects.filter(chat_name__in=names).delete()
+        self.message_user(request, f'Eliminados {rows} de posibles clientes correctamente', level=messages.SUCCESS)
+
 
 @admin.register(WhatsAppProcessedLead)
 class WhatsAppLeadAdmin(admin.ModelAdmin):
