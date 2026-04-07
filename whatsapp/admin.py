@@ -101,6 +101,7 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
     readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
     list_filter = ['account', 'processed']
+    actions = ['create_message_for_lead']
 
     def save_model(self, request, obj, form, change):
         obj.save()
