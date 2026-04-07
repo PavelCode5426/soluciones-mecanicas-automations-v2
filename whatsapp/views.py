@@ -89,12 +89,13 @@ class WhatsAppGroupEventWebhook(APIView, WhatsAppWebhookMixins):
         is_from_me = payload.get('is_from_me')
         sender_name = payload.get('sender_name', "")
         sender = payload.get('sender')
+        chat_id = payload.get('chat_id')
         media_url = payload.get('media_url')
 
         print(payload)
 
         if is_group and account.can_find_leads and message and not is_from_me and 'promo' not in sender_name.lower():
-            group = WhatsAppGroup.objects.filter(chat_id=sender).first()
+            group = WhatsAppGroup.objects.filter(chat_id=chat_id).first()
             if group:
                 WhatsAppLead.objects.create(account=account, group=group, message=message,
                                             chat_id=sender, media_url=media_url, chat_name=sender_name)
