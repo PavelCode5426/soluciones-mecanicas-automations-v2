@@ -18,7 +18,7 @@ def run_async_safe(coro):
     """Ejecuta una corrutina de forma síncrona, funcionando tanto si hay un bucle corriendo como si no."""
     try:
         loop = asyncio.get_running_loop()
-    except RuntimeError:
+    except Exception:
         return asyncio.run(coro)
     else:
         future = asyncio.run_coroutine_threadsafe(coro, loop)
