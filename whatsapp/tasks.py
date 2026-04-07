@@ -1,13 +1,11 @@
+import asyncio
 import base64
 import time
 
-from asgiref.sync import async_to_sync
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 
-from core.helpers import run_async_safe
 from services.agents import WhatsAppLeadAnalyzer
-from services.automations import run_async
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
@@ -191,8 +189,7 @@ def send_message_to_lead(lead: WhatsAppLead):
     long_messages = "\n".join(messages)
     all_groups = ", ".join(groups)
     analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-    sync_runner = async_to_sync(analyzer.run, force_new_loop=True)
-    response = sync_runner(message=long_messages, groups=all_groups, profile=lead.chat_name)
+    response = asyncio.run(analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name))
     if response.is_relevant:
         create_whatsapp_service(lead.account).send_text_message({
             "chatId": lead.chat_id,
