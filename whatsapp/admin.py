@@ -120,11 +120,8 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
 @admin.register(WhatsAppProcessedLead)
 class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
-    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
+    readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed', 'message_reply']
     list_filter = ['account']
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).filter(processed=True)
 
 
 @admin.register(WhatsAppContact)

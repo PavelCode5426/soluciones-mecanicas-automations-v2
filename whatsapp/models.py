@@ -3,6 +3,7 @@ from django.utils.timezone import now
 from django_jsonform.models.fields import JSONField
 
 from core.models import WeekDay
+from whatsapp.managers import ProcessedLeadManager
 
 
 class AbstractWhatsAppMessage(models.Model):
@@ -229,6 +230,8 @@ class WhatsAppAutoReplyMessage(AbstractWhatsAppMessage):
 
 
 class WhatsAppProcessedLead(WhatsAppLead):
+    objects = ProcessedLeadManager()
+
     class Meta:
         verbose_name = 'Cliente Procesado'
         verbose_name_plural = 'Clientes Procesados'
