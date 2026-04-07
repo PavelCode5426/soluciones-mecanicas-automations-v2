@@ -200,6 +200,7 @@ def send_message_to_lead(lead: WhatsAppLead):
 
     response = asyncio.run(main())
 
+    print(response)
     if response.is_relevant:
         create_whatsapp_service(lead.account).send_text_message({
             "chatId": lead.chat_id,
