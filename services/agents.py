@@ -202,7 +202,6 @@ class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
                                                PromptTemplate(self.system_prompt),
                                                messages=messages, groups=groups, profile=profile)
 
-        print(response)
         return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
                                      promotional_message=response.promotional_message)
 
