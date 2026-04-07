@@ -149,52 +149,81 @@ class AnalyzerResponseEvent(StopEvent):
 class FacebookPostAnalyzerOutputFormat(BaseModel):
     is_relevant: bool = Field(description="Indica si el mensaje está relacionado con el servicio")
     justification: str = Field(description="Breve explicación de por qué es o no relevante")
-    promotional_message: Optional[str] = Field(
-        description="Mensaje de respuesta sugerido si es relevante, null en caso contrario")
+    phone_number: Optional[str] = Field(description="Numero de telefono para contactar, null en caso contrario")
+    product_service: Optional[str] = Field(description="Describe lo que vende o el servicio que se brinda")
 
 
 class FacebookPostAnalyzerAgent(Workflow):
+    classificator_prompt = """
+    Eres un experto en prospección de ventas. Tu misión es analizar posts de Facebook para identificar vendedores potenciales.
+
+    POST A ANALIZAR:
+    - Autor: {facebook_profile}
+    - Contenido: {facebook_post}
+
+    REGLAS DE CLASIFICACIÓN:
+    1. `is_relevant`: Debe ser true SOLO si el autor está vendiendo un producto o servicio. Si el autor está BUSCANDO comprar algo o hace una pregunta informativa, marca false.
+    2. `justification`: Una frase corta. Ej: "Vende repuestos de autos" o "Es una consulta sobre clima, no relevante".
+    3. `phone_number`: Extrae solo números. Si hay varios, el primero. Si no hay, null. Ignora precios (ej. $100).
+    4. `product_service`: Identifica qué vende. Ej: "Zapatos artesanales", "Servicios de mudanza". Máximo 5 palabras.
+
+    RESPONDE ÚNICAMENTE EN FORMATO JSON:
+    {{
+      "is_relevant": boolean,
+      "justification": "string",
+      "phone_number": "string o null",
+      "product_service": "string o null"
+    }}
+    """
+
     agent_prompt = """
-       Eres Pavel, especialista en automatización de marketing. Tu teléfono es +50735591 y debes incluirlo SIEMPRE en el mensaje promocional.
+    Eres Pavel, un estratega de conversión. Tu objetivo es dejar un comentario en Facebook que cuestione la eficiencia del vendedor y lo obligue a buscar profesionalismo.
 
-El usuario te proporcionará dos datos:
-- El NOMBRE del autor del post (si no lo sabe, escribe "sin nombre").
-- El CONTENIDO del post (texto completo).
+    DATOS:
+    - Nombre: {facebook_profile}
+    - Producto: {product_service}
+    - Link: {whatsapp_link}
 
-Tu tarea es analizar ese contenido y generar una salida en formato JSON con tres campos: "is_relevant", "justification", "promotional_message".
+    ESTRUCTURA OBLIGATORIA:
+    1. GOLPE DE REALIDAD: "Hola {facebook_profile}, tienes un producto con potencial, pero publicarlo así es jugar a la lotería."
+    2. EL DIAGNÓSTICO: "Mientras tu gestión dependa de responder comentarios manualmente, tu negocio tiene un techo de cristal que no te deja escalar."
+    3. LA DIFERENCIA: "Yo instalo infraestructuras de conversión que venden 24/7 sin que tú muevas un dedo."
+    4. LA PREGUNTA DISRUPTIVA: "¿Quieres un negocio real o un hobby agotador?"
+    5. CTA: "Hablemos aquí: {whatsapp_link} — Pavel de Sinergia Solutions."
 
-Reglas:
+    REGLAS CRÍTICAS:
+    - Una sola línea (sin saltos de línea).
+    - Máximo 600 caracteres.
+    - Tono: Desafiante, experto, de alto nivel.
+    - NO uses emojis.
+    - Si el nombre es "sin nombre", usa "Hola,".
+    """
 
-1. is_relevant (true/false):
-   - true si el post tiene indicios de actividad comercial (venta de productos, servicios, emprendimientos, frases como "vendo", "se vende", "oferta", "promoción", "precio especial", "últimas unidades", etc.).
-   - false solo si el post está vacío o es totalmente personal sin relación con ventas.
-   
-2. justification: breve explicación de por qué es relevante o no, mencionando el producto/servicio si aplica.
+    whatsapp_prompt = """
+    Eres Pavel, un consultor de automatización de alto nivel. Tu tono es directo, profesional y psicológicamente provocador. No quieres "ayudar", quieres "profesionalizar" negocios que operan de forma amateur.
 
-3. promotional_message:
-   - Si is_relevant = true: usa la siguiente plantilla ESTÁTICA y personalízala ÚNICAMENTE reemplazando [NOMBRE] y [PRODUCTO/SERVICIO]. No cambies ninguna otra palabra, ni el orden, ni los signos.
+    DATOS:
+    - Nombre: {facebook_profile}
+    - Producto: {product_service}
 
-     Plantilla:
-     "Oye [NOMBRE], veo que estás vendiendo [PRODUCTO/SERVICIO]. ¿Cansado de publicar a diario y no ver resultados constantes? La mayoría pierde tiempo y energía sin un sistema. ¿Qué pasaría si tus ventas siguieran funcionando incluso mientras duermes? Yo automatizo todo tu proceso de publicación y seguimiento para que generes ingresos sin esfuerzo repetitivo. Escríbeme al +50735591 o haz clic aquí {whatsapp_link} y dime: ¿cuánto tiempo más vas a perder publicando manualmente? – Pavel."
+    ESTRUCTURA OBLIGATORIA (Sigue el tono agresivo):
+    1. OBSERVACIÓN: "Hola {facebook_profile}, vi tu anuncio de {product_service}. Tienes un buen producto, pero siendo honesto: si estás gestionando esto manualmente, estás dejando dinero sobre la mesa."
+    2. EL "DOLOR" PSICOLÓGICO: "La mayoría de los emprendedores quedan atrapados en el autoempleo, perdiendo ventas por no tener un sistema que convierta el interés en dinero mientras duermen."
+    3. LA SOLUCIÓN PROFESIONAL: "He diseñado una infraestructura de conversión que elimina el error humano y garantiza que ningún prospecto se quede sin atención."
+    4. LA PREGUNTA INCÓMODA: "¿Quieres seguir intercambiando horas de tu vida por respuestas manuales, o estás listo para que tu negocio opere con una estructura profesional?"
+    5. CIERRE: "Hablemos si quieres dejar de simplemente 'postear' y empezar a vender en serio. Saludos, Pavel."
 
-     Reglas de personalización:
-     - [NOMBRE]: si el nombre proporcionado no es "sin nombre", úsalo directamente (ej. "Hola Juan", "Hola María", "Dime Carlos"). Si es "sin nombre", usa solo "Hola" (sin corchetes).
-     - [PRODUCTO/SERVICIO]: extrae del contenido del post exactamente lo que la persona vende, con sus propias palabras. Si no especifica producto, usa "lo que vendes".
-     - El mensaje final debe ser UNA SOLA LÍNEA, sin saltos de párrafo.
-
-   - Si is_relevant = false: usa este mensaje estático general en una sola línea:
-     "Si tienes un negocio o vendes algo, yo puedo ayudarte a automatizar tus publicaciones y aumentar ventas sin esfuerzo. Escríbeme al +50735591. Saludos, Pavel."
-
-
-Ahora, procesa los siguientes datos de entrada:
-- Nombre del autor: {facebook_profile}
-- Contenido del post: {facebook_post}
+    REGLAS DE ORO:
+    - NO uses emojis.
+    - NO seas amable, sé PROFESIONAL y DIRECTO.
+    - El objetivo es que el cliente sienta que está trabajando mal actualmente.
+    - Si el nombre es "sin nombre", omite el saludo personal.
     """
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', temperature=0.1,
-                          context_window=20_000)
+        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
+                          request_timeout=500)
         self.lead_description = lead_description
 
     @step
@@ -206,8 +235,6 @@ Ahora, procesa los siguientes datos de entrada:
     @step
     async def make_decision(self, ev: PostParsedEvent) -> AnalyzerResponseEvent:
         post_data = ev.post_data
-        template_prompt = PromptTemplate(self.agent_prompt)
-
         facebook_profile = post_data.get('author').get('name')
         facebook_post = post_data.get('message')
         print(f"Generando mensaje para: {facebook_post}")
@@ -215,15 +242,31 @@ Ahora, procesa los siguientes datos de entrada:
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        whatsapp_link = "https://wa.me/50735591?text=Hola"
-        response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat, template_prompt,
-                                               whatsapp_link=whatsapp_link,
+        response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat,
+                                               PromptTemplate(self.classificator_prompt),
                                                facebook_post=facebook_post, facebook_profile=facebook_profile)
-        return AnalyzerResponseEvent(
-            is_relevant=response.is_relevant,
-            justification=response.justification,
-            promotional_message=response.promotional_message
-        )
+
+        facebook_promotional_message = None
+        whatsapp_promotional_message = None
+        if response.is_relevant:
+            whatsapp_link = "https://wa.me/50735591?text=Hola"
+            facebook_promotional_message = self.llm.predict(
+                PromptTemplate(self.agent_prompt),
+                whatsapp_link=whatsapp_link,
+                facebook_post=facebook_post,
+                facebook_profile=facebook_profile,
+                product_service=response.product_service,
+                extracted_phone=response.phone_number
+            )
+            if response.phone_number:
+                whatsapp_promotional_message = self.llm.predict(PromptTemplate(self.whatsapp_prompt),
+                                                                product_service=response.product_service,
+                                                                facebook_profile=facebook_profile,
+                                                                promotional_message=facebook_promotional_message)
+
+        return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
+                                     promotional_message=facebook_promotional_message,
+                                     whatsapp_promotional_message=whatsapp_promotional_message)
 
 
 class FacebookAccountAgent:

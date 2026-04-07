@@ -56,9 +56,10 @@ with sync_playwright() as pw:
             post_analyser = FacebookPostAnalyzerAgent()
             response = await post_analyser.run(raw_html=post_html, )
             if response.is_relevant:
-                textarea.click()
-                page.keyboard.type(response.promotional_message)
-                page.keyboard.press('Enter')
+                print("Mensaje relevante")
+                # textarea.click()
+                # page.keyboard.type(response.promotional_message)
+                # page.keyboard.press('Enter')
 
 
         run_async(analyzer_facebook_post())
