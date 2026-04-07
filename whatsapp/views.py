@@ -61,7 +61,7 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
                 enqueue_whatsapp_auto_reply_message(message=account.automatic_message, chat_id=sender)
             else:
                 automatic_message = self.__send_auto_message(account, message, sender)
-                if automatic_message is None and account.can_use_ia:
+                if automatic_message is None and account.can_reply_with_ia:
                     self.__reply_using_ia(account, message, sender)
 
         return Response(status=status.HTTP_200_OK)
