@@ -205,7 +205,7 @@ def send_message_to_lead(lead: WhatsAppLead):
         })
     all_messages.delete()
     WhatsAppProcessedLead.objects.create(chat_id=lead.chat_id, account=lead.account, chat_name=lead.chat_name,
-                                         group=lead.group, messages=long_messages,
+                                         group=lead.group, message=long_messages,
                                          message_reply=response.promotional_message, processed=True)
     return response.promotional_message
 
