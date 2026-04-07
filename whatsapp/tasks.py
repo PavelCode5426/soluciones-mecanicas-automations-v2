@@ -6,7 +6,7 @@ from django_q.tasks import async_task
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
-    WhatsAppAutoReplyMessage
+    WhatsAppAutoReplyMessage, WhatsAppLead
 
 
 def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
@@ -167,3 +167,7 @@ def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
 def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_id: str):
     message.refresh_from_db()
     enqueue_simple_message(message, chat_id, 10)
+
+
+def enqueue_create_message_for_lead(leads: WhatsAppLead):
+    pass

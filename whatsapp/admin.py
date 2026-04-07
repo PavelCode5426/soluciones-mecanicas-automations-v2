@@ -11,7 +11,7 @@ from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
     WhatsAppMessage, WhatsAppLead, WhatsAppAutoReplyMessage, WhatsAppProcessedLead
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts, \
-    publish_whatsapp_status, enqueue_whatsapp_message
+    publish_whatsapp_status, enqueue_whatsapp_message, enqueue_create_message_for_lead
 
 
 class PreviewFileMixin:
@@ -103,10 +103,15 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         obj.save()
 
-    def remove_same_name(self, request, queryset):
-        names = queryset.values_list('chat_name', flat=True).distinct()
-        rows = self.model.objects.filter(chat_name__in=names).delete()
-        self.message_user(request, f'Eliminados {rows} de posibles clientes correctamente', level=messages.SUCCESS)
+    def delete_queryset(self, request, queryset):
+        names = queryset.values_list('chat_id', flat=True).distinct()
+        queryset.filter(chat_id__in=names, processed=False).delete()
+
+    @admin.action(description='Enviar mensaje automatico al cliente')
+    def create_message_for_lead(self, request, queryset):
+        leads = queryset.filter(processed=False).all()
+        enqueue_create_message_for_lead(leads)
+        self.message_user(request, f'Se agendaron mensajes para los clientes seleccionados.', level=messages.SUCCESS)
 
 
 @admin.register(WhatsAppProcessedLead)
