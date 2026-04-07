@@ -154,13 +154,15 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
     promotional_message: Optional[str] = Field(description="Genera un mensaje promocional para el cliente")
 
 
-class FacebookPostAnalyzerAgent(Workflow):
-
+class SocialNetworkAnalyzerAgent(Workflow):
     def __init__(self, system_prompt=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
                           request_timeout=500)
         self.system_prompt = system_prompt
+
+
+class FacebookPostAnalyzerAgent(SocialNetworkAnalyzerAgent):
 
     @step
     def start_workflow(self, ev: StartEvent) -> PostParsedEvent:
@@ -185,7 +187,13 @@ class FacebookPostAnalyzerAgent(Workflow):
                                      promotional_message=response.promotional_message)
 
 
-class WhatsAppLeadAnalyzer(FacebookPostAnalyzerAgent):
+class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
+    def __init__(self, system_prompt=None, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
+                          request_timeout=500)
+        self.system_prompt = system_prompt
+
     @step
     def start_workflow(self, ev: StartEvent) -> AnalyzerResponseEvent:
         messages = ev.get('messages', "")
