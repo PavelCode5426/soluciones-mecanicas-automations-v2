@@ -196,7 +196,7 @@ def send_message_to_lead(lead: WhatsAppLead):
 
     async def main():
         analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-        return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
+        return await analyzer.run(messages=long_messages, groups=all_groups, profile=lead.chat_name)
 
     response = asyncio.run(main())
 
