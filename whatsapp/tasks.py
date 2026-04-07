@@ -177,17 +177,19 @@ def send_message_to_lead(lead: WhatsAppLead):
     all_messages = WhatsAppLead.objects.select_related('group') \
         .filter(chat_id=lead.chat_id, processed=False, account=lead.account).all()
 
-    long_message = ""
-    all_groups = ""
+    messages = []
+    groups = []
 
     for m in all_messages:
-        if m.message not in long_message:
-            long_message += m.message
-        if m.group not in all_groups:
-            all_groups += m.group
+        if m.message not in messages:
+            messages.append(m.message)
+        if m.group.name not in groups:
+            groups.append(m.group.name)
 
+    long_messages = "\n".join(messages)
+    all_groups = ", ".join(groups)
     analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-    response = run_async(analyzer.run(message=long_message, groups=all_groups, profile=lead.chat_name))
+    response = run_async(analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name))
     if response.is_relevant:
         create_whatsapp_service(lead.account).send_text_message({
             "chatId": lead.chat_id,
