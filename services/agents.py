@@ -203,7 +203,7 @@ class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
                                                messages=messages, groups=groups, profile=profile)
 
         return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
-                                     promotional_message=None)
+                                     promotional_message=response.promotional_message)
 
 
 class FacebookAccountAgent:
