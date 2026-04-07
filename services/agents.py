@@ -146,66 +146,21 @@ class AnalyzerResponseEvent(StopEvent):
     promotional_message: Optional[str]
 
 
-class FacebookPostAnalyzerOutputFormat(BaseModel):
+class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
     is_relevant: bool = Field(description="Indica si el mensaje está relacionado con el servicio")
     justification: str = Field(description="Breve explicación de por qué es o no relevante")
     phone_number: Optional[str] = Field(description="Numero de telefono para contactar, null en caso contrario")
     product_service: Optional[str] = Field(description="Describe lo que vende o el servicio que se brinda")
+    promotional_message: Optional[str] = Field(description="Genera un mensaje promocional para el cliente")
 
 
 class FacebookPostAnalyzerAgent(Workflow):
-    classificator_prompt = """
-    Eres un experto en prospección de ventas. Tu misión es analizar posts de Facebook para identificar vendedores potenciales.
 
-    POST A ANALIZAR:
-    - Autor: {facebook_profile}
-    - Contenido: {facebook_post}
-
-    REGLAS DE CLASIFICACIÓN:
-    1. `is_relevant`: Debe ser true SOLO si el autor está vendiendo un producto o servicio. Si el autor está BUSCANDO comprar algo o hace una pregunta informativa, marca false.
-    2. `justification`: Una frase corta. Ej: "Vende repuestos de autos" o "Es una consulta sobre clima, no relevante".
-    3. `phone_number`: Extrae solo números. Si hay varios, el primero. Si no hay, null. Ignora precios (ej. $100).
-    4. `product_service`: Identifica qué vende. Ej: "Zapatos artesanales", "Servicios de mudanza". Máximo 5 palabras.
-
-    RESPONDE ÚNICAMENTE EN FORMATO JSON:
-    {{
-      "is_relevant": boolean,
-      "justification": "string",
-      "phone_number": "string o null",
-      "product_service": "string o null"
-    }}
-    """
-
-    agent_prompt = """
-    Eres Pavel, un estratega de conversión. Tu objetivo es dejar un comentario en Facebook que cuestione la eficiencia del vendedor y lo obligue a buscar profesionalismo.
-
-    DATOS:
-    - Nombre: {facebook_profile}
-    - Producto: {product_service}
-    - Link: {whatsapp_link}
-
-    ESTRUCTURA OBLIGATORIA:
-    1. GOLPE DE REALIDAD: "Hola {facebook_profile}, tienes un producto con potencial, pero publicarlo así es jugar a la lotería."
-    2. EL DIAGNÓSTICO: "Mientras tu gestión dependa de responder comentarios manualmente, tu negocio tiene un techo de cristal que no te deja escalar."
-    3. LA DIFERENCIA: "Yo instalo infraestructuras de conversión que venden 24/7 sin que tú muevas un dedo."
-    4. LA PREGUNTA DISRUPTIVA: "¿Quieres un negocio real o un hobby agotador?"
-    5. CTA: "Hablemos aquí: {whatsapp_link} — Pavel de Sinergia Solutions."
-
-    REGLAS CRÍTICAS:
-    - Una sola línea (sin saltos de línea).
-    - Máximo 600 caracteres.
-    - Tono: Desafiante, experto, de alto nivel.
-    - NO uses emojis.
-    - Si el nombre es "sin nombre", usa "Hola,".
-    """
-
-
-
-    def __init__(self, profile_prompt=None, *args, **kwargs) -> None:
+    def __init__(self, system_prompt=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
                           request_timeout=500)
-        self.profile_prompt = profile_prompt
+        self.system_prompt = system_prompt
 
     @step
     def start_workflow(self, ev: StartEvent) -> PostParsedEvent:
@@ -218,36 +173,31 @@ class FacebookPostAnalyzerAgent(Workflow):
         post_data = ev.post_data
         facebook_profile = post_data.get('author').get('name')
         facebook_post = post_data.get('message')
-        print(f"Generando mensaje para: {facebook_post}")
 
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat,
-                                               PromptTemplate(self.classificator_prompt),
-                                               facebook_post=facebook_post, facebook_profile=facebook_profile)
-
-        facebook_promotional_message = None
-        whatsapp_promotional_message = None
-        if response.is_relevant:
-            whatsapp_link = "https://wa.me/50735591?text=Hola"
-            facebook_promotional_message = self.llm.predict(
-                PromptTemplate(self.profile_prompt),
-                whatsapp_link=whatsapp_link,
-                facebook_post=facebook_post,
-                facebook_profile=facebook_profile,
-                product_service=response.product_service,
-                extracted_phone=response.phone_number
-            )
-            # if response.phone_number:
-            #     whatsapp_promotional_message = self.llm.predict(PromptTemplate(self.whatsapp_prompt),
-            #                                                     product_service=response.product_service,
-            #                                                     facebook_profile=facebook_profile,
-            #                                                     promotional_message=facebook_promotional_message)
+        response = self.llm.structured_predict(SocialNetworkPostAnalyzerOutputFormat,
+                                               PromptTemplate(self.system_prompt),
+                                               post=facebook_post, profile=facebook_profile)
 
         return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
-                                     promotional_message=facebook_promotional_message,
-                                     whatsapp_promotional_message=whatsapp_promotional_message)
+                                     promotional_message=response.promotional_message)
+
+
+class WhatsAppLeadAnalyzer(FacebookPostAnalyzerAgent):
+    @step
+    def start_workflow(self, ev: StartEvent) -> AnalyzerResponseEvent:
+        messages = ev.get('messages', "")
+        groups = ev.get('groups', "")
+        profile = ev.get('profile', "")
+
+        response = self.llm.structured_predict(SocialNetworkPostAnalyzerOutputFormat,
+                                               PromptTemplate(self.system_prompt),
+                                               messages=messages, groups=groups, profile=profile)
+
+        return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
+                                     promotional_message=None)
 
 
 class FacebookAccountAgent:

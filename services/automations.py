@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 from workflows import Context
 
+from core.helpers import run_async
 from facebook.models import FacebookPostCampaign, FacebookLeadExplorer, FacebookScheduledPost, AbstractFacebookPost
 from facebook.models import FacebookProfile, FacebookGroup
 from services.agents import FacebookPostAnalyzerAgent
@@ -19,16 +20,6 @@ def get_playwright() -> PlaywrightContextManager:
     return sync_playwright()
 
 
-def run_async(coro):
-    nest_asyncio.apply()
-    new_loop = asyncio.get_event_loop()
-    # new_loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(new_loop)
-    try:
-        return new_loop.run_until_complete(coro)
-    finally:
-        pass
-        # new_loop.close()
 
 
 class FacebookAutomationService:

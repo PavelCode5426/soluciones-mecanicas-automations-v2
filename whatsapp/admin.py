@@ -47,6 +47,8 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
         fields = super().get_fields(request, obj)
         if obj and not obj.can_reply_with_ia:
             fields.remove('agent_prompt')
+        if obj and not obj.can_find_leads:
+            fields.remove('lead_prompt')
         return fields
 
     def save_model(self, request, obj, form, change):
@@ -107,7 +109,7 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
         names = queryset.values_list('chat_id', flat=True).distinct()
         queryset.filter(chat_id__in=names, processed=False).delete()
 
-    @admin.action(description='Enviar mensaje automatico al cliente')
+    @admin.action(description='Enviar propuesta al cliente')
     def create_message_for_lead(self, request, queryset):
         leads = queryset.filter(processed=False).all()
         enqueue_create_message_for_lead(leads)

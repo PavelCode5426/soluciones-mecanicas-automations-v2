@@ -1,8 +1,11 @@
 import base64
 import time
 
+from django.db.models import QuerySet
 from django_q.tasks import async_task
 
+from services.agents import WhatsAppLeadAnalyzer
+from services.automations import run_async
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
@@ -169,5 +172,33 @@ def enqueue_whatsapp_auto_reply_message(message: WhatsAppAutoReplyMessage, chat_
     enqueue_simple_message(message, chat_id, 10)
 
 
-def enqueue_create_message_for_lead(leads: WhatsAppLead):
-    pass
+def send_message_to_lead(lead: WhatsAppLead):
+    lead.refresh_from_db()
+    all_messages = WhatsAppLead.objects.select_related('group') \
+        .filter(chat_id=lead.chat_id, processed=False, account=lead.account).all()
+
+    long_message = ""
+    all_groups = ""
+
+    for m in all_messages:
+        if m.message not in long_message:
+            long_message += m.message
+        if m.group not in all_groups:
+            all_groups += m.group
+
+    analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
+    response = run_async(analyzer.run(message=long_message, groups=all_groups, profile=lead.chat_name))
+    if response.is_relevant:
+        create_whatsapp_service(lead.account).send_text_message({
+            "chatId": lead.chat_id,
+            "reply_to": None,
+            "text": response.promotional_message,
+            "linkPreview": False,
+            "linkPreviewHighQuality": False
+        })
+    all_messages.update(processed=True)
+
+
+def enqueue_create_message_for_lead(leads: QuerySet[WhatsAppLead]):
+    for lead in leads:
+        async_task(send_message_to_lead, lead, cluster='whatsapp')

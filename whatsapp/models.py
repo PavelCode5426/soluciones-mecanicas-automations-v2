@@ -59,6 +59,7 @@ class WhatsAppAccount(models.Model):
     can_reply_with_ia = models.BooleanField(default=False)
 
     agent_prompt = models.TextField(blank=True, null=True)
+    lead_prompt = models.TextField(blank=True, null=True)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
