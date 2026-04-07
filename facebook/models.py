@@ -41,6 +41,7 @@ class FacebookProfile(models.Model):
     context = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
     posts_footer = models.TextField(null=True, blank=True)
+    leads_explorer_prompt = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name

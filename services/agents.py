@@ -199,32 +199,13 @@ class FacebookPostAnalyzerAgent(Workflow):
     - Si el nombre es "sin nombre", usa "Hola,".
     """
 
-    whatsapp_prompt = """
-    Eres Pavel, un consultor de automatización de alto nivel. Tu tono es directo, profesional y psicológicamente provocador. No quieres "ayudar", quieres "profesionalizar" negocios que operan de forma amateur.
 
-    DATOS:
-    - Nombre: {facebook_profile}
-    - Producto: {product_service}
 
-    ESTRUCTURA OBLIGATORIA (Sigue el tono agresivo):
-    1. OBSERVACIÓN: "Hola {facebook_profile}, vi tu anuncio de {product_service}. Tienes un buen producto, pero siendo honesto: si estás gestionando esto manualmente, estás dejando dinero sobre la mesa."
-    2. EL "DOLOR" PSICOLÓGICO: "La mayoría de los emprendedores quedan atrapados en el autoempleo, perdiendo ventas por no tener un sistema que convierta el interés en dinero mientras duermen."
-    3. LA SOLUCIÓN PROFESIONAL: "He diseñado una infraestructura de conversión que elimina el error humano y garantiza que ningún prospecto se quede sin atención."
-    4. LA PREGUNTA INCÓMODA: "¿Quieres seguir intercambiando horas de tu vida por respuestas manuales, o estás listo para que tu negocio opere con una estructura profesional?"
-    5. CIERRE: "Hablemos si quieres dejar de simplemente 'postear' y empezar a vender en serio. Saludos, Pavel."
-
-    REGLAS DE ORO:
-    - NO uses emojis.
-    - NO seas amable, sé PROFESIONAL y DIRECTO.
-    - El objetivo es que el cliente sienta que está trabajando mal actualmente.
-    - Si el nombre es "sin nombre", omite el saludo personal.
-    """
-
-    def __init__(self, lead_description=None, *args, **kwargs) -> None:
+    def __init__(self, profile_prompt=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
                           request_timeout=500)
-        self.lead_description = lead_description
+        self.profile_prompt = profile_prompt
 
     @step
     def start_workflow(self, ev: StartEvent) -> PostParsedEvent:
@@ -251,18 +232,18 @@ class FacebookPostAnalyzerAgent(Workflow):
         if response.is_relevant:
             whatsapp_link = "https://wa.me/50735591?text=Hola"
             facebook_promotional_message = self.llm.predict(
-                PromptTemplate(self.agent_prompt),
+                PromptTemplate(self.profile_prompt),
                 whatsapp_link=whatsapp_link,
                 facebook_post=facebook_post,
                 facebook_profile=facebook_profile,
                 product_service=response.product_service,
                 extracted_phone=response.phone_number
             )
-            if response.phone_number:
-                whatsapp_promotional_message = self.llm.predict(PromptTemplate(self.whatsapp_prompt),
-                                                                product_service=response.product_service,
-                                                                facebook_profile=facebook_profile,
-                                                                promotional_message=facebook_promotional_message)
+            # if response.phone_number:
+            #     whatsapp_promotional_message = self.llm.predict(PromptTemplate(self.whatsapp_prompt),
+            #                                                     product_service=response.product_service,
+            #                                                     facebook_profile=facebook_profile,
+            #                                                     promotional_message=facebook_promotional_message)
 
         return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
                                      promotional_message=facebook_promotional_message,
