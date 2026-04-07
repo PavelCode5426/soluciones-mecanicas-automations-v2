@@ -2,6 +2,7 @@ import asyncio
 import base64
 import time
 
+from django.conf import settings
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 
@@ -194,8 +195,9 @@ def send_message_to_lead(lead: WhatsAppLead):
     all_groups = ", ".join(groups)
 
     async def main():
-        analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
-        return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
+        async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
+            analyzer = WhatsAppLeadAnalyzer(lead.account.lead_prompt)
+            return await analyzer.run(message=long_messages, groups=all_groups, profile=lead.chat_name)
 
     response = asyncio.run(main())
 
