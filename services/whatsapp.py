@@ -234,7 +234,8 @@ class WAHAService:
 
     def get_last_message_timestamp(self, chat_id: str):
         messages = self.chat_messages(chat_id, {"limit": 2, 'sortOrder': 'desc'})
-        return 0 if len(messages) <= 2 else messages[-1]['timestamp']
+        print(len(messages), messages)
+        return 0 if len(messages) <= 2 else messages[0]['timestamp']
 
     def send_simple_text_message(self, chat_id: str, message: str):
         return self.send_text_message({
