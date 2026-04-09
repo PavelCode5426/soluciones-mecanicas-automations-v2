@@ -118,6 +118,9 @@ class RAGApplication(models.Model):
         cache.delete(self.name)
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
 
 class StaticMemory(models.Model):
     application = models.ForeignKey(RAGApplication, on_delete=models.PROTECT)
