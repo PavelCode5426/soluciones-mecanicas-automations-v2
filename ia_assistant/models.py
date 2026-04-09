@@ -108,17 +108,11 @@ class FunctionTool(models.Model):
 
 
 class RAGApplication(models.Model):
-    JSON_SCHEMA = {
-        'type': 'object',
-        'additionalProperties': True
-    }
-
     name = models.CharField(max_length=250)
     description = models.TextField(null=True, blank=True)
     root_agent = models.ForeignKey(Agent, on_delete=models.PROTECT, null=True, blank=True)
     root_workflow = models.ForeignKey(AgentWorkflow, on_delete=models.PROTECT, null=True, blank=True)
     active = models.BooleanField(default=True)
-    config = JSONField(schema=JSON_SCHEMA)
 
     def save(self, *args, **kwargs):
         cache.delete(self.name)
