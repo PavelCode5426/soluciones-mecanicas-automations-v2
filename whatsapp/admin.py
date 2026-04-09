@@ -46,7 +46,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         fields = super().get_fields(request, obj)
         if obj and not obj.can_reply_with_ia:
-            fields.remove('agent_prompt')
+            fields.remove('ia_application')
         if obj and not obj.can_find_leads:
             fields.remove('lead_prompt')
         return fields

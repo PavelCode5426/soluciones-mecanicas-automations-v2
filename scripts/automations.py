@@ -6,6 +6,8 @@ import nest_asyncio
 from bs4 import BeautifulSoup
 from huggingface_hub import InferenceClient
 from llama_index.core import PromptTemplate
+from llama_index.core.agent import FunctionAgent
+from llama_index.core.tools import FunctionTool
 from llama_index.core.workflow import Workflow, Event, step, StartEvent, StopEvent
 from llama_index.llms.ollama import Ollama
 from pydantic import BaseModel, Field, HttpUrl
@@ -287,3 +289,14 @@ class FacebookAccountAgent:
     def is_nsfw_image(self, image) -> bool:
         output = self.inference_client.image_classification(image, model="Falconsai/nsfw_image_detection")[0]
         return output.label == 'normal' and output.score > 0.85
+
+
+class WhatsAppAgent:
+    def __init__(self, llm: Ollama, system_prompt: str) -> None:
+        self.agent = FunctionAgent(llm=llm, system_prompt=system_prompt, tools=[
+            FunctionTool.from_defaults(self.send_general_information)
+        ])
+
+    def send_general_information(self):
+        """USAR CUANDO EL USUARIO SOLICITE MAS INFORMACIÓN EN GENERAL"""
+        return "Mas información general"

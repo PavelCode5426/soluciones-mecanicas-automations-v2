@@ -53,7 +53,7 @@ INSTALLED_APPS = [
     "core",
     "facebook",
     "whatsapp",
-    # "ia_assistant"
+    "ia_assistant"
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM, RAGApplication
+from ia_assistant.models import Agent, FunctionTool, AgentWorkflow, OllamaLLM, RAGApplication, StaticMemory
 
 
 @admin.register(OllamaLLM)
@@ -33,3 +33,8 @@ class AgentWorkflowAdmin(admin.ModelAdmin):
 @admin.register(RAGApplication)
 class RAGApplicationAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
+
+
+@admin.register(StaticMemory)
+class StaticMemoryAdmin(admin.ModelAdmin):
+    list_display = ['application', 'name', 'active']

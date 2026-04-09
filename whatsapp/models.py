@@ -3,6 +3,7 @@ from django.utils.timezone import now
 from django_jsonform.models.fields import JSONField
 
 from core.models import WeekDay
+from ia_assistant.models import RAGApplication
 from whatsapp.managers import ProcessedLeadManager
 
 
@@ -55,12 +56,13 @@ class WhatsAppAccount(models.Model):
     automatic_message = models.ForeignKey('WhatsAppAutoReplyMessage', blank=True, null=True, on_delete=models.PROTECT)
 
     can_use_webhook = models.BooleanField(default=True)
-    can_find_leads = models.BooleanField(default=True)
     can_auto_reply = models.BooleanField(default=True)
-    can_reply_with_ia = models.BooleanField(default=False)
 
-    agent_prompt = models.TextField(blank=True, null=True)
+    can_find_leads = models.BooleanField(default=True)
     lead_prompt = models.TextField(blank=True, null=True)
+
+    can_reply_with_ia = models.BooleanField(default=False)
+    ia_application = models.ForeignKey(RAGApplication, blank=True, null=True, on_delete=models.PROTECT)
 
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

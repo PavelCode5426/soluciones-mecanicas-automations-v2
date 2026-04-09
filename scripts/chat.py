@@ -13,20 +13,18 @@ host = "https://ia.pavelcode5426.duckdns.org"
 persist_dir = "./agent/context_store_persistence/"
 chromadb_dir = "./agent/chroma_db"
 
-model_name = "llama3.2:1b"
+# model_name = "llama3.2:1b"
 model_name = "llama3.1:8b-instruct-q4_K_M"
 embedding_model_name = "embeddinggemma:300m-qat-q4_0"
 ollama.Client(host).pull(model_name)
 
 logging.basicConfig(level=logging.INFO)
-llm = Ollama(model=model_name, base_url=host, request_timeout=120, temperature=0.1,context_window=4000)
+llm = Ollama(model=model_name, base_url=host, request_timeout=120, temperature=0.1, context_window=4000)
 embed_model = OllamaEmbedding(model_name=embedding_model_name, base_url=host)
 chroma_client = chromadb.PersistentClient(path=chromadb_dir)
 
-account_agent = FacebookAccountAgent(
-    llm=llm, embed_model=embed_model, chroma_client=chroma_client,
-    DOCS_DIR='./data', CONTEXT_STORE_DIR=persist_dir
-)
+account_agent = FacebookAccountAgent(llm=llm, embed_model=embed_model, chroma_client=chroma_client, DOCS_DIR='./data',
+                                     CONTEXT_STORE_DIR=persist_dir)
 
 
 async def main():
