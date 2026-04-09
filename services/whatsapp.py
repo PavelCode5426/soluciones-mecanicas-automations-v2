@@ -155,7 +155,6 @@ class WAHAService:
 
     def send_list_message(self, data: dict):
         data.setdefault('session', self._session)
-        print(data)
         response = requests.post(
             f'{self._api_url}/api/sendList',
             headers=self._headers, auth=self._auth, json=data
