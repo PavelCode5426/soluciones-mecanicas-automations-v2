@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup, WhatsAppAutoReplyMessage, \
     WhatsAppProcessedLead
-from whatsapp.tasks import enqueue_whatsapp_auto_reply_message
+from whatsapp.tasks import enqueue_whatsapp_auto_reply_message, enqueue_reply_using_ia
 
 
 class WhatsAppWebhookMixins:
@@ -76,7 +76,7 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
         return auto_message
 
     def __reply_using_ia(self, account, message, chat_id):
-        pass
+        enqueue_reply_using_ia(account, message, chat_id)
 
 
 class WhatsAppGroupEventWebhook(APIView, WhatsAppWebhookMixins):

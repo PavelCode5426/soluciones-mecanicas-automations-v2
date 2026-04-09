@@ -2,10 +2,16 @@ import asyncio
 import base64
 import time
 
+from django.conf import settings
+from django.core import cache
 from django.db.models import QuerySet
 from django_q.tasks import async_task
+from llama_index.core.memory import Memory
+from workflows import Context
 
+from ia_assistant.factories import retrieve_agent_from_application, retrieve_memory_blocks_from_application
 from services.agents import WhatsAppLeadAnalyzer
+from services.whatsapp import WAHAService
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
@@ -213,3 +219,45 @@ def send_message_to_lead(lead: WhatsAppLead):
 def enqueue_create_message_for_lead(leads: QuerySet[WhatsAppLead]):
     for lead in leads:
         async_task(send_message_to_lead, lead, cluster='whatsapp')
+
+
+def ___keep_typing_loop_task(service: WAHAService, chat_id):
+    async def __keep_typing():
+        try:
+            while True:
+                service.start_typing(chat_id)
+                await asyncio.sleep(5)
+        except asyncio.CancelledError:
+            service.stop_typing(chat_id)
+
+    return asyncio.create_task(__keep_typing())
+
+
+def enqueue_reply_using_ia(account: WhatsAppAccount, message: str, chat_id: str):
+    account.refresh_from_db()
+    if account.active and account.can_reply_with_ia and account.ia_application:
+        ia_application = account.ia_application
+        agent = retrieve_agent_from_application(ia_application)
+        memory = Memory.from_defaults(
+            chat_id,
+            memory_blocks=retrieve_memory_blocks_from_application(ia_application)
+        )
+        whatsapp_service = create_whatsapp_service(account)
+
+        async def main():
+            previus_context = cache.get_or_set(chat_id, {})
+            ctx = Context(agent, previous_context=previus_context)
+            typing_task = ___keep_typing_loop_task(whatsapp_service, chat_id)
+            try:
+                async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
+                    response = await agent.run(message, ctx=ctx, memory=memory)
+                    whatsapp_service.send_simple_text_message(chat_id, str(response))
+            finally:
+                typing_task.cancel()
+            cache.set(chat_id, ctx.to_dict())
+
+        if '--reset' in message:
+            cache.delete(chat_id)
+            whatsapp_service.send_simple_text_message(chat_id, "👌")
+        else:
+            asyncio.run(main(), debug=True)
