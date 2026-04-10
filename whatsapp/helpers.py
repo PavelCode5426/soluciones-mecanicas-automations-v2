@@ -1,6 +1,9 @@
 import asyncio
 import mimetypes
 import os
+import threading
+
+from django.core.cache import cache
 
 from services.whatsapp import WAHAService
 
@@ -63,3 +66,42 @@ def keep_presence_loop_task(service: WAHAService, chat_id, presence):
             service.set_chat_presence(chat_id, "paused")
 
     return asyncio.create_task(__keep_typing())
+
+
+class ChatMessageDebouncer:
+
+    def __init__(self, chat_id, debounce_function, delay=15, ):
+        self.chat_id = chat_id
+        self.delay = delay
+        self.current_timer = None
+        self.debounce_function = debounce_function
+
+    @property
+    def buffer_key(self):
+        return f"chat_buffer:{self.chat_id}"
+
+    @property
+    def lock_key(self):
+        return f"chat_lock:{self.chat_id}"
+
+    def add_message(self, message_text):
+        messages = cache.get_or_set(self.buffer_key, [])
+        messages.append(message_text)
+        cache.set(self.buffer_key, messages)
+
+        added = cache.add(self.lock_key, "processing", timeout=self.delay)
+        if not added:
+            self.current_timer.cancel()
+        self.current_timer = threading.Timer(self.delay, self._flush_buffer)
+        self.current_timer.start()
+        return added
+
+    def _flush_buffer(self):
+        """Recupera todos los mensajes, los concatena y los procesa."""
+        messages = cache.get(self.buffer_key, [])
+        if not messages:
+            return
+
+        full_messages = "\n".join(messages)
+        self.debounce_function(full_messages)
+        cache.delete(self.lock_key)
