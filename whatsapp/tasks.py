@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 from llama_index.core.memory import Memory
+from ollama import ResponseError
 from workflows import Context
 
 from ia_assistant.factories import retrieve_agent_from_application, retrieve_memory_blocks_from_application
@@ -253,6 +254,8 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str)
                     response = await agent.run(message, ctx=ctx, memory=memory)
                     response = str(response).replace("**", "*")
                     whatsapp_service.send_simple_text_message(chat_id, response)
+            except ResponseError:
+                await main()
             finally:
                 typing_task.cancel()
             cache.set(chat_id, ctx.to_dict())
