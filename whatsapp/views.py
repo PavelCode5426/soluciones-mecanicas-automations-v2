@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.helpers import ChatMessageDebouncer
+from whatsapp.helpers import ChatMessageDebouncer, get_or_set_chat_debouncer
 from whatsapp.models import WhatsAppAccount, WhatsAppLead, WhatsAppGroup, WhatsAppAutoReplyMessage, \
     WhatsAppProcessedLead
 from whatsapp.tasks import enqueue_whatsapp_auto_reply_message, enqueue_reply_using_ia
@@ -77,8 +77,8 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
         return auto_message
 
     def __reply_using_ia(self, account, message, chat_id):
-        debouncer = cache.get_or_set(
-            f'debouncer_{chat_id}',
+        debouncer = get_or_set_chat_debouncer(
+            chat_id,
             ChatMessageDebouncer(
                 chat_id,
                 debounce_function=enqueue_reply_using_ia,

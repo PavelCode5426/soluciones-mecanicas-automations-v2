@@ -107,3 +107,11 @@ class ChatMessageDebouncer:
         full_messages = "\n".join(messages)
         self.debounce_function(*self.function_args, full_messages)
         cache.delete(self.lock_key)
+
+
+___debounce = dict()
+
+
+def get_or_set_chat_debouncer(chat_id, debouncer):
+    ___debounce.setdefault(chat_id, debouncer)
+    return ___debounce.get(chat_id)
