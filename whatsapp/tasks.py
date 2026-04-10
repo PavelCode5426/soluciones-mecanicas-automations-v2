@@ -13,7 +13,7 @@ from ia_assistant.factories import retrieve_agent_from_application, retrieve_mem
 from services.agents import WhatsAppLeadAnalyzer
 from services.whatsapp import WAHAService
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.helpers import get_file_mimetype, ChatMessageDebouncer
+from whatsapp.helpers import get_file_mimetype
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppStatus, WhatsAppMessage, \
     WhatsAppAutoReplyMessage, WhatsAppLead, WhatsAppProcessedLead
 
@@ -251,7 +251,8 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str)
             try:
                 async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
                     response = await agent.run(message, ctx=ctx, memory=memory)
-                    whatsapp_service.send_simple_text_message(chat_id, str(response))
+                    response = str(response).replace("**", "*")
+                    whatsapp_service.send_simple_text_message(chat_id, response)
             finally:
                 typing_task.cancel()
             cache.set(chat_id, ctx.to_dict())

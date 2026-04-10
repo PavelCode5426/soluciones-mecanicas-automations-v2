@@ -84,8 +84,7 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
                 debounce_function=enqueue_reply_using_ia,
                 function_args=[account, chat_id])
         )
-        added = debouncer.add_message(message)
-        print(added)
+        debouncer.add_message(message)
 
 
 class WhatsAppGroupEventWebhook(APIView, WhatsAppWebhookMixins):
