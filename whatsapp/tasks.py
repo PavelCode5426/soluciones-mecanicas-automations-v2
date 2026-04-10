@@ -233,7 +233,7 @@ def ___keep_typing_loop_task(service: WAHAService, chat_id):
     return asyncio.create_task(__keep_typing())
 
 
-def enqueue_reply_using_ia(account: WhatsAppAccount, message: str, chat_id: str):
+def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str):
     account.refresh_from_db()
     if account.active and account.can_reply_with_ia and account.ia_application:
         ia_application = account.ia_application
@@ -244,13 +244,13 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, message: str, chat_id: str)
         )
         whatsapp_service = create_whatsapp_service(account)
 
-        async def main(full_messages):
+        async def main():
             previus_context = cache.get_or_set(chat_id, {})
             ctx = Context(agent, previous_context=previus_context)
             typing_task = ___keep_typing_loop_task(whatsapp_service, chat_id)
             try:
                 async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
-                    response = await agent.run(full_messages, ctx=ctx, memory=memory)
+                    response = await agent.run(message, ctx=ctx, memory=memory)
                     whatsapp_service.send_simple_text_message(chat_id, str(response))
             finally:
                 typing_task.cancel()
@@ -260,7 +260,4 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, message: str, chat_id: str)
             cache.delete(chat_id)
             whatsapp_service.send_simple_text_message(chat_id, "👌")
         else:
-            debouncer = cache.get_or_set(f'debouncer_{chat_id}',
-                                         ChatMessageDebouncer(chat_id, lambda x: asyncio.run(main(x), debug=True)))
-            added = debouncer.add_message(message)
-            print(added)
+            asyncio.run(main(), debug=True)

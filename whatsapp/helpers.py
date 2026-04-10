@@ -70,11 +70,14 @@ def keep_presence_loop_task(service: WAHAService, chat_id, presence):
 
 class ChatMessageDebouncer:
 
-    def __init__(self, chat_id, debounce_function, delay=15, ):
+    def __init__(self, chat_id, debounce_function, function_args=None, delay=15, ):
+        if function_args is None:
+            function_args = []
         self.chat_id = chat_id
         self.delay = delay
         self.current_timer = None
         self.debounce_function = debounce_function
+        self.function_args = function_args
 
     @property
     def buffer_key(self):
@@ -103,5 +106,5 @@ class ChatMessageDebouncer:
             return
 
         full_messages = "\n".join(messages)
-        self.debounce_function(full_messages)
+        self.debounce_function(*self.function_args, full_messages)
         cache.delete(self.lock_key)
