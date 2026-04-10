@@ -75,7 +75,7 @@ class ChatMessageDebouncer:
             function_args = []
         self.chat_id = chat_id
         self.delay = delay
-        self.current_timer = threading.Timer(self.delay, self._flush_buffer)
+        self.current_timer = None
         self.debounce_function = debounce_function
         self.function_args = function_args
 
@@ -93,8 +93,9 @@ class ChatMessageDebouncer:
         cache.set(self.buffer_key, messages)
 
         added = cache.add(self.lock_key, "processing", timeout=self.delay)
-        if not added:
+        if not added and self.current_timer is not None:
             self.current_timer.cancel()
+        self.current_timer = threading.Timer(self.delay, self._flush_buffer)
         self.current_timer.start()
         return added
 
