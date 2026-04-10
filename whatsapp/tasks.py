@@ -3,7 +3,7 @@ import base64
 import time
 
 from django.conf import settings
-from django.core import cache
+from django.core.cache import cache
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 from llama_index.core.memory import Memory
