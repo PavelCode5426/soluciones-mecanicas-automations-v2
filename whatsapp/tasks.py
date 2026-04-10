@@ -250,6 +250,7 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, message: str, chat_id: str)
             typing_task = ___keep_typing_loop_task(whatsapp_service, chat_id)
             try:
                 async with asyncio.timeout(settings.LLAMAINDEX_TIMEOUT):
+                    print(message)
                     response = await agent.run(message, ctx=ctx, memory=memory)
                     whatsapp_service.send_simple_text_message(chat_id, str(response))
             finally:

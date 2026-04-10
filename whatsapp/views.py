@@ -24,8 +24,8 @@ class WhatsAppWebhookMixins:
         sender = info.get('Sender')
         sender_name = info.get('PushName')
         message = payload.get('body')
-        media_url = None if not has_media else payload.get('media').get('url').replace("http://localhost:3000",
-                                                                                       settings.WAHA_SERVER_URL)
+        media_url = None if not has_media else payload.get('media').get('url', '').replace("http://localhost:3000",
+                                                                                           settings.WAHA_SERVER_URL)
 
         return {
             'payload': payload,
@@ -58,7 +58,6 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
 
         if not is_group and not is_from_me and account.can_auto_reply:
             last_message_timestamp = create_whatsapp_service(account).get_last_message_timestamp(sender)
-            print(last_message_timestamp)
             if (int(now().timestamp()) - last_message_timestamp) >= 24 * 3600 and account.automatic_message:
                 enqueue_whatsapp_auto_reply_message(message=account.automatic_message, chat_id=sender)
             else:
