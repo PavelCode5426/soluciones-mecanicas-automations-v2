@@ -241,16 +241,17 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str)
     account.refresh_from_db()
     if account.active and account.can_reply_with_ia and account.ia_application:
         ia_application = account.ia_application
-        agent = retrieve_agent_from_application(ia_application)
-        memory = Memory.from_defaults(
-            chat_id,
-            memory_blocks=retrieve_memory_blocks_from_application(ia_application)
-        )
         whatsapp_service = create_whatsapp_service(account)
+
         token_counter = TokenCountingHandler(
             tokenizer=tiktoken.encoding_for_model('gpt-3.5-turbo').encode,
             verbose=True)
         Settings.callback_manager = CallbackManager([token_counter])
+        memory = Memory.from_defaults(
+            chat_id,
+            memory_blocks=retrieve_memory_blocks_from_application(ia_application)
+        )
+        agent = retrieve_agent_from_application(ia_application)
 
         async def main():
             previus_context = cache.get_or_set(chat_id, {})
