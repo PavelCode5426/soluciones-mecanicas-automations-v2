@@ -77,7 +77,6 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
         return auto_message
 
     def __reply_using_ia(self, account, message, chat_id):
-        print(self.request.data)
         debouncer = get_or_set_chat_debouncer(
             chat_id,
             ChatMessageDebouncer(
