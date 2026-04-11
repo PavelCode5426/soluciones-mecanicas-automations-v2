@@ -2,10 +2,13 @@ import asyncio
 import base64
 import time
 
+import tiktoken
 from django.conf import settings
 from django.core.cache import cache
 from django.db.models import QuerySet
 from django_q.tasks import async_task
+from llama_index.core import Settings
+from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
 from llama_index.core.memory import Memory
 from ollama import ResponseError
 from workflows import Context
@@ -244,6 +247,10 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str)
             memory_blocks=retrieve_memory_blocks_from_application(ia_application)
         )
         whatsapp_service = create_whatsapp_service(account)
+        token_counter = TokenCountingHandler(
+            tokenizer=tiktoken.encoding_for_model('gpt-3.5-turbo').encode,
+            verbose=True)
+        Settings.callback_manager = CallbackManager([token_counter])
 
         async def main():
             previus_context = cache.get_or_set(chat_id, {})
@@ -254,6 +261,15 @@ def enqueue_reply_using_ia(account: WhatsAppAccount, chat_id: str, message: str)
                     response = await agent.run(message, ctx=ctx, memory=memory)
                     response = str(response).replace("**", "*")
                     whatsapp_service.send_simple_text_message(chat_id, response)
+
+                    print("--- Consumo para CONSULTA ---")
+                    print(f"LLM Prompt Tokens:   {token_counter.prompt_llm_token_count}")
+                    print(f"LLM Completion Tokens: {token_counter.completion_llm_token_count}")
+                    print(f"Total LLM Tokens:    {token_counter.total_llm_token_count}")
+                    print("-----------------------------")
+
+
+
             except ResponseError:
                 await main()
             finally:
