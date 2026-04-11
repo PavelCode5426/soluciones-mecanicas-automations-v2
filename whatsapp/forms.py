@@ -13,7 +13,6 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
                 from_date=instance.from_date,
                 until_date=instance.until_date,
                 publish_at=instance.publish_at,
-                weekdays=instance.weekdays,
                 published_count=instance.published_count
             )
 
