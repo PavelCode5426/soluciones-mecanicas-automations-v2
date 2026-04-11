@@ -6,8 +6,8 @@ from llama_index.core import Settings
 from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
 from llama_index.core.workflow import Context
 
-from ia_assistant.factories import create_agent_workflow
-from ia_assistant.models import AgentWorkflow
+from ia_assistant.factories import retrieve_agent_from_application
+from ia_assistant.models import Agent, RAGApplication
 
 
 class Command(BaseCommand):
@@ -15,7 +15,7 @@ class Command(BaseCommand):
     agent_name = 'seller_agent'
 
     def handle(self, *args, **options):
-        agent = create_agent_workflow(AgentWorkflow.objects.first())
+        agent = retrieve_agent_from_application(RAGApplication.objects.first())
         tokenizer = tiktoken.get_encoding('cl100k_base')
         token_counter = TokenCountingHandler(tokenizer=tokenizer.encode, verbose=True)
         Settings.callback_manager = CallbackManager([token_counter])

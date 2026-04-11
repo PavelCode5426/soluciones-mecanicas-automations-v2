@@ -1,9 +1,11 @@
 import importlib
 
+from django.conf import settings
 from llama_index.core.agent import FunctionAgent, AgentWorkflow
 from llama_index.core.memory import StaticMemoryBlock
 from llama_index.core.tools import FunctionTool
 from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.llms.ollama import Ollama
 
 from ia_assistant import models
@@ -11,7 +13,9 @@ from ia_assistant.models import RAGApplication, StaticMemory
 
 
 def create_llm(model: models.OllamaLLM):
-    return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
+    return HuggingFaceInferenceAPI(model_name="google/gemma-2-2b-it", token=settings.HUGGINGFACE_TOKEN, provider="auto")
+
+    # return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
 
 
 def create_embedding_model(model: models.OllamaLLM):
