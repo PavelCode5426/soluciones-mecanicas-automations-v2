@@ -24,7 +24,7 @@ def enqueue_active_status():
     whatsapp_status = (WhatsAppStatus.objects.select_related('account')
                        .filter(active=True, from_date__lte=now())
                        .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
-                       .filter(publish_at__hour=now().hour)
+                       .filter(publish_at__hour=now().hour, weekdays__day=now().weekday())
                        .all())
 
     for status in whatsapp_status:
@@ -42,6 +42,7 @@ def enqueue_active_messages():
     messages = (WhatsAppMessage.objects.select_related('account')
                 .filter(active=True, from_date__lte=now())
                 .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
+                .filter(publish_at__hour=now().hour, weekdays__day=now().weekday())
                 .all())
 
     for message in messages:
