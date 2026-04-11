@@ -70,7 +70,7 @@ def keep_presence_loop_task(service: WAHAService, chat_id, presence):
 
 class ChatMessageDebouncer:
 
-    def __init__(self, chat_id, debounce_function, function_args=None, delay=15, ):
+    def __init__(self, chat_id, debounce_function, function_args=None, delay=3, ):
         if function_args is None:
             function_args = []
         self.chat_id = chat_id
