@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from django.utils.timezone import now
 from django_q.tasks import async_task
 from rest_framework.reverse import reverse
+from whatsapp import forms
 
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
@@ -161,6 +162,7 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
 
 @admin.register(WhatsAppStatus)
 class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
+    form = forms.WhatsAppStatusAdminForm
     search_fields = ['name']
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
@@ -172,7 +174,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["name", "account", 'message', 'file', 'file_preview', 'active']
         }),
         ("Planificar estado", {
-            "fields": ['published_count', 'publish_at', 'from_date', 'until_date', 'weekdays']
+            "fields": ['published_count', 'publish_at', 'from_date', 'until_date', 'weekdays', 'sync_schedule']
         }),
     ]
 

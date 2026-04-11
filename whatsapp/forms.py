@@ -1,0 +1,24 @@
+from django import forms
+
+from whatsapp.models import WhatsAppStatus
+
+
+class WhatsAppStatusAdminForm(forms.ModelForm):
+    sync_schedule = forms.BooleanField(initial=False)
+
+    def save(self, commit=True):
+        instance = super(WhatsAppStatusAdminForm, self).save(commit=False)
+        if self.cleaned_data['sync_schedule']:
+            WhatsAppStatus.objects.filter(active=True, account=instance.account).update(
+                from_date=instance.from_date,
+                until_date=instance.until_date,
+                publish_at=instance.publish_at,
+                weekdays=instance.weekdays,
+                published_count=instance.published_coune
+            )
+
+        return instance
+
+    class Meta:
+        model = WhatsAppStatus
+        fields = forms.ALL_FIELDS
