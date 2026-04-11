@@ -30,9 +30,9 @@ def enqueue_active_status():
     for status in whatsapp_status:
         async_task(
             publish_whatsapp_status, status,
-            name=f'create_whatsapp_status_{status.pk}',
+            task_name=f'create_whatsapp_status_{status.pk}',
             cluster='whatsapp',
-            next_run=datetime.combine(now(), status.publish_at)
+            # next_run=datetime.combine(now(), status.publish_at)
         )
 
     return f"Programados {whatsapp_status.count()} estados de whatsapp"
