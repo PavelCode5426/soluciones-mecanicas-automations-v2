@@ -4,7 +4,7 @@ from whatsapp.models import WhatsAppStatus
 
 
 class WhatsAppStatusAdminForm(forms.ModelForm):
-    sync_schedule = forms.BooleanField(initial=False)
+    sync_schedule = forms.BooleanField(initial=False, required=False)
 
     def save(self, commit=True):
         instance = super(WhatsAppStatusAdminForm, self).save(commit=False)
@@ -14,7 +14,7 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
                 until_date=instance.until_date,
                 publish_at=instance.publish_at,
                 weekdays=instance.weekdays,
-                published_count=instance.published_coune
+                published_count=instance.published_count
             )
 
         return instance
