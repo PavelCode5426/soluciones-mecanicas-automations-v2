@@ -1,7 +1,7 @@
 import importlib
 
 from django.conf import settings
-from llama_index.core.agent import FunctionAgent, AgentWorkflow
+from llama_index.core.agent import FunctionAgent, AgentWorkflow, ReActAgent
 from llama_index.core.memory import StaticMemoryBlock
 from llama_index.core.tools import FunctionTool
 from llama_index.embeddings.ollama import OllamaEmbedding
@@ -13,7 +13,8 @@ from ia_assistant.models import RAGApplication, StaticMemory
 
 
 def create_llm(model: models.OllamaLLM):
-    return HuggingFaceInferenceAPI(model_name="google/gemma-2-2b-it", token=settings.HUGGINGFACE_TOKEN, provider="auto")
+    return HuggingFaceInferenceAPI(model_name="google/gemma-2-2b-it", token=settings.HUGGINGFACE_TOKEN, provider="auto",
+                                   **model.config)
 
     # return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
 
@@ -30,8 +31,8 @@ def create_function_agent(agent: models.Agent):
         tools.append(FunctionTool.from_defaults(getattr(module, func), name=tool.name, description=tool.description))
 
     llm = create_llm(agent.llm)
-    return FunctionAgent(name=agent.name, description=agent.description,
-                         system_prompt=agent.system_prompt, tools=tools, llm=llm, **agent.options)
+    return ReActAgent(name=agent.name, description=agent.description,
+                      system_prompt=agent.system_prompt, tools=tools, llm=llm, **agent.options)
 
 
 def create_agent_workflow(workflow: models.AgentWorkflow):
