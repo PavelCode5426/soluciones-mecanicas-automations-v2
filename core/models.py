@@ -9,6 +9,10 @@ class WeekDay(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Día"
+        verbose_name_plural = "Días"
+
 
 class Media(models.Model):
     name = models.CharField(max_length=25)
