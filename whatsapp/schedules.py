@@ -4,7 +4,7 @@ from datetime import datetime
 from dateutil.utils import today
 from django.db.models import Q
 from django.utils.timezone import now
-from django_q.models import Schedule
+from django_q.models import Schedule, Task
 from django_q.tasks import async_task, schedule
 
 from whatsapp.models import WhatsAppStatus, WhatsAppAccount, WhatsAppMessage
@@ -24,15 +24,17 @@ def enqueue_active_status():
     whatsapp_status = (WhatsAppStatus.objects.select_related('account')
                        .filter(active=True, from_date__lte=now())
                        .filter(Q(until_date__gte=now()) | Q(until_date__isnull=True))
+                       .filter(publish_at__hour=now().hour)
                        .all())
 
     for status in whatsapp_status:
-        schedule(
+        async_task(
             publish_whatsapp_status, status,
             name=f'create_whatsapp_status_{status.pk}',
             cluster='whatsapp',
             next_run=datetime.combine(now(), status.publish_at)
         )
+
     return f"Programados {whatsapp_status.count()} estados de whatsapp"
 
 
