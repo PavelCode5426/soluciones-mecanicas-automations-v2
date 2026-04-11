@@ -8,14 +8,11 @@ class OllamaLLM(models.Model):
     JSON_SCHEMA = {
         'type': 'dict',
         'keys': {
-            'context_window': {'type': 'number', 'default': -1},
-            'request_timeout': {'type': 'number', 'default': 120, }
         },
         'additionalProperties': True
     }
 
     name = models.CharField(max_length=100)
-    base_url = models.CharField(max_length=100, blank=True)
     model_name = models.CharField(max_length=100, blank=True)
     config = JSONField(schema=JSON_SCHEMA)
 

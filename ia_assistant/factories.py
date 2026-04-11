@@ -13,14 +13,12 @@ from ia_assistant.models import RAGApplication, StaticMemory
 
 
 def create_llm(model: models.OllamaLLM):
-    return HuggingFaceInferenceAPI(model_name="google/gemma-2-2b-it", token=settings.HUGGINGFACE_TOKEN, provider="auto",
-                                   **model.config)
-
-    # return Ollama(model=model.model_name, base_url=model.base_url, **model.config)
+    # HuggingFaceInferenceAPI(model_name=model.model_name, token=settings.HUGGINGFACE_TOKEN, **model.config)
+    return Ollama(model=model.model_name, base_url=settings.IA_OLLAMA_HOST, **model.config)
 
 
 def create_embedding_model(model: models.OllamaLLM):
-    return OllamaEmbedding(model_name=model.name, base_url=model.base_url)
+    return OllamaEmbedding(model_name=model.name, base_url=settings.IA_OLLAMA_HOST)
 
 
 def create_function_agent(agent: models.Agent):
@@ -31,8 +29,8 @@ def create_function_agent(agent: models.Agent):
         tools.append(FunctionTool.from_defaults(getattr(module, func), name=tool.name, description=tool.description))
 
     llm = create_llm(agent.llm)
-    return ReActAgent(name=agent.name, description=agent.description,
-                      system_prompt=agent.system_prompt, tools=tools, llm=llm, **agent.options)
+    return FunctionAgent(name=agent.name, description=agent.description,
+                         system_prompt=agent.system_prompt, tools=tools, llm=llm, **agent.options)
 
 
 def create_agent_workflow(workflow: models.AgentWorkflow):
