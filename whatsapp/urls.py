@@ -14,6 +14,8 @@ urlpatterns = [
     path(r'status/<int:pk>/edit', views.WhatsAppStatusUpdateView.as_view(), name='status.update'),
 
     path(r'contacts', views.WhatsAppContactsListView.as_view(), name='contacts.index'),
+    path(r'contacts/<int:pk>/edit', views.WhatsAppContactsUpdateView.as_view(), name='contacts.update'),
+
     path(r'groups', views.WhatsAppGroupsListView.as_view(), name='groups.index'),
 
 ]

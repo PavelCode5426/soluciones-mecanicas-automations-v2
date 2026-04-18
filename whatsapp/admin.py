@@ -253,13 +253,11 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
 
         for message in _messages:
             account = message.account
-            message_type = message.message_type
-
             _defaults = {
                 "name": message.name,
-                "message": message.text,
+                "message": message.message,
                 "file": message.file,
-                "message_type": message_type
+                "message_type": message.message_type
             }
 
             WhatsAppStatus.objects.update_or_create(

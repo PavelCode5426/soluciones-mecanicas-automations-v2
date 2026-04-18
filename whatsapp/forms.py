@@ -2,7 +2,7 @@ from dateutil.utils import today
 from django import forms
 
 from core.forms.widgets import DatePickerInput, TimePickerInput
-from whatsapp.models import WhatsAppStatus
+from whatsapp.models import WhatsAppStatus, WhatsAppContact
 
 
 class WhatsAppStatusAdminForm(forms.ModelForm):
@@ -36,3 +36,9 @@ class WhatsAppStatusForm(forms.ModelForm):
             'until_date': DatePickerInput(),
             'publish_at': TimePickerInput(),
         }
+
+
+class WhatsAppContactForm(forms.ModelForm):
+    class Meta:
+        model = WhatsAppContact
+        fields = forms.ALL_FIELDS

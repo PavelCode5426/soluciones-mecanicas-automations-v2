@@ -39,6 +39,15 @@ class WhatsAppContactsListView(FilterView):
     paginate_by = 100
 
 
+class WhatsAppContactsUpdateView(UpdateView):
+    template_name = 'whatsapp/contacts/create_or_update.html'
+    form_class = forms.WhatsAppContactForm
+    queryset = models.WhatsAppContact.objects.all()
+    extra_context = {
+        "page_title": "Actualizar contacto"
+    }
+
+
 class WhatsAppGroupsListView(FilterView):
     template_name = 'whatsapp/groups/index.html'
     filterset_class = filters.WhatsAppGenericFilterSet

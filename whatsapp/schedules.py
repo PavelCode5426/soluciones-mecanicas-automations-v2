@@ -19,7 +19,8 @@ def enqueue_active_status():
     whatsapp_status = (WhatsAppStatus.objects.select_related('account')
                        .filter(active=True, from_date__lte=localtime())
                        .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
-                       .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
+                       # .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
+                       .filter(weekdays__day=localtime().weekday())
                        .all())
 
     for status in whatsapp_status:

@@ -15,7 +15,9 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
+    <td>
+        <a href="{% url 'whatsapp:contacts.update' pk=object.pk %}">{{ object.name }}</a>
+    </td>
     <td>{{ object.account }}</td>
     <td>
         <a href="https://wa.me/{{ object.chat_id|parse_whatsapp_chat:False }}" target="_blank"
