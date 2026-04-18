@@ -212,14 +212,17 @@ Q_CLUSTER = {
         },
         "whatsapp": {
             "workers": 1,
-            'max_attempts': 3
+            'max_attempts': 1
         },
     },
 }
 
-WAHA_SERVER_URL = 'https://whatsapp.pavelcode5426.duckdns.org'
-WAHA_USERNAME = 'pavelcode5426'
-WAHA_PASSWORD = 'pavelcode5426'
+# WAHA_SERVER_URL = 'https://whatsapp.pavelcode5426.duckdns.org'
+# WAHA_USERNAME = 'pavelcode5426'
+# WAHA_PASSWORD = 'pavelcode5426'
+WAHA_SERVER_URL = 'http://waha:3000'
+WAHA_USERNAME = None
+WAHA_PASSWORD = None
 WAHA_APIKEY = 'admin'
 
 IA_OLLAMA_HOST = env("IA_OLLAMA_HOST", default='https://ia.pavelcode5426.duckdns.org')
