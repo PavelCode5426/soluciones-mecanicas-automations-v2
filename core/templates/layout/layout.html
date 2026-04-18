@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{% block title %}SINERGIA MARKETING AUTOMATIONS{% endblock %}</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.png' %}"/>
+
+    {% include "layout/partials/title-meta.html" %}
+
+    <!-- App css -->
+    {% block css %}
+        {% include "layout/partials/head-css.html" %}
+    {% endblock %}
+    {% block after_css %}{% endblock %}
+    {% block page_css %}{% endblock %}
+
+</head>
+<body>
+
+{% block body %}{% endblock %}
+
+{% block before_scripts %}{% endblock %}
+
+{% block scripts %}
+    {% include 'layout/partials/vendorjs.html' %}
+{% endblock %}
+
+<script src="{% static 'js/app.js' %}"></script>
+
+{% block after_scripts %}{% endblock %}
+
+{% block module_scripts %}{% endblock %}
+
+{% block page_scripts %}{% endblock %}
+</body>
+</html>

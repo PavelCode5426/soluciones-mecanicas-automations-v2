@@ -1,0 +1,28 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+
+{% block title %}Estados de WhatsApp{% endblock %}
+{% block page_title %}Estados de WhatsApp{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+    <th>Fecha</th>
+    <th>Estado</th>
+    <th class="text-end">
+        {% url 'whatsapp:status.create' as create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary"><i class="fa fa-plus"></i> Crear Nuevo</a>
+    </th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{{ object.account }}</td>
+    <td>{{ object.updated_at }}</td>
+    <td>{% status_badge object.active %}</td>
+    <td class="text-end">
+        <a href="{% url 'whatsapp:status.update' pk=object.pk %}"><i class="las la-pen text-secondary font-16"></i></a>
+        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
+    </td>
+{% endblock %}

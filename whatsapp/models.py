@@ -1,3 +1,4 @@
+from dateutil.utils import today
 from django.db import models
 from django.utils.timezone import now
 from django_jsonform.models.fields import JSONField
@@ -30,7 +31,7 @@ class AbstractWhatsAppMessage(models.Model):
 
 
 class ScheduledMessage(models.Model):
-    from_date = models.DateField(null=True, blank=True, default=now)
+    from_date = models.DateField(null=True, blank=True, default=today)
     until_date = models.DateField(null=True, blank=True)
 
     frequency = models.IntegerField(default=0, choices=[

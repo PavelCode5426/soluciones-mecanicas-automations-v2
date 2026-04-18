@@ -1,5 +1,7 @@
+from dateutil.utils import today
 from django import forms
 
+from core.forms.widgets import DatePickerInput, TimePickerInput
 from whatsapp.models import WhatsAppStatus
 
 
@@ -21,3 +23,16 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
     class Meta:
         model = WhatsAppStatus
         fields = forms.ALL_FIELDS
+
+
+class WhatsAppStatusForm(forms.ModelForm):
+    from_date = forms.DateField(widget=DatePickerInput, initial=today)
+
+    class Meta:
+        model = WhatsAppStatus
+        exclude = ['published_count']
+        widgets = {
+            'from_date': DatePickerInput(),
+            'until_date': DatePickerInput(),
+            'publish_at': TimePickerInput(),
+        }

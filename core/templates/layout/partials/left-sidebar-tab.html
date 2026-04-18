@@ -1,0 +1,44 @@
+{% load static %}
+
+<div class="leftbar-tab-menu">
+    <div class="main-icon-menu">
+        <div class="main-icon-menu-body">
+            <div class="position-reletive h-100" data-simplebar style="overflow-x: hidden;">
+                <ul class="nav nav-tabs" role="tablist" id="tab-menu">
+
+                    {% for module in SYSTEM_MODULES %}
+                        <li class="nav-item" data-bs-toggle="tooltip" data-bs-placement="right"
+                            title="{{ module.label }}"
+                            data-bs-trigger="hover">
+                            <a href="#menu-{{ module.app_name }}" id="tab-{{ module.app_name }}"
+                               class="nav-link">
+                                <i class="menu-icon {{ module.app_icon }}"></i>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-menu-inner">
+        <div class="topbar-left">
+            <a class="logo">
+                <span>
+                    <img src="{% static 'images/logo-dark.png' %}" alt="logo-large" class="logo-lg logo-dark">
+                    <img src="{% static 'images/logo.png' %}" alt="logo-large" class="logo-lg logo-light">
+                </span>
+            </a>
+        </div>
+
+        <div class="menu-body navbar-vertical tab-content" data-simplebar>
+            {% for template in MODULES_TEMPLATES %}
+                <div id="{{ template.menu_id }}" class="main-icon-menu-pane tab-pane" role="tabpanel"
+                     aria-labelledby="{{ template.tab_id }}">
+
+                    {% include template.sidebar_tab %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+<ul class="list-unstyled topbar-nav float-end">
+    <li class="dropdown">
+        <a class="nav-link dropdown-toggle nav-user" data-bs-toggle="dropdown" href="#" role="button"
+           aria-haspopup="false" aria-expanded="false">
+            <div class="d-flex align-items-center">
+                <div class="user-name d-block">
+                    <small class="d-block font-11">{{ user.role }}</small>
+                    <span class="d-block fw-semibold font-12">{{ user.get_full_name }} <i
+                            class="mdi mdi-chevron-down"></i></span>
+                </div>
+            </div>
+        </a>
+        <div class="dropdown-menu dropdown-menu-end">
+            <form method="post" action="{% url 'authentication.logout' %}">
+                {% csrf_token %}
+                <a class="dropdown-item" href="#" id="logout">
+                    <i class="ti ti-power font-16 me-1 align-text-bottom"></i> Cerrar Sesion</a>
+            </form>
+        </div>
+    </li>
+    <li class="menu-item">
+        <!-- Mobile menu toggle-->
+        <a class="navbar-toggle nav-link" id="mobileToggle" onclick="toggleMenu()" onclick="toggleMenu()">
+            <div class="lines">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </a><!-- End mobile menu toggle-->
+    </li>
+</ul>

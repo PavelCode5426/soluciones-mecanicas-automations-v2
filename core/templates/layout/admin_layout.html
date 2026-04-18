@@ -1,0 +1,74 @@
+{% extends 'layout/layout.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block after_css %}
+    <link href="{% static 'libs/datatables/plugins/datatables.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'libs/select2/select2.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'libs/mobius1-selectr/selectr.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'libs/sweetalert2/sweetalert2.min.css' %}" rel="stylesheet" type="text/css"/>
+    <link href="{% static 'libs/vanillajs-datepicker/css/datepicker-bs5.min.css' %}" rel="stylesheet" type="text/css"/>
+{% endblock %}
+
+{% block body %}
+
+    <div class="topbar">
+        <nav class="navbar-custom">
+            {% include 'layout/partials/top_bar/float-start.html' %}
+            {% include 'layout/partials/top_bar/float-end.html' %}
+
+            <div class="navbar-custom-menu">
+                <div id="navigation">
+                    <ul class="navigation-menu">
+                        {% block horizontal-nav-items %}{% endblock %}
+                    </ul><!-- End navigation menu -->
+                </div>
+            </div>
+            <!-- Navbar -->
+        </nav>
+    </div>
+
+    {% include 'layout/partials/left-sidebar-tab.html' %}
+
+    <div class="page-wrapper">
+        <!-- Page Content-->
+        <div class="page-content-tab" id="{{ request.resolver_match.url_name }}">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="page-title-box">
+                            <div class="float-end">
+                                <ul class="breadcrumb">
+                                    {% block breadcrumb_items %}{% endblock %}
+                                </ul>
+                            </div>
+                            <h4 class="page-title">
+                                {% block page_title %}{% endblock %}
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% bootstrap_messages %}
+            <div class="py-2">
+                {% block page_content %}{% endblock %}
+            </div>
+
+        </div>
+
+        {% include 'layout/partials/footer.html' %}
+    </div>
+
+{% endblock %}
+
+{% block after_scripts %}
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'libs/datatables/plugins/datatables.min.js' %}"></script>
+    <script src="{% static 'libs/select2/select2.min.js' %}"></script>
+    <script src="{% static 'libs/mobius1-selectr/selectr.min.js' %}"></script>
+    <script src="{% static 'libs/sweetalert2/sweetalert2.min.js' %}"></script>
+    <script src="{% static 'libs/vanillajs-datepicker/js/datepicker-full.min.js' %}"></script>
+    <script src="{% static 'js/core/services.js' %}"></script>
+    <script src="{% static 'js/core/index.js' %}"></script>
+{% endblock %}

@@ -5,7 +5,8 @@ from django.urls import path, include
 
 urlpatterns = [
                   path("admin/", admin.site.urls),
-                  path("", include('facebook.urls', namespace='facebook')),
-                  path("", include('whatsapp.urls', namespace='whatsapp')),
+                  path("", include('core.urls')),
+                  path("facebook/", include('facebook.urls', namespace='facebook')),
+                  path("whatsapp/", include('whatsapp.urls', namespace='whatsapp')),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
               + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

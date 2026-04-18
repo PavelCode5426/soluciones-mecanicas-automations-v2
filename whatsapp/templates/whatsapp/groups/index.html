@@ -1,0 +1,16 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+
+{% block title %}Grupos de WhatsApp{% endblock %}
+{% block page_title %}Grupos de WhatsApp{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{{ object.account }}</td>
+{% endblock %}

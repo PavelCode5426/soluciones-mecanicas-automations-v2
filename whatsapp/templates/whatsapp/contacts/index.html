@@ -1,0 +1,26 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load custom_tags %}
+{% load components %}
+
+{% block title %}Contactos de WhatsApp{% endblock %}
+{% block page_title %}Contactos de WhatsApp{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+    <th>Télefono</th>
+    <th>Estado</th>
+    <
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{{ object.account }}</td>
+    <td>
+        <a href="https://wa.me/{{ object.chat_id|parse_whatsapp_chat:False }}" target="_blank"
+           title="Escribir a {{ object.name }}">{{ object.chat_id|parse_whatsapp_chat }}</a>
+    </td>
+    <td>{% status_badge object.name %}</td>
+
+{% endblock %}

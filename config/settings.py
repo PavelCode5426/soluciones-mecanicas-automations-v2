@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 import environ
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
 # Application definition
 
+
 INSTALLED_APPS = [
     "daphne",
     "django_q",
@@ -47,6 +49,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django_bootstrap5',
     "rest_framework",
     "rest_framework.authtoken",
     "django_jsonform",
@@ -80,6 +83,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "config.context_processors.system_modules"
             ],
         },
     },
@@ -146,6 +150,10 @@ TIME_ZONE = "America/Havana"
 USE_I18N = True
 # USE_TZ = True
 
+LOGIN_REDIRECT_URL = reverse_lazy('index')
+LOGIN_URL = reverse_lazy('authentication.login')
+LOGOUT_REDIRECT_URL = reverse_lazy('authentication.login')
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -175,6 +183,10 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
+}
+
+BOOTSTRAP5 = {
+    # "field_renderers": "core.forms.renderes.ExtraFieldRenderer"
 }
 
 PLAYWRIGHT = dict(

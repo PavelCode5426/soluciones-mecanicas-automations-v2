@@ -1,0 +1,29 @@
+<input type="{{ widget.type }}" name="{{ widget.name }}"{% include "django_bootstrap5/forms//attrs.html" %}>
+{% if widget.is_initial %}
+    <div class="row mt-1">
+        <div class="col-auto">
+            {{ widget.initial_text }}:&nbsp;<a href="{{ widget.value.url }}">{{ widget.value }}</a>
+        </div>
+        {% if not widget.required %}
+            <div class="col-auto">
+                <div class="form-check">
+                    <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"
+                           class="form-check-input"
+                            {% if widget.attrs.disabled %} disabled{% endif %}>
+                    <label for="{{ widget.checkbox_id }}"
+                           class="form-check-label">{{ widget.clear_checkbox_label }}</label>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if widget.value %}
+            {% if widget.value.url|lower|endswith:".jpg" or widget.value.url|lower|endswith:".png" %}
+                <img src="{{ widget.value.url }}" width="200">
+            {% elif widget.value.url|lower|endswith:".mp3" %}
+                <audio controls src="{{ widget.value.url }}"></audio>
+            {% elif widget.value.url|lower|endswith:".mp4" %}
+                <video controls width="300" src="{{ widget.value.url }}"></video>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}

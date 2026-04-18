@@ -1,0 +1,36 @@
+{% extends 'layout/admin_form_layout.html' %}
+{% load django_bootstrap5 %}
+
+{% block form %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Información del estado</h4>
+            <p class="text-muted mb-0">Mas información</p>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-3">
+                {% bootstrap_field form.name %}
+                {% bootstrap_field form.account %}
+                {% bootstrap_field form.message_type %}
+                {% bootstrap_field form.active %}
+            </div>
+            {% bootstrap_field form.message %}
+            {% bootstrap_field form.file %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Planificacion del estado</h4>
+            <p class="text-muted mb-0">Mas información</p>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-3">
+                {% bootstrap_field form.publish_at %}
+                {% bootstrap_field form.from_date %}
+                {% bootstrap_field form.until_date %}
+            </div>
+            {% bootstrap_field form.weekdays %}
+        </div>
+    </div>
+{% endblock %}

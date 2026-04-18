@@ -5,8 +5,8 @@ from django.utils.html import format_html
 from django.utils.timezone import now
 from django_q.tasks import async_task
 from rest_framework.reverse import reverse
-from whatsapp import forms
 
+from whatsapp import forms
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, WhatsAppDistributionList, WhatsAppStatus, \
@@ -203,7 +203,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     list_filter = ['account', 'active', 'message_type']
     readonly_fields = ['published_count', 'file_preview']
     filter_horizontal = ['weekdays', 'distribution_lists']
-    actions = ['activar_mensajes', 'desactivar_mensajes', 'send_messages']
+    actions = ['activar_mensajes', 'desactivar_mensajes', 'send_messages', 'message_to_status']
 
     fieldsets = [
         ("Información del mensaje", {
@@ -246,6 +246,26 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
         for message in _messages:
             enqueue_whatsapp_message(message)
         self.message_user(request, f'Agendados correctamente {len(_messages)} mensajes', level=messages.SUCCESS)
+
+    @admin.action(description='Convertir a estados los mensajes seleccionados')
+    def message_to_status(self, request, queryset):
+        _messages = (queryset.filter(active=True).all())
+
+        for message in _messages:
+            account = message.account
+            message_type = message.message_type
+
+            _defaults = {
+                "name": message.name,
+                "message": message.text,
+                "file": message.file,
+                "message_type": message_type
+            }
+
+            WhatsAppStatus.objects.update_or_create(
+                defaults=_defaults, create_defaults=_defaults, account=account, name=message.name,
+            )
+        self.message_user(request, f'Convertidos correctamente {len(_messages)} mensajes', level=messages.SUCCESS)
 
 
 @admin.register(WhatsAppAutoReplyMessage)

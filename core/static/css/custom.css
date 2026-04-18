@@ -1,0 +1,7 @@
+.modal-footer {
+    gap: 0.5rem;
+}
+
+.leftbar-tab-menu .main-menu-inner .menu-body .nav-item .nav-link {
+    height: auto !important;
+}

@@ -1,0 +1,85 @@
+{% extends 'layout/admin_layout.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block page_content %}
+    {% block filter_content %}
+        {% if filter %}
+            <form class="form-group">
+                <div class="row mb-3">
+                    {% for field in filter.form %}
+                        {% bootstrap_field field layout="bootstrap_field" wrapper_class='col' placeholder="" %}
+                    {% endfor %}
+                </div>
+                <input class="btn btn-primary" type="submit" value="Filtrar">
+                <a href="{{ request.path }}" class="btn btn-secondary" type="reset">Vaciar</a>
+            </form>
+        {% endif %}
+    {% endblock %}
+
+
+    {% block detail_content %}{% endblock %}
+
+    {% if object_list %}
+
+        {% block table %}
+            <div class="table-responsive">
+                <table class="table table-striped mb-0">
+                    <thead>
+                    <tr>
+                        {% block table_headers_top %}{% endblock %}
+                    </tr>
+                    <tr>
+                        {% block table_headers %}{% endblock %}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for object in object_list %}
+                        <tr>
+                            {% block table_data %}{% endblock %}
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endblock %}
+
+        <div class="d-flex justify-content-between mt-2">
+            {% if show_per_page %}
+                <div class="d-flex">
+                    <div class="flex-fill">Mostrar</div>
+                    <div class="flex-fill ms-1">
+                        <select id="per_page" class="form-select form-select-sm no-select2">
+                            <option value="10" {% if per_page == '10' %}selected="selected"{% endif %}>10</option>
+                            <option value="25" {% if per_page == '25' %}selected="selected"{% endif %}>25</option>
+                            <option value="50" {% if per_page == '50' %}selected="selected"{% endif %}>50</option>
+                            <option value="100" {% if per_page == '100' %}selected="selected"{% endif %}>100
+                            </option>
+                        </select>
+                    </div>
+                    <div class="flex-fill ms-1">registros por página</div>
+                </div>
+            {% endif %}
+            {% if is_paginated %}
+                <div>
+                    {% if is_paginated %}
+                        Mostrando
+                        <strong>{{ page_obj.start_index }}</strong> a
+                        <strong>{{ page_obj.end_index }}</strong> de
+                        <strong>{{ page_obj.paginator.count }}</strong> registros
+                    {% elif object_list %}
+                        Mostrando <strong>{{ object_list|length }}</strong> registros
+                    {% endif %}
+                </div>
+
+                <div>
+                    {% bootstrap_pagination page_obj justify_content="end" extra=request.GET.urlencode %}
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        {% block empty %}{% endblock %}
+    {% endif %}
+
+    {% block extra_content %}{% endblock %}
+{% endblock %}
