@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, ExpressionWrapper, F, DecimalField
 from django.utils.timezone import localtime
 from django_q.tasks import async_task
 
@@ -35,10 +35,12 @@ def enqueue_active_status():
 
 
 def enqueue_active_messages():
+    current_hour = localtime().hour
     messages = (WhatsAppMessage.objects.select_related('account')
                 .filter(active=True, from_date__lte=localtime())
                 .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
-                .filter(publish_at__hour=localtime().hour, weekdays__day=localtime().weekday())
+                .filter(weekdays__day=localtime().weekday())
+                .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour, DecimalField()))
                 .all())
 
     for message in messages:

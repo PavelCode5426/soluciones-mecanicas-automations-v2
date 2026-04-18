@@ -5,7 +5,7 @@ import time
 import tiktoken
 from django.conf import settings
 from django.core.cache import cache
-from django.db.models import QuerySet
+from django.db.models import QuerySet, F
 from django_q.tasks import async_task
 from llama_index.core import Settings
 from llama_index.core.callbacks import TokenCountingHandler, CallbackManager
@@ -102,6 +102,8 @@ def publish_whatsapp_status(status: WhatsAppStatus):
                 "linkPreview": False,
                 "linkPreviewHighQuality": False
             })
+        status.published_count = F('published_count') + 1
+        status.save(update_fields=['published_count'])
 
 
 def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
@@ -153,6 +155,9 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
                 "linkPreviewHighQuality": False
             })
         service.set_chat_presence(chat_id, 'paused')
+
+        message.published_count = F('published_count') + 1
+        message.save(update_fields=['published_count'])
 
 
 def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
