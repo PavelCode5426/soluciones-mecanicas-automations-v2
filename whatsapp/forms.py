@@ -39,6 +39,9 @@ class WhatsAppStatusForm(forms.ModelForm):
 
 
 class WhatsAppContactForm(forms.ModelForm):
+    push_name = forms.CharField(disabled=True)
+    chat_id = forms.CharField(disabled=True)
+
     class Meta:
         model = WhatsAppContact
-        fields = forms.ALL_FIELDS
+        fields = ['name', 'push_name', 'chat_id', 'active']

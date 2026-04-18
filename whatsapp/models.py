@@ -98,9 +98,9 @@ class WhatsAppGroup(models.Model):
 
 
 class WhatsAppContact(models.Model):
-    chat_id = models.CharField(editable=False, max_length=250)
+    chat_id = models.CharField(max_length=250)
     name = models.CharField(blank=True, null=True, max_length=250)
-    push_name = models.CharField(editable=False, blank=True, null=True, max_length=250)
+    push_name = models.CharField(blank=True, null=True, max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='contacts', on_delete=models.PROTECT)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

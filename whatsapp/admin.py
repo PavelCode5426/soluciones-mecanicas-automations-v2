@@ -129,7 +129,7 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
 class WhatsAppContactAdmin(admin.ModelAdmin):
     search_fields = ['name', 'chat_id']
     list_display = ['name', 'account', 'active']
-    readonly_fields = ['chat_id']
+    readonly_fields = ['chat_id', 'push_name']
     list_filter = ['account']
 
 
@@ -167,7 +167,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
     readonly_fields = ['published_count', 'message_type', 'file_preview']
-    actions = ['publish_status']
+    actions = ['publish_status', 'activate_status', 'desactivate_status']
     filter_horizontal = ['weekdays']
     fieldsets = [
         ("Información del estado", {
@@ -177,6 +177,16 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ['published_count', 'publish_at', 'from_date', 'until_date', 'weekdays', 'sync_schedule']
         }),
     ]
+
+    @admin.action(description='Activar estados los seleccionados.')
+    def activate_status(self, request, queryset):
+        updated = queryset.update(active=True)
+        self.message_user(request, f'{updated} estado(s) activado(s).')
+
+    @admin.action(description='Desactivar estados los seleccionados.')
+    def desactivate_status(self, request, queryset):
+        updated = queryset.update(active=False)
+        self.message_user(request, f'{updated} estado(s) desactivado(s).')
 
     @admin.action(description='Publicar los estados seleccionados.')
     def publish_status(self, request, queryset):
