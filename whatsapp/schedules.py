@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, F, ExpressionWrapper, DecimalField
 from django.utils.timezone import localtime
 from django_q.tasks import async_task
 
@@ -35,18 +35,15 @@ def enqueue_active_status():
 
 
 def enqueue_active_messages():
-    enqueued = 0
     current_hour = localtime().hour
     messages = (WhatsAppMessage.objects.select_related('account')
                 .filter(active=True, from_date__lte=localtime())
                 .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
                 .filter(weekdays__day=localtime().weekday())
-                # .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour, DecimalField()))
-                # .filter(can_publish=0)
+                .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour, DecimalField()))
+                .filter(Q(can_publish=0) | Q(can_publish__isnull=True))
                 .all())
 
     for message in messages:
-        if message.frequency % current_hour == 0:
-            enqueue_whatsapp_message(message, refresh=False)
-            enqueued += 1
-    return f"Programados {enqueued} mensajes de whatsapp a las {localtime()}"
+        enqueue_whatsapp_message(message, refresh=False)
+    return f"Programados {len(messages)} mensajes de whatsapp a las {localtime()}"
