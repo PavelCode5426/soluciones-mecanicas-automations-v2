@@ -17,7 +17,7 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
+    <td>{% object_link object url='whatsapp:accounts.details' %}</td>
     <td>{{ object.chat_id }}</td>
     <td>
         {% url 'whatsapp:accounts.toggle-status' pk=object.pk as change_status_url %}
