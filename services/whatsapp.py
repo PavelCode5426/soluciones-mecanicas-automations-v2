@@ -88,20 +88,20 @@ class WAHAService:
         response.raise_for_status()
         return response.status_code
 
-    def get_all_groups(self):
+    def get_groups(self, limit=None, offset=None):
         response = requests.get(
             f"{self._api_url}/api/{self._session}/groups",
             headers=self._headers, auth=self._auth,
-            params={"exclude": ['participants']}
+            params={"exclude": ['participants'], "limit": limit, "offset": offset}
         )
         response.raise_for_status()
         return response.json()
 
-    def get_all_contacts(self):
+    def get_contacts(self, limit=None, offset=None):
         response = requests.get(
             f"{self._api_url}/api/contacts/all",
             headers=self._headers, auth=self._auth,
-            params={"session": self._session}
+            params={"session": self._session, "limit": limit, "offset": offset}
         )
         response.raise_for_status()
         return response.json()

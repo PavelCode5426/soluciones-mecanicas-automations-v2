@@ -24,7 +24,15 @@ from whatsapp.models import WhatsAppAccount, WhatsAppGroup, WhatsAppContact, Wha
 
 def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
     service = create_whatsapp_service(account)
-    account_groups = service.get_all_groups()
+    limit, offset = 100, 0
+    account_groups = []
+
+    groups = service.get_groups(limit, offset)
+    while len(groups) > 0:
+        account_groups.extend(groups)
+        offset = limit + offset
+        groups = service.get_groups(limit, offset)
+
     for group in account_groups:
         chat_id = group['JID']
         name = group['Name']
@@ -53,8 +61,16 @@ def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
 
 def syncronize_whatsapp_account_contacts(account: WhatsAppAccount):
     service = create_whatsapp_service(account)
-    contacts = service.get_all_contacts()
-    for contact in contacts:
+    limit, offset = 100, 0
+    all_contacts = []
+
+    contacts = service.get_contacts(limit, offset)
+    while len(contacts) > 0:
+        all_contacts.extend(contacts)
+        offset = limit + offset
+        contacts = service.get_all_contacts(limit, offset)
+
+    for contact in all_contacts:
         chat_id = contact['id']
         name = contact['name']
         push_name = contact['pushname']
