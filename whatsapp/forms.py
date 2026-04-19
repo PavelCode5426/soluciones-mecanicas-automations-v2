@@ -1,12 +1,26 @@
+from urllib.request import urlopen
+
 from dateutil.utils import today
 from django import forms
 from django.core.cache import cache
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from rest_framework.reverse import reverse
 
 from core.forms.widgets import DatePickerInput, TimePickerInput
 from whatsapp.factories import create_whatsapp_service
-from whatsapp.models import WhatsAppStatus, WhatsAppContact, WhatsAppAccount
+from whatsapp.models import WhatsAppStatus, WhatsAppContact, WhatsAppAccount, WhatsAppDistributionList, WhatsAppGroup, \
+    WhatsAppMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups
+
+ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')], widget=forms.Select)
+
+
+class RemoveActiveOnCreateMixin(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not kwargs.get('instance'):
+            self.fields.pop('active')
 
 
 class WhatsAppStatusAdminForm(forms.ModelForm):
@@ -46,7 +60,19 @@ class WhatsAppStatusForm(forms.ModelForm):
         }
 
 
-class WhatsAppContactForm(forms.ModelForm):
+class WhatsAppMessageForm(forms.ModelForm):
+    from_date = forms.DateField(widget=DatePickerInput, initial=today)
+
+    class Meta:
+        model = WhatsAppMessage
+        exclude = ['published_count']
+        widgets = {
+            'from_date': DatePickerInput(),
+            'until_date': DatePickerInput(),
+        }
+
+
+class WhatsAppContactForm(RemoveActiveOnCreateMixin, forms.ModelForm):
     push_name = forms.CharField(disabled=True)
     chat_id = forms.CharField(disabled=True)
 
@@ -76,6 +102,13 @@ class WhatsAppCreateAccountForm(forms.ModelForm):
         profile = service.get_profile_info()
         obj.name = profile['name']
         obj.chat_id = profile['id']
+
+        img_temp = NamedTemporaryFile()
+        with urlopen(profile['picture']) as response:
+            img_temp.write(response.read())
+            img_temp.flush()
+            obj.avatar.save(f"{obj.name}.jpg", File(img_temp), save=False)
+
         obj.save()
         cache.delete(obj.session)
 
@@ -96,4 +129,22 @@ class WhatsAppCreateAccountForm(forms.ModelForm):
 class WhatsAppUpdateAccountForm(WhatsAppCreateAccountForm):
     class Meta:
         model = WhatsAppAccount
+        fields = forms.ALL_FIELDS
+
+
+class WhatsAppDistributionListCreateForm(forms.ModelForm):
+    class Meta:
+        model = WhatsAppDistributionList
+        exclude = ['contacts', 'groups', 'active']
+
+
+class WhatsAppDistributionListUpdateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(WhatsAppDistributionListUpdateForm, self).__init__(*args, **kwargs)
+        self.fields['account'].disabled = True
+        self.fields['contacts'].queryset = WhatsAppContact.objects.filter(account=kwargs['instance'].account)
+        self.fields['groups'].queryset = WhatsAppGroup.objects.filter(account=kwargs['instance'].account)
+
+    class Meta:
+        model = WhatsAppDistributionList
         fields = forms.ALL_FIELDS

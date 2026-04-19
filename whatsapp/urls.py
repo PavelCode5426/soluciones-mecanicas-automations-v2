@@ -31,5 +31,29 @@ urlpatterns = [
     path(r'accounts/<int:pk>/delete', views.WhatsAppAccountsDeleteView.as_view(), name='accounts.delete'),
     path(r'accounts/<int:pk>/toggle-status', views.WhatsAppAccountsToggleStatusView.as_view(),
          name='accounts.toggle-status'),
+    path(r'accounts/<int:pk>/details', views.WhatsAppAccountDetailView.as_view(), name='accounts.details'),
+    path(r'accounts/<int:pk>/update-groups', views.WhatsAppAccountSynchronizeGroupsView.as_view(),
+         name='accounts.update-groups'),
+
+    path(r'accounts/<int:pk>/update-contacts', views.WhatsAppAccountSynchronizeContactsView.as_view(),
+         name='accounts.update-contacts'),
+
+    path(r'distribution-lists', views.WhatsAppDistributionListsListView.as_view(), name='distribution-lists.index'),
+    path(r'distribution-lists/create', views.WhatsAppDistributionListsCreateView.as_view(),
+         name='distribution-lists.create'),
+    path(r'distribution-lists/<int:pk>/edit', views.WhatsAppDistributionListsUpdateView.as_view(),
+         name='distribution-lists.update'),
+    path(r'distribution-lists/<int:pk>/delete', views.WhatsAppDistributionListsDeleteView.as_view(),
+         name='distribution-lists.delete'),
+    path(r'distribution-lists/<int:pk>/toggle-status', views.WhatsAppDistributionListsToggleStatusView.as_view(),
+         name='distribution-lists.toggle-status'),
+
+    path(r'messages', views.WhatsAppMessagesListView.as_view(), name='messages.index'),
+    path(r'messages/create', views.WhatsAppMessageCreateView.as_view(), name='messages.create'),
+    path(r'messages/<int:pk>/edit', views.WhatsAppMessageUpdateView.as_view(), name='messages.update'),
+    path(r'messages/<int:pk>/delete', views.WhatsAppMessageDeleteView.as_view(),
+         name='messages.delete'),
+    path(r'messages/<int:pk>/toggle-status', views.WhatsAppMessageToggleStatusView.as_view(),
+         name='messages.toggle-status'),
 
 ]

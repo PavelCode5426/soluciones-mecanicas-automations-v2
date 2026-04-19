@@ -1,12 +1,13 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 from django_filters.views import FilterView
 
-from core.generics import ToggleStatusView
+from core.generics import ToggleStatusView, SingleFormView
 from whatsapp import filters
 from whatsapp import models, forms
 from whatsapp.mixins import WhatsAppAccountViewMixins
+from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts
 
 
 class WhatsAppStatusListView(FilterView):
@@ -32,7 +33,7 @@ class WhatsAppStatusUpdateView(UpdateView):
     queryset = models.WhatsAppStatus.objects.all()
     template_name = 'whatsapp/status/create_or_update.html'
     extra_context = {
-        "page_title": "Actualizar {{instance}}",
+        "page_title": "Actualizar estado: ",
         "cancel_url": success_url
     }
 
@@ -41,7 +42,7 @@ class WhatsAppStatusToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:status.index')
     queryset = models.WhatsAppStatus.objects.all()
-    success_message = "Estado {instance} activado/desactivado exitosamente"
+    success_message = "Estado object activado/desactivado exitosamente"
 
 
 class WhatsAppContactsListView(FilterView):
@@ -57,7 +58,7 @@ class WhatsAppContactsUpdateView(UpdateView):
     form_class = forms.WhatsAppContactForm
     queryset = models.WhatsAppContact.objects.all()
     extra_context = {
-        "page_title": "Actualizar contacto",
+        "page_title": "Actualizar contacto: ",
         "cancel_url": success_url
     }
 
@@ -67,19 +68,19 @@ class WhatsAppContactsDeleteView(SuccessMessageMixin, DeleteView):
     queryset = models.WhatsAppContact.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar contacto",
-        "modal_title": "Eliminar contacto",
+        "page_title": "Eliminar contacto: ",
+        "modal_title": "Eliminar contacto: ",
         "modal_description": "Eliminar contacto",
         "cancel_url": success_url
     }
-    success_message = "Contacto {instance} eliminada exitosamente"
+    success_message = "Contacto {object} eliminada exitosamente"
 
 
 class WhatsAppContactsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:contacts.index')
     queryset = models.WhatsAppContact.objects.all()
-    success_message = "Contacto {instance} activado/desactivado exitosamente"
+    success_message = "Contacto object activado/desactivado exitosamente"
 
 
 class WhatsAppGroupsListView(FilterView):
@@ -93,7 +94,7 @@ class WhatsAppGroupsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:groups.index')
     queryset = models.WhatsAppGroup.objects.all()
-    success_message = "Grupo {instance} activado/desactivado exitosamente"
+    success_message = "Grupo object activado/desactivado exitosamente"
 
 
 class WhatsAppAccountsListView(ListView):
@@ -118,17 +119,17 @@ class WhatsAppAccountsUpdateView(WhatsAppAccountViewMixins, SuccessMessageMixin,
     queryset = models.WhatsAppAccount.objects.all()
     template_name = 'whatsapp/accounts/create_or_update.html'
     extra_context = {
-        "page_title": "Actualizar cuenta",
+        "page_title": "Actualizar cuenta: ",
         "cancel_url": success_url
     }
-    success_message = "Cuenta {instance} actualizada exitosamente"
+    success_message = "Cuenta object actualizada exitosamente"
 
 
 class WhatsAppAccountsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:accounts.index')
     queryset = models.WhatsAppAccount.objects.all()
-    success_message = "Cuenta {instance} activada/desactivada exitosamente"
+    success_message = "Cuenta object activada/desactivada exitosamente"
 
 
 class WhatsAppAccountsDeleteView(SuccessMessageMixin, DeleteView):
@@ -136,9 +137,142 @@ class WhatsAppAccountsDeleteView(SuccessMessageMixin, DeleteView):
     queryset = models.WhatsAppAccount.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar cuenta",
-        "modal_title": "Eliminar cuenta",
-        "modal_description": "Eliminar cuenta",
+        "page_title": "Eliminar cuenta: ",
+        "modal_title": "Eliminar cuenta: ",
+        "modal_description": "Eliminar cuenta: ",
         "cancel_url": success_url
     }
-    success_message = "Cuenta {instance} eliminada exitosamente"
+    success_message = "Cuenta object eliminada exitosamente"
+
+
+class WhatsAppDistributionListsListView(ListView):
+    template_name = 'whatsapp/distribucion_lists/index.html'
+    queryset = models.WhatsAppDistributionList.objects.all()
+
+
+class WhatsAppDistributionListsCreateView(SuccessMessageMixin, CreateView):
+    # success_url = reverse_lazy('whatsapp:distribution-lists.update')
+    form_class = forms.WhatsAppDistributionListCreateForm
+    template_name = 'layout/admin_form_layout.html'
+    extra_context = {
+        "page_title": "Crear nueva lista de distribución",
+        "cancel_url": reverse_lazy('whatsapp:distribution-lists.index')
+    }
+    success_message = "Lista de distribución creada exitosamente"
+
+    def get_success_url(self):
+        return str(reverse_lazy('whatsapp:distribution-lists.update', kwargs=dict(pk=self.object.pk)))
+
+
+class WhatsAppDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    form_class = forms.WhatsAppDistributionListUpdateForm
+    queryset = models.WhatsAppDistributionList.objects.all()
+    template_name = 'whatsapp/distribucion_lists/create_or_update.html'
+    extra_context = {
+        "page_title": "Actualizar lista de distribución: ",
+        "cancel_url": success_url
+    }
+    success_message = "Lista de distribución {name} actualizada exitosamente"
+
+
+class WhatsAppDistributionListsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
+    http_method_names = ['post']
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    queryset = models.WhatsAppDistributionList.objects.all()
+    success_message = "Lista de distribución object activada/desactivada exitosamente"
+
+
+class WhatsAppDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    queryset = models.WhatsAppDistributionList.objects.all()
+    template_name = 'layout/admin_delete_layout.html'
+    extra_context = {
+        "page_title": "Eliminar lista de distribución: ",
+        "modal_title": "Eliminar lista de distribución: ",
+        "modal_description": "Eliminar lista de distribución",
+        "cancel_url": success_url
+    }
+    success_message = "Lista de distribución object eliminada exitosamente"
+
+
+class WhatsAppMessagesListView(ListView):
+    template_name = 'whatsapp/messages/index.html'
+    queryset = models.WhatsAppMessage.objects.all()
+
+
+class WhatsAppMessageCreateView(SuccessMessageMixin, CreateView):
+    success_url = reverse_lazy('whatsapp:messages.index')
+    form_class = forms.WhatsAppMessageForm
+    template_name = 'whatsapp/messages/create_or_update.html'
+    extra_context = {
+        "page_title": "Crear un nuevo mensaje",
+        "cancel_url": success_url
+    }
+    success_message = "Nuevo mensaje creado exitosamente"
+
+
+class WhatsAppMessageUpdateView(SuccessMessageMixin, UpdateView):
+    success_url = reverse_lazy('whatsapp:messages.index')
+    form_class = forms.WhatsAppMessageForm
+    queryset = models.WhatsAppMessage.objects.all()
+    template_name = 'whatsapp/messages/create_or_update.html'
+    extra_context = {
+        "page_title": "Actualizar mensaje: ",
+        "cancel_url": success_url
+    }
+    success_message = "Mensaje {name} actualizado exitosamente"
+
+
+class WhatsAppMessageDeleteView(SuccessMessageMixin, DeleteView):
+    success_url = reverse_lazy('whatsapp:messages.index')
+    queryset = models.WhatsAppMessage.objects.all()
+    template_name = 'layout/admin_delete_layout.html'
+    extra_context = {
+        "page_title": "Eliminar mensaje: ",
+        "modal_title": "Eliminar mensaje: ",
+        "modal_description": "Eliminar mensaje",
+        "cancel_url": success_url
+    }
+    success_message = "Mensaje {name} eliminado exitosamente"
+
+
+class WhatsAppMessageToggleStatusView(SuccessMessageMixin, ToggleStatusView):
+    http_method_names = ['post']
+    success_url = reverse_lazy('whatsapp:messages.index')
+    queryset = models.WhatsAppMessage.objects.all()
+    success_message = "Mensaje {name} activado/desactivado exitosamente"
+
+
+class WhatsAppAccountDetailView(DetailView):
+    queryset = models.WhatsAppAccount.objects.all()
+    template_name = 'whatsapp/accounts/details.html'
+
+    def get_context_data(self, **kwargs):
+        last_messages = self.get_object().messages.filter(published_count__gt=0).order_by('updated_at')[:10]
+        last_statues = self.get_object().status.filter(published_count__gt=0).order_by('updated_at')[:10]
+        return super().get_context_data(last_messages=last_messages, last_statues=last_statues, **kwargs)
+
+
+class WhatsAppAccountSynchronizeGroupsView(SuccessMessageMixin, SingleFormView):
+    queryset = models.WhatsAppAccount.objects.all()
+    success_message = "Grupos actualizados correctamente"
+
+    def form_valid(self, form):
+        syncronize_whatsapp_account_groups(self.get_object())
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return str(reverse_lazy('whatsapp:accounts.details', kwargs=dict(pk=self.get_object().pk)))
+
+
+class WhatsAppAccountSynchronizeContactsView(SuccessMessageMixin, SingleFormView):
+    queryset = models.WhatsAppAccount.objects.all()
+    success_message = "Contactos actualizados correctamente"
+
+    def form_valid(self, form):
+        syncronize_whatsapp_account_contacts(self.get_object())
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return str(reverse_lazy('whatsapp:accounts.details', kwargs=dict(pk=self.get_object().pk)))

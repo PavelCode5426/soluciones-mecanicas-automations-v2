@@ -31,3 +31,8 @@
         {% include 'components/delete_link.html' with url=delete_url %}
     </td>
 {% endblock %}`
+
+{% block empty %}
+    {% url 'whatsapp:accounts.create' as create_url %}
+    {% include 'components/empty.html' with url=create_url text="No existen cuentas en el sistema" %}
+{% endblock %}

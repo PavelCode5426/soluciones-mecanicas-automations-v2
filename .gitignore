@@ -133,4 +133,5 @@ storage
 scripts/agent
 scripts/data
 
+!storage/defaults/
 # End of https://www.gitignore.io/api/macos,django,pycharm+all

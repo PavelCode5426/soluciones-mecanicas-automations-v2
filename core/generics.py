@@ -1,6 +1,7 @@
 from django.db import models
+from django.forms import forms
 from django.http import HttpResponseRedirect
-from django.views.generic import DeleteView
+from django.views.generic import FormView, UpdateView, DetailView
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
@@ -29,9 +30,13 @@ class PermissionsMeta(models.Model):
         default_permissions = []
 
 
-class ToggleStatusView(DeleteView):
+class ToggleStatusView(UpdateView):
     def form_valid(self, form):
         success_url = self.get_success_url()
         self.object.active = not self.object.active
         self.object.save()
         return HttpResponseRedirect(success_url)
+
+
+class SingleFormView(FormView, DetailView):
+    form_class = forms.Form

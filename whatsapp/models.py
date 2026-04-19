@@ -51,6 +51,8 @@ class ScheduledMessage(models.Model):
 # Create your models here.
 class WhatsAppAccount(models.Model):
     name = models.CharField(max_length=250)
+    avatar = models.ImageField(blank=True, null=True, upload_to="whatsapp_profile",
+                               default="defaults/profile.jpg")
     chat_id = models.CharField(max_length=250)
     session = models.CharField(max_length=250)
 

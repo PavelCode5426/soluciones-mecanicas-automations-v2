@@ -2,8 +2,9 @@
 {% load django_bootstrap5 %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
-{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block title %}{{ page_title }} {{ object }}{% endblock %}
+{% block page_title %}{{ page_title }} {{ object }}{% endblock %}
 
 
 {% block page_content %}
@@ -15,7 +16,7 @@
                 {% bootstrap_form form %}
             </div>
         {% endblock %}
-        {% if update_form %}
+        {% if object %}
             <input class="btn btn-primary" type="submit" value="Actualizar">
         {% else %}
             <input class="btn btn-primary" type="submit">
