@@ -56,11 +56,11 @@ class WhatsAppAccount(models.Model):
 
     automatic_message = models.ForeignKey('WhatsAppAutoReplyMessage', blank=True, null=True, on_delete=models.PROTECT)
 
-    can_use_webhook = models.BooleanField(default=True)
-    can_auto_reply = models.BooleanField(default=True)
+    can_use_webhook = models.BooleanField(default=False)
+    can_auto_reply = models.BooleanField(default=False)
 
     can_find_leads = models.BooleanField(default=True)
-    lead_prompt = models.TextField(blank=True, null=True)
+    lead_prompt = models.TextField(blank=True, null=False)
 
     can_reply_with_ia = models.BooleanField(default=False)
     ia_application = models.ForeignKey(RAGApplication, blank=True, null=True, on_delete=models.PROTECT)

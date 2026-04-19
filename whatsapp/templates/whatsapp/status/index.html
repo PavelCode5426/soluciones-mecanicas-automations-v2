@@ -20,9 +20,22 @@
     <td>{{ object.name }}</td>
     <td>{{ object.account }}</td>
     <td>{{ object.updated_at }}</td>
-    <td>{% status_badge object.active %}</td>
-    <td class="text-end">
-        <a href="{% url 'whatsapp:status.update' pk=object.pk %}"><i class="las la-pen text-secondary font-16"></i></a>
-        <a href="#"><i class="las la-trash-alt text-secondary font-16"></i></a>
+    <td>
+        {% url 'whatsapp:status.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
+    <td class="text-end">
+        {% url 'whatsapp:status.delete' pk=object.pk as delete_url %}
+        {% url 'whatsapp:status.update' pk=object.pk as edit_url %}
+
+        {% include 'components/update_link.html' with url=edit_url %}
+        {% include 'components/delete_link.html' with url=delete_url %}
+    </td>
+{% endblock %}
+
+
+{% block empty %}
+    {% url 'whatsapp:status.create' as create_url %}
+
+    {% include 'components/empty.html' with url=create_url text="No existen estados" %}
 {% endblock %}

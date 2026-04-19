@@ -1,0 +1,33 @@
+`{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+{% load django_bootstrap5 %}
+
+{% block title %}Cuentas de WhatsApp{% endblock %}
+{% block page_title %}Cuentas de WhatsApp{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Telefono</th>
+    <th>Estado</th>
+    <th class="text-end">
+        {% url 'whatsapp:accounts.create' as create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary"><i class="fa fa-plus"></i> Crear Nuevo</a>
+    </th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{{ object.chat_id }}</td>
+    <td>
+        {% url 'whatsapp:accounts.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td class="text-end">
+        {% url 'whatsapp:accounts.delete' pk=object.pk as delete_url %}
+        {% url 'whatsapp:accounts.update' pk=object.pk as edit_url %}
+
+        {% include 'components/update_link.html' with url=edit_url %}
+        {% include 'components/delete_link.html' with url=delete_url %}
+    </td>
+{% endblock %}`
