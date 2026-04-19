@@ -164,7 +164,7 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
 class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppStatusAdminForm
     search_fields = ['name']
-    list_display = ['name', 'account', 'active']
+    list_display = ['name', 'account', 'published_count', 'active', 'updated_at']
     list_filter = ['account']
     readonly_fields = ['published_count', 'message_type', 'file_preview']
     actions = ['publish_status', 'activate_status', 'desactivate_status']
