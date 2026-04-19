@@ -267,12 +267,16 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
                 "name": message.name,
                 "message": message.message,
                 "file": message.file,
-                "message_type": message.message_type
+                "message_type": message.message_type,
+                "from_date": message.from_date,
+                "until_date": message.until_date,
             }
 
-            WhatsAppStatus.objects.update_or_create(
+            instance, created = WhatsAppStatus.objects.update_or_create(
                 defaults=_defaults, create_defaults=_defaults, account=account, name=message.name,
             )
+            instance.weekdays.set(message.weekdays.all())
+
         self.message_user(request, f'Convertidos correctamente {len(_messages)} mensajes', level=messages.SUCCESS)
 
 
