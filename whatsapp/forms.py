@@ -11,12 +11,16 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
     def save(self, commit=True):
         instance = super(WhatsAppStatusAdminForm, self).save(commit=False)
         if self.cleaned_data['sync_schedule']:
+            weekdays = instance.weekdays.all()
             WhatsAppStatus.objects.filter(active=True, account=instance.account).update(
                 from_date=instance.from_date,
                 until_date=instance.until_date,
                 publish_at=instance.publish_at,
                 published_count=instance.published_count
             )
+            status = WhatsAppStatus.objects.filter(active=True, account=instance.account).exclude(pk=instance.pk).all()
+            for _status in status:
+                _status.weekdays.set(weekdays)
 
         return instance
 
