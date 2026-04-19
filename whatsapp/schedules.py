@@ -40,8 +40,8 @@ def enqueue_active_messages():
                 .filter(active=True, from_date__lte=localtime())
                 .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
                 .filter(weekdays__day=localtime().weekday())
-                .annotate(can_publish=ExpressionWrapper(F('frequency') % current_hour, DecimalField()))
-                .filter(Q(can_publish=0) | Q(can_publish__isnull=True))
+                .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
+                .filter(can_publish=0)
                 .all())
 
     for message in messages:
