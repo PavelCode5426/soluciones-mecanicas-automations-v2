@@ -46,4 +46,4 @@ def enqueue_active_messages():
 
     for message in messages:
         enqueue_whatsapp_message(message, refresh=False)
-    return f"Programados {len(messages)} mensajes de whatsapp"
+    return f"Programados {len(messages)} mensajes de whatsapp a las {localtime()}"
