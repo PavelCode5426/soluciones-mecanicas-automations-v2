@@ -1,5 +1,6 @@
 {% extends 'layout/admin_layout.html' %}
 {% load django_bootstrap5 %}
+{% load components %}
 
 
 {% block page_content %}
@@ -104,6 +105,7 @@
                         <th>Nombre</th>
                         <th>Tipo</th>
                         <th>Publicaciones</th>
+                        <th>Estado</th>
                         <th>Fecha</th>
                         <th></th>
                     </tr>
@@ -114,6 +116,7 @@
                             <td>{{ message.name }}</td>
                             <td>{{ message.message_type }}</td>
                             <td>{{ message.published_count }}</td>
+                            <td>{% status_badge status %}</td>
                             <td>{{ message.updated_at }}</td>
                             <td class="text-end">
                                 {% url 'whatsapp:messages.delete' pk=message.pk as delete_url %}
@@ -151,6 +154,7 @@
                         <th>Nombre</th>
                         <th>Tipo</th>
                         <th>Publicaciones</th>
+                        <th>Estado</th>
                         <th>Fecha</th>
                         <th></th>
                     </tr>
@@ -161,6 +165,7 @@
                             <td>{{ status.name }}</td>
                             <td>{{ status.message_type }}</td>
                             <td>{{ status.published_count }}</td>
+                            <td>{% status_badge status %}</td>
                             <td>{{ status.updated_at }}</td>
                             <td class="text-end">
                                 {% url 'whatsapp:status.delete' pk=status.pk as delete_url %}
