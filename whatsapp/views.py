@@ -250,8 +250,8 @@ class WhatsAppAccountDetailView(DetailView):
     template_name = 'whatsapp/accounts/details.html'
 
     def get_context_data(self, **kwargs):
-        last_messages = self.get_object().messages.filter(published_count__gt=0).order_by('updated_at')[:10]
-        last_statues = self.get_object().status.filter(published_count__gt=0).order_by('updated_at')[:10]
+        last_messages = self.get_object().messages.filter(published_count__gt=0).order_by('-updated_at')[:10]
+        last_statues = self.get_object().status.filter(published_count__gt=0).order_by('-updated_at')[:10]
         return super().get_context_data(last_messages=last_messages, last_statues=last_statues, **kwargs)
 
 
