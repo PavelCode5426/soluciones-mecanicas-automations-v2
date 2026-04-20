@@ -68,7 +68,7 @@ def syncronize_whatsapp_account_contacts(account: WhatsAppAccount):
     while len(contacts) > 0:
         all_contacts.extend(contacts)
         offset = limit + offset
-        contacts = service.get_all_contacts(limit, offset)
+        contacts = service.get_contacts(limit, offset)
 
     for contact in all_contacts:
         chat_id = contact['id']
