@@ -29,7 +29,7 @@ class WhatsAppGroupsFilterSet(WhatsAppGenericFilterSet):
 
 
 class WhatsAppContactsFilterSet(WhatsAppGenericFilterSet):
-    distributions_lists = filters.ModelChoiceFilter(
+    distribution_lists = filters.ModelChoiceFilter(
         queryset=models.WhatsAppDistributionList.objects.filter(active=True), label="Listas de ditribución")
 
     def search_method(self, queryset, name, value):
@@ -39,4 +39,4 @@ class WhatsAppContactsFilterSet(WhatsAppGenericFilterSet):
         )
 
     class Meta:
-        fields = ['account', 'distributions_lists', 'search']
+        fields = ['account', 'distribution_lists', 'search']

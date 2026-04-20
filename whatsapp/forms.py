@@ -127,6 +127,9 @@ class WhatsAppCreateAccountForm(forms.ModelForm):
 
 
 class WhatsAppUpdateAccountForm(WhatsAppCreateAccountForm):
+    chat_id = forms.CharField(disabled=True)
+    session = forms.CharField(disabled=True)
+
     class Meta:
         model = WhatsAppAccount
         fields = forms.ALL_FIELDS
