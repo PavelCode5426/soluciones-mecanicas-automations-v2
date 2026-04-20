@@ -219,6 +219,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
 
 @admin.register(WhatsAppMessage)
 class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
+    form = forms.WhatsAppMessageAdminForm
     search_fields = ['name', 'message']
     list_display = ['name', 'account', 'message_type', 'active', 'published_count']
     list_filter = ['account', 'active', 'message_type']
@@ -237,7 +238,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["distribution_lists"]
         }),
         ("Planificación", {
-            "fields": ["frequency", "from_date", "until_date","from_time","until_time", "weekdays"],
+            "fields": ["frequency", "from_date", "until_date","from_time","until_time", "weekdays","sync_schedule"],
             'classes': ('collapse',),
         }),
         ("Estadísticas", {

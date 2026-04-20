@@ -36,7 +36,8 @@ class ScheduledMessage(models.Model):
     from_date = models.DateField(null=True, blank=True, default=today)
     until_date = models.DateField(null=True, blank=True)
 
-    frequency = models.IntegerField(default=0, choices=[
+    frequency = models.IntegerField(default=8, null=True, choices=[
+        (None, "Sin intervalo"),
         (2, "Publicar cada 2h"),
         (4, "Publicar cada 4h"),
         (8, "Publicar cada 8h"),

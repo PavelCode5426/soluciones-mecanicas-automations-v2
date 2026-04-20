@@ -27,7 +27,7 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
     sync_schedule = forms.BooleanField(initial=False, required=False)
 
     def save(self, commit=True):
-        instance = super(WhatsAppStatusAdminForm, self).save(commit=False)
+        instance = super(WhatsAppStatusAdminForm, self).save(commit=commit)
         if self.cleaned_data['sync_schedule']:
             weekdays = instance.weekdays.all()
             WhatsAppStatus.objects.filter(active=True, account=instance.account).update(
@@ -44,6 +44,33 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
 
     class Meta:
         model = WhatsAppStatus
+        fields = forms.ALL_FIELDS
+
+
+class WhatsAppMessageAdminForm(forms.ModelForm):
+    sync_schedule = forms.BooleanField(initial=False, required=False)
+
+    def save(self, commit=True):
+        instance = super(WhatsAppMessageAdminForm, self).save(commit=commit)
+        if self.cleaned_data['sync_schedule']:
+            weekdays = instance.weekdays.all()
+            WhatsAppMessage.objects.filter(active=True, account=instance.account).update(
+                frequency=instance.frequency,
+                from_date=instance.from_date,
+                until_date=instance.until_date,
+                publish_at=instance.publish_at,
+                from_time=instance.from_time,
+                until_time=instance.until_time,
+                # published_count=instance.published_count
+            )
+            messages = WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(pk=instance.pk).all()
+            for _message in messages:
+                _message.weekdays.set(weekdays)
+
+        return instance
+
+    class Meta:
+        model = WhatsAppMessage
         fields = forms.ALL_FIELDS
 
 
