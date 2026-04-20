@@ -9,6 +9,7 @@
     <th>Nombre</th>
     <th>Cuenta</th>
     <th>Estado</th>
+    <th>ID</th>
 {% endblock %}
 
 {% block table_data %}
@@ -17,6 +18,9 @@
     <td>
         {% url 'whatsapp:groups.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td>
+        {{ object.chat_id }}
     </td>
     {#    <td class="text-end">#}
     {#        {% url 'whatsapp:groups.delete' pk=object.pk as delete_url %}#}
