@@ -12,7 +12,7 @@ class WAHAService:
 
     def __get_session_config(self, webhook_urls: list[str]):
         data = {"gows": {
-            "ignore": {"status": False, "groups": False, "channels": False, "broadcast": False},
+            "ignore": {"status": True, "groups": True, "channels": True, "broadcast": True},
             "storage": {"messages": False, "groups": False, "chats": False, "labels": False}}
         }
 
