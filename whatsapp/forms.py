@@ -58,7 +58,6 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
                 frequency=instance.frequency,
                 from_date=instance.from_date,
                 until_date=instance.until_date,
-                publish_at=instance.publish_at,
                 from_time=instance.from_time,
                 until_time=instance.until_time,
                 # published_count=instance.published_count
