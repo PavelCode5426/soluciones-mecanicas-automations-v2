@@ -40,3 +40,7 @@ class WhatsAppContactsFilterSet(WhatsAppGenericFilterSet):
 
     class Meta:
         fields = ['account', 'distribution_lists', 'search']
+
+
+class WhatsAppMessagesFilterSet(WhatsAppStatusFilterSet):
+    pass

@@ -53,7 +53,8 @@
         </div>
 
         <div class="col-lg-2">
-            <div class="card">
+            <form class="card" action="{% url 'whatsapp:messages.index' %}">
+                <input value="{{ object.pk }}" type="hidden" name="account">
                 <div class="card-body">
                     <span class="text-muted fw-semibold">Mensajes</span>
                     <div class="row">
@@ -62,15 +63,15 @@
                         </div>
                     </div>
                     <div class="d-grid">
-                        <a href="{% url 'whatsapp:messages.create' %}" class="btn btn-soft-primary btn-sm">
-                            Agregar nuevo</a>
+                        <button type="submit" class="btn btn-soft-primary btn-sm"> Ver mensajes</button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
 
         <div class="col-lg-2">
-            <div class="card">
+            <form class="card" action="{% url 'whatsapp:status.index' %}">
+                <input value="{{ object.pk }}" type="hidden" name="account">
                 <div class="card-body">
                     <span class="text-muted fw-semibold">Estados</span>
                     <div class="row">
@@ -79,11 +80,10 @@
                         </div>
                     </div>
                     <div class="d-grid">
-                        <a href="{% url 'whatsapp:status.create' %}" class="btn btn-soft-primary btn-sm">
-                            Agregar nuevo</a>
+                        <button type="submit" class="btn btn-soft-primary btn-sm"> Ver estados</button>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 

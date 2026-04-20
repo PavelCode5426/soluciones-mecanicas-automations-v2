@@ -18,13 +18,13 @@
         {% url 'whatsapp:groups.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
-    <td class="text-end">
-        {% url 'whatsapp:groups.delete' pk=object.pk as delete_url %}
-        {% url 'whatsapp:groups.update' pk=object.pk as edit_url %}
-
-        {% include 'components/update_link.html' with url=edit_url %}
-        {% include 'components/delete_link.html' with url=delete_url %}
-    </td>
+    {#    <td class="text-end">#}
+    {#        {% url 'whatsapp:groups.delete' pk=object.pk as delete_url %}#}
+    {#        {% url 'whatsapp:groups.update' pk=object.pk as edit_url %}#}
+    {##}
+    {#        {% include 'components/update_link.html' with url=edit_url %}#}
+    {#        {% include 'components/delete_link.html' with url=delete_url %}#}
+    {#    </td>#}
 {% endblock %}
 
 {% block empty %}

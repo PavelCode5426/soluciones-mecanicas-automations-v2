@@ -196,9 +196,10 @@ class WhatsAppDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
     success_message = "Lista de distribución object eliminada exitosamente"
 
 
-class WhatsAppMessagesListView(ListView):
+class WhatsAppMessagesListView(FilterView):
     template_name = 'whatsapp/messages/index.html'
     queryset = models.WhatsAppMessage.objects.all()
+    filterset_class = filters.WhatsAppMessagesFilterSet
 
 
 class WhatsAppMessageCreateView(SuccessMessageMixin, CreateView):
