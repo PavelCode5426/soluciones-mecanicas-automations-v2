@@ -17,6 +17,17 @@ class WhatsAppStatusFilterSet(WhatsAppGenericFilterSet):
         )
 
 
+class WhatsAppGroupsFilterSet(WhatsAppGenericFilterSet):
+
+    def search_method(self, queryset, name, value):
+        return queryset.filter(
+            Q(name__icontains=value)
+        )
+
+    class Meta:
+        fields = ['account', 'distributions_lists', 'search']
+
+
 class WhatsAppContactsFilterSet(WhatsAppGenericFilterSet):
     distributions_lists = filters.ModelChoiceFilter(
         queryset=models.WhatsAppDistributionList.objects.filter(active=True), label="Listas de ditribución")

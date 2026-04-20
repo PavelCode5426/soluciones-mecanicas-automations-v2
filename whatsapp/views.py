@@ -47,7 +47,7 @@ class WhatsAppStatusToggleStatusView(SuccessMessageMixin, ToggleStatusView):
 
 class WhatsAppContactsListView(FilterView):
     template_name = 'whatsapp/contacts/index.html'
-    filterset_class = filters.WhatsAppGenericFilterSet
+    filterset_class = filters.WhatsAppContactsFilterSet
     queryset = models.WhatsAppContact.objects.all()
     paginate_by = 100
 
@@ -85,7 +85,7 @@ class WhatsAppContactsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
 
 class WhatsAppGroupsListView(FilterView):
     template_name = 'whatsapp/groups/index.html'
-    filterset_class = filters.WhatsAppGenericFilterSet
+    filterset_class = filters.WhatsAppGroupsFilterSet
     queryset = models.WhatsAppGroup.objects.all()
     paginate_by = 100
 

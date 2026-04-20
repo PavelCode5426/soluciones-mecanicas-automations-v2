@@ -31,7 +31,10 @@ def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
     while len(groups) > 0:
         account_groups.extend(groups)
         offset = limit + offset
-        groups = service.get_groups(limit, offset)
+        try:
+            groups = service.get_groups(limit, offset)
+        except Exception:
+            groups = []
 
     for group in account_groups:
         chat_id = group['JID']
@@ -68,7 +71,10 @@ def syncronize_whatsapp_account_contacts(account: WhatsAppAccount):
     while len(contacts) > 0:
         all_contacts.extend(contacts)
         offset = limit + offset
-        contacts = service.get_contacts(limit, offset)
+        try:
+            contacts = service.get_contacts(limit, offset)
+        except Exception:
+            contacts = []
 
     for contact in all_contacts:
         chat_id = contact['id']

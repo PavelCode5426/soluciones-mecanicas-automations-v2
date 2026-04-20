@@ -92,7 +92,15 @@ class WAHAService:
         response = requests.get(
             f"{self._api_url}/api/{self._session}/groups",
             headers=self._headers, auth=self._auth,
-            params={"exclude": ['participants'], "limit": limit, "offset": offset}
+            params={"exclude": ['participants'], "limit": limit, "offset": offset, "sortOrder": 'desc'}
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def get_groups_count(self):
+        response = requests.get(
+            f"{self._api_url}/api/{self._session}/groups/count",
+            headers=self._headers, auth=self._auth
         )
         response.raise_for_status()
         return response.json()
@@ -101,7 +109,7 @@ class WAHAService:
         response = requests.get(
             f"{self._api_url}/api/contacts/all",
             headers=self._headers, auth=self._auth,
-            params={"session": self._session, "limit": limit, "offset": offset}
+            params={"session": self._session, "limit": limit, "offset": offset, "sortOrder": 'desc'}
         )
         response.raise_for_status()
         return response.json()

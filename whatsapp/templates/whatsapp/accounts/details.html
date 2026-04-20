@@ -19,7 +19,7 @@
         </div>
 
         <div class="col-lg-2">
-            <form method="post" action="{% url 'whatsapp:accounts.update-contacts' pk=object.pk %}" class="card">
+            <form method="post" action="{% url 'whatsapp:accounts.update-groups' pk=object.pk %}" class="card">
                 {% csrf_token %}
                 <div class="card-body">
                     <span class="text-muted fw-semibold">Grupos</span>
