@@ -1,3 +1,5 @@
+import datetime
+
 from dateutil.utils import today
 from django.db import models
 from django.utils.timezone import now
@@ -178,6 +180,8 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
     distribution_lists = models.ManyToManyField(WhatsAppDistributionList, related_name='messages', blank=True)
 
     publish_at = None
+    from_time = models.TimeField(default=datetime.time(0, 0))
+    until_time = models.TimeField(default=datetime.time(11, 59))
     weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
 
     def __str__(self):

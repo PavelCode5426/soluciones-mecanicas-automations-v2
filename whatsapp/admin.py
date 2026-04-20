@@ -1,5 +1,9 @@
+from urllib.request import urlopen
+
 from django.contrib import admin, messages
 from django.core.cache import cache
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from django.db.models import Q
 from django.utils.html import format_html
 from django.utils.timezone import now
@@ -62,6 +66,13 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
         profile = service.get_profile_info()
         obj.name = profile['name']
         obj.chat_id = profile['id']
+
+        img_temp = NamedTemporaryFile()
+        with urlopen(profile['picture']) as response:
+            img_temp.write(response.read())
+            img_temp.flush()
+            obj.avatar.save(f"{obj.name}.jpg", File(img_temp), save=False)
+
         obj.save()
         cache.delete(obj.session)
 
@@ -226,7 +237,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["distribution_lists"]
         }),
         ("Planificación", {
-            "fields": ["frequency", "from_date", "until_date", "weekdays"],
+            "fields": ["frequency", "from_date", "until_date","from_time","until_time", "weekdays"],
             'classes': ('collapse',),
         }),
         ("Estadísticas", {
