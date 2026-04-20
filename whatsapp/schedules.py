@@ -40,12 +40,13 @@ def enqueue_active_messages():
     current_weekday = current_time.weekday()
 
     messages = (WhatsAppMessage.objects.select_related('account')
+                .exclude(frequency__isnull=True)
                 .filter(active=True, from_date__lte=current_time)
                 .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True))
                 .filter(from_time__lte=current_time, until_time__gte=current_time)
                 .filter(weekdays__day=current_weekday)
                 .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
-                .filter(can_publish=0).exclude(frequency__isnull=True)
+                .filter(can_publish=0)
                 .all())
 
     for message in messages:
