@@ -178,8 +178,9 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
             })
         service.set_chat_presence(chat_id, 'paused')
 
-        message.published_count = F('published_count') + 1
-        message.save(update_fields=['published_count'])
+        if not isinstance(message, WhatsAppAutoReplyMessage):
+            message.published_count = F('published_count') + 1
+            message.save(update_fields=['published_count'])
 
 
 def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
