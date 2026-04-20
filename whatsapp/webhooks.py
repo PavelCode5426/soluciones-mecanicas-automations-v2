@@ -58,13 +58,13 @@ class WhatsAppChatsWebhookView(APIView, WhatsAppWebhookMixins):
         sender = payload.get('sender')
 
         if not is_group and not is_from_me and account.can_auto_reply:
-            # last_message_timestamp = create_whatsapp_service(account).get_last_message_timestamp(sender)
-            # if (int(now().timestamp()) - last_message_timestamp) >= 24 * 3600 and account.automatic_message:
-            #     enqueue_whatsapp_auto_reply_message(message=account.automatic_message, chat_id=sender)
-            # else:
-            automatic_message = self.__send_auto_message(account, message, sender)
-            if automatic_message is None and account.can_reply_with_ia:
-                self.__reply_using_ia(account, message, sender)
+            last_message_timestamp = create_whatsapp_service(account).get_last_message_timestamp(sender)
+            if (int(now().timestamp()) - last_message_timestamp) >= 24 * 3600 and account.automatic_message:
+                enqueue_whatsapp_auto_reply_message(message=account.automatic_message, chat_id=sender)
+            else:
+                automatic_message = self.__send_auto_message(account, message, sender)
+                if automatic_message is None and account.can_reply_with_ia:
+                    self.__reply_using_ia(account, message, sender)
 
         return Response(status=status.HTTP_200_OK)
 
