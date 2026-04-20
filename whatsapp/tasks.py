@@ -140,7 +140,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
         } if message.file else None
         message_presence = "recording" if 'audio' in mimetype else "typing"
 
-        typing_timer = max(10, int(len(caption) * 0.3)) if typing_timeout is None else typing_timeout
+        typing_timer = max(10, int(len(caption) * 0.03)) if typing_timeout is None else typing_timeout
 
         while typing_timer > 0:
             service.set_chat_presence(chat_id, message_presence)
