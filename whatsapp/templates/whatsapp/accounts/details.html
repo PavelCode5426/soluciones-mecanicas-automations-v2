@@ -116,7 +116,7 @@
                             <td>{{ message.name }}</td>
                             <td>{{ message.message_type }}</td>
                             <td>{{ message.published_count }}</td>
-                            <td>{% status_badge status %}</td>
+                            <td>{% status_badge message %}</td>
                             <td>{{ message.updated_at }}</td>
                             <td class="text-end">
                                 {% url 'whatsapp:messages.delete' pk=message.pk as delete_url %}
