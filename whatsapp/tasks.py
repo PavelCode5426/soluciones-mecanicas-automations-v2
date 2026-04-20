@@ -38,7 +38,7 @@ def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
 
     for group in account_groups:
         chat_id = group['JID']
-        name = group['Name']
+        name = group.get('Name', 'Sin nombre')
         is_locked = group['IsLocked']
         is_ephemeral = group['IsEphemeral']
         participant_count = group['ParticipantCount']
