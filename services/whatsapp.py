@@ -11,7 +11,10 @@ class WAHAService:
             self._auth = (username, password)
 
     def __get_session_config(self, webhook_urls: list[str]):
-        data = {"gows": {"storage": {"messages": False, "groups": False, "chats": False, "labels": False}}}
+        data = {"gows": {
+            "ignore": {"status": False, "groups": False, "channels": False, "broadcast": False},
+            "storage": {"messages": False, "groups": False, "chats": False, "labels": False}}
+        }
 
         if len(webhook_urls):
             webhooks = [{
