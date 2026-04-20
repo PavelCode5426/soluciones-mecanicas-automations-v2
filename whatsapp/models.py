@@ -44,6 +44,7 @@ class ScheduledMessage(models.Model):
     ])
 
     publish_at = models.TimeField(default=now)
+    order = models.IntegerField(default=0)
     weekdays = models.ManyToManyField(WeekDay, blank=True)
     published_count = models.BigIntegerField(default=0)
 

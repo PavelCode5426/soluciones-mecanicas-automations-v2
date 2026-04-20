@@ -185,7 +185,11 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["name", "account", 'message', 'file', 'file_preview', 'active']
         }),
         ("Planificar estado", {
-            "fields": ['published_count', 'publish_at', 'from_date', 'until_date', 'weekdays', 'sync_schedule']
+            "fields": ["order", 'publish_at', 'from_date', 'until_date', 'weekdays', 'sync_schedule']
+        }),
+        ("Estadísticas", {
+            "fields": ["published_count"],
+            'classes': ('collapse',),
         }),
     ]
 
@@ -238,7 +242,8 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["distribution_lists"]
         }),
         ("Planificación", {
-            "fields": ["frequency", "from_date", "until_date","from_time","until_time", "weekdays","sync_schedule"],
+            "fields": ["order", "frequency", "from_date", "until_date", "from_time", "until_time", "weekdays",
+                       "sync_schedule"],
             'classes': ('collapse',),
         }),
         ("Estadísticas", {
