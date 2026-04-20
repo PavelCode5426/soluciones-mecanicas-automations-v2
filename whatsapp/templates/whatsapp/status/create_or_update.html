@@ -34,7 +34,8 @@
             <p class="text-muted mb-0">Mas información</p>
         </div>
         <div class="card-body">
-            <div class="row row-cols-3">
+            <div class="row row-cols-4">
+                {% bootstrap_field form.order %}
                 {% bootstrap_field form.publish_at %}
                 {% bootstrap_field form.from_date %}
                 {% bootstrap_field form.until_date %}
