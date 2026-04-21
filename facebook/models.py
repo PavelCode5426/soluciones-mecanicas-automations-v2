@@ -32,8 +32,8 @@ class FacebookGroupCategory(models.Model):
         return f"{self.name} ({self.profile})"
 
     class Meta:
-        verbose_name = "Tipo de Grupo"
-        verbose_name_plural = "Tipos de Grupos"
+        verbose_name = "Lista de Distribución"
+        verbose_name_plural = "Listas de Distribución"
 
 
 class FacebookProfile(models.Model):
