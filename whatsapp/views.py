@@ -328,6 +328,7 @@ class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterView, FormView):
     filterset_class = filters.WhatsAppStatusFilterSet
     form_class = forms.PublishWhastAppStatusForm
     queryset = models.WhatsAppStatus.objects.all()
+    template_name = 'whatsapp/status/publish_now.html'
     success_message = "Estados enviados a publicar correctamente"
     success_url = reverse_lazy('whatsapp:status.index')
 
