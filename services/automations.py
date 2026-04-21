@@ -241,7 +241,7 @@ class FacebookAutomationService:
             page.keyboard.press("Space")
 
         if post.file:
-            file_input = page.locator('input[type="file"][multiple]')
+            file_input = page.locator('input[type="file"][multiple]').first
             file_input.set_input_files(files=[post.file.path])
 
         time.sleep(random.randint(30, 60))
