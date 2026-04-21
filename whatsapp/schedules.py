@@ -47,6 +47,7 @@ def enqueue_active_messages():
                 .filter(weekdays__day=current_weekday)
                 .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
                 .filter(can_publish=0)
+                .order_by('account', 'order')
                 .all())
 
     for message in messages:
