@@ -107,7 +107,12 @@
                         <th>Publicaciones</th>
                         <th>Estado</th>
                         <th>Fecha</th>
-                        <th></th>
+                        <th class="text-end">
+                            <form action="{% url 'whatsapp:messages.publish-now' %}">
+                                <input type="hidden" name="account" value="{{ object.pk }}">
+                                <input type="submit" class="btn btn-primary" value="Enviar nuevos mensajes"/>
+                            </form>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -128,7 +133,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td class="text-center" colspan="5">Sin mensajes publicados</td>
+                            <td class="text-center" colspan="6">Sin mensajes publicados</td>
                         </tr>
                     {% endfor %}
                     </tbody>
@@ -156,7 +161,12 @@
                         <th>Publicaciones</th>
                         <th>Estado</th>
                         <th>Fecha</th>
-                        <th></th>
+                        <th class="text-end">
+                            <form action="{% url 'whatsapp:status.publish-now' %}">
+                                <input type="hidden" name="account" value="{{ object.pk }}">
+                                <input type="submit" class="btn btn-primary" value="Publicar nuevos estados"/>
+                            </form>
+                        </th>
                     </tr>
                     </thead>
                     <tbody>
@@ -177,7 +187,7 @@
                         </tr>
                     {% empty %}
                         <tr>
-                            <td class="text-center" colspan="5">Sin estados publicados</td>
+                            <td class="text-center" colspan="6">Sin estados publicados</td>
                         </tr>
                     {% endfor %}
                     </tbody>
