@@ -293,7 +293,7 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
         return self.account.messages.all()
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(object_list=self.get_queryset(), **kwargs)
+        return super().get_context_data(object_list=self.get_queryset(), account=self.account, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
