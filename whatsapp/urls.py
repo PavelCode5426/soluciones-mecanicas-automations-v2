@@ -35,6 +35,8 @@ urlpatterns = [
     path(r'accounts/<int:pk>/update-groups', views.WhatsAppAccountSynchronizeGroupsView.as_view(),
          name='accounts.update-groups'),
 
+    path(r'accounts/<int:pk>/sort-messages', views.WhatsAppMessagesSorterView.as_view(), name='accounts.sort-messages'),
+
     path(r'accounts/<int:pk>/update-contacts', views.WhatsAppAccountSynchronizeContactsView.as_view(),
          name='accounts.update-contacts'),
 

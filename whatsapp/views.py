@@ -1,6 +1,7 @@
 from django.contrib.messages.views import SuccessMessageMixin
-from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.shortcuts import get_object_or_404
+from django.urls import reverse_lazy, reverse
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from django_filters.views import FilterView
 
 from core.generics import ToggleStatusView, SingleFormView
@@ -277,3 +278,34 @@ class WhatsAppAccountSynchronizeContactsView(SuccessMessageMixin, SingleFormView
 
     def get_success_url(self):
         return str(reverse_lazy('whatsapp:accounts.details', kwargs=dict(pk=self.get_object().pk)))
+
+
+class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
+    template_name = 'whatsapp/messages/sort-messages.html'
+    form_class = forms.WhatAppSortMessageFormSet
+
+    def dispatch(self, request, *args, **kwargs):
+        self.account = get_object_or_404(models.WhatsAppAccount, id=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.account.messages.all()
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(object_list=self.get_queryset(), **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'POST':
+            return {'data': self.request.POST, 'queryset': self.get_queryset(), **kwargs}
+        return {'queryset': self.get_queryset(), **kwargs}
+
+    def form_valid(self, formset):
+        for form in formset.ordered_forms:
+            instance = form.save(commit=False)
+            instance.order = form.cleaned_data['ORDER']
+            instance.save()
+        return super().form_valid(formset)
+
+    def get_success_url(self):
+        return reverse('whatsapp:accounts.sort-messages', kwargs={'pk': self.account.pk})

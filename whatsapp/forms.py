@@ -5,6 +5,7 @@ from django import forms
 from django.core.cache import cache
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
+from django.forms import modelformset_factory
 from rest_framework.reverse import reverse
 
 from core.forms.widgets import DatePickerInput, TimePickerInput
@@ -62,7 +63,8 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
                 until_time=instance.until_time,
                 # published_count=instance.published_count
             )
-            messages = WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(pk=instance.pk).all()
+            messages = WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(
+                pk=instance.pk).all()
             for _message in messages:
                 _message.weekdays.set(weekdays)
 
@@ -95,6 +97,7 @@ class WhatsAppMessageForm(forms.ModelForm):
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
+            'order': forms.HiddenInput(),
         }
 
 
@@ -177,3 +180,12 @@ class WhatsAppDistributionListUpdateForm(forms.ModelForm):
     class Meta:
         model = WhatsAppDistributionList
         fields = forms.ALL_FIELDS
+
+
+WhatAppSortMessageFormSet = modelformset_factory(
+    WhatsAppMessage,
+    fields=['order'],
+    widgets={'order': forms.HiddenInput()},
+    extra=0,
+    can_order=True,
+)
