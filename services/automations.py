@@ -244,6 +244,7 @@ class FacebookAutomationService:
             file_input = page.locator('input[type="file"][multiple]').first
             file_input.set_input_files(files=[post.file.path])
 
-        time.sleep(random.randint(30, 60))
+        # time.sleep(random.randint(30, 60))
+        time.sleep(random.randint(5, 15))
         publish_button.click()
         page.locator('span', has_text='Publicando').wait_for(state='hidden')

@@ -7,17 +7,23 @@ state_file = Path(__file__).parent.joinpath("states/facebook.json")
 
 url = "https://www.facebook.com/groups/1116295636394497/"
 
-post_title = "Neveras en venta"
+post_title = "🍕✨ Las mejores pizzas de Guanabacoa están en Pizza’s Time."
 
 post_text = """
-Publicación de prueba
+Variedad, sabor y calidad en cada porción.
 """
 
 post_hastag = """
 #pizza
 """
 post_footer = """
+📲 Haz tu pedido fácil por WhatsApp:
++53 51942070 | +53 53448317
 
+📍 Esquina Corrasfalso y Santamaría, Guanabacoa
+🕒 Martes a Domingo | 11:00 am – 10:00 pm
+
+🔥 ¡Prueba nuestras pizzas artesanales y disfruta el verdadero sabor casero!
 """
 post_file = Path(__file__).parent.joinpath("data/1.jpg")
 
