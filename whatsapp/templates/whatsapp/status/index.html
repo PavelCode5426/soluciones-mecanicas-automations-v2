@@ -37,11 +37,25 @@
         {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
     <td class="text-end">
-        {% url 'whatsapp:status.delete' pk=object.pk as delete_url %}
-        {% url 'whatsapp:status.update' pk=object.pk as edit_url %}
+        <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown"
+                aria-expanded="false">
+            Acciones <i class="mdi mdi-chevron-down"></i>
+        </button>
+        <div class="dropdown-menu">
+            {% url 'whatsapp:status.delete' pk=object.pk as delete_url %}
+            {% url 'whatsapp:status.update' pk=object.pk as edit_url %}
+            {% url 'whatsapp:status.duplicate' pk=object.pk as duplicate_url %}
 
-        {% include 'components/update_link.html' with url=edit_url %}
-        {% include 'components/delete_link.html' with url=delete_url %}
+            <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+            <a class="dropdown-item" href="{{ duplicate_url }}">Duplicar</a>
+            <form method="post" action="{% url 'whatsapp:status.publish-now' %}">
+                <input type="hidden" name="items" value="{{ object.pk }}">
+                {% csrf_token %}
+                <input class="dropdown-item" type="submit" value="Publicar ahora">
+            </form>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+        </div>
     </td>
 {% endblock %}
 

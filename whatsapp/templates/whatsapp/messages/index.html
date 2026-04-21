@@ -46,9 +46,10 @@
         <div class="dropdown-menu">
             {% url 'whatsapp:messages.delete' pk=object.pk as delete_url %}
             {% url 'whatsapp:messages.update' pk=object.pk as edit_url %}
-            {% url 'whatsapp:messages.update' pk=object.pk as edit_url %}
+            {% url 'whatsapp:messages.duplicate' pk=object.pk as duplicate_url %}
 
             <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+            <a class="dropdown-item" href="{{ duplicate_url }}">Duplicar</a>
             <form method="post" action="{% url 'whatsapp:messages.publish-now' %}">
                 <input type="hidden" name="items" value="{{ object.pk }}">
                 {% csrf_token %}

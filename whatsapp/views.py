@@ -4,7 +4,7 @@ from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from django_filters.views import FilterView
 
-from core.generics import ToggleStatusView, SingleFormView
+from core.generics import ToggleStatusView, SingleFormView, DuplicateView
 from whatsapp import filters
 from whatsapp import models, forms
 from whatsapp.mixins import WhatsAppAccountViewMixins
@@ -327,7 +327,7 @@ class WhatsAppStatusSorterView(WhatsAppMessagesSorterView):
 class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterView, FormView):
     filterset_class = filters.WhatsAppStatusFilterSet
     form_class = forms.PublishWhastAppStatusForm
-    queryset = models.WhatsAppStatus.objects.all()
+    queryset = models.WhatsAppStatus.objects.filter(active=True).all()
     template_name = 'whatsapp/status/publish_now.html'
     success_message = "Estados enviados a publicar correctamente"
     success_url = reverse_lazy('whatsapp:status.index')
@@ -340,7 +340,21 @@ class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterView, FormView):
 class PublishNowWhatsAppMessagesView(PublishNowWhatsAppStatusView):
     filterset_class = filters.WhatsAppMessagesFilterSet
     form_class = forms.PublishWhastAppMessagesForm
-    queryset = models.WhatsAppMessage.objects.all()
+    queryset = models.WhatsAppMessage.objects.filter(active=True).all()
     template_name = 'whatsapp/messages/publish_now.html'
     success_message = "Mensajes enviados a publicar correctamente"
     success_url = reverse_lazy('whatsapp:messages.index')
+
+
+class WhatsAppStatusDuplicateView(DuplicateView):
+    success_url = reverse_lazy('whatsapp:status.index')
+    success_message = "Estado duplicado correctamente correctamente"
+    queryset = models.WhatsAppStatus.objects.all()
+    template_name = 'whatsapp/status/duplicate.html'
+
+
+class WhatsAppMessageDuplicateView(DuplicateView):
+    success_url = reverse_lazy('whatsapp:messages.index')
+    success_message = "Estado duplicado correctamente correctamente"
+    queryset = models.WhatsAppMessage.objects.all()
+    template_name = 'whatsapp/messages/duplicate.html'

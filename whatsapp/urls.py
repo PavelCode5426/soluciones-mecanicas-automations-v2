@@ -15,6 +15,9 @@ urlpatterns = [
     path(r'status/<int:pk>/toggle-status', views.WhatsAppStatusToggleStatusView.as_view(),
          name='status.toggle-status'),
 
+    path(r'status/<int:pk>/duplicate', views.WhatsAppStatusDuplicateView.as_view(),
+         name='status.duplicate'),
+
     path(r'contacts', views.WhatsAppContactsListView.as_view(), name='contacts.index'),
     path(r'contacts/<int:pk>/edit', views.WhatsAppContactsUpdateView.as_view(), name='contacts.update'),
     path(r'contacts/<int:pk>/delete', views.WhatsAppContactsDeleteView.as_view(), name='contacts.delete'),
@@ -58,6 +61,8 @@ urlpatterns = [
          name='messages.delete'),
     path(r'messages/<int:pk>/toggle-status', views.WhatsAppMessageToggleStatusView.as_view(),
          name='messages.toggle-status'),
+    path(r'messages/<int:pk>/duplicate', views.WhatsAppMessageDuplicateView.as_view(),
+         name='messages.duplicate'),
 
     path(r'status/publish-now', views.PublishNowWhatsAppStatusView.as_view(), name='status.publish-now'),
     path(r'messages/publish-now', views.PublishNowWhatsAppMessagesView.as_view(), name='messages.publish-now'),

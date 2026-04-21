@@ -1,9 +1,7 @@
 from django.db import models
 from django.forms import forms
 from django.http import HttpResponseRedirect
-from django.views.generic import FormView, UpdateView, DetailView, DeleteView
-from django.views.generic.detail import BaseDetailView
-from django.views.generic.edit import FormMixin
+from django.views.generic import FormView, DetailView, DeleteView
 from rest_framework.settings import api_settings
 from rest_framework.views import APIView
 
@@ -36,6 +34,15 @@ class ToggleStatusView(DeleteView):
     def form_valid(self, form):
         success_url = self.get_success_url()
         self.object.active = not self.object.active
+        self.object.save()
+        return HttpResponseRedirect(success_url)
+
+
+class DuplicateView(DeleteView):
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.object.id = None
+        self.object.name += " (Copia)"
         self.object.save()
         return HttpResponseRedirect(success_url)
 
