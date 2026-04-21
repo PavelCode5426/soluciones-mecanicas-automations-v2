@@ -160,6 +160,7 @@ class WhatsAppStatus(AbstractWhatsAppMessage, ScheduledMessage):
     class Meta:
         verbose_name = 'Estado'
         verbose_name_plural = 'Estados'
+        ordering = ['account', 'order']
 
 
 class WhatsAppDistributionList(models.Model):
@@ -197,7 +198,7 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
     class Meta:
         verbose_name = 'Mensaje'
         verbose_name_plural = 'Mensajes'
-        ordering = ['account', '-order']
+        ordering = ['account', 'order']
 
 
 class WhatsAppAutoReplyMessage(AbstractWhatsAppMessage):
