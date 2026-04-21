@@ -12,7 +12,7 @@ from core.forms.widgets import DatePickerInput, TimePickerInput
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.models import WhatsAppStatus, WhatsAppContact, WhatsAppAccount, WhatsAppDistributionList, WhatsAppGroup, \
     WhatsAppMessage
-from whatsapp.tasks import syncronize_whatsapp_account_groups
+from whatsapp.tasks import syncronize_whatsapp_account_groups, enqueue_whatsapp_status, enqueue_whatsapp_message
 
 ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')], widget=forms.Select)
 
@@ -197,3 +197,23 @@ WhatAppSortStatusFormSet = modelformset_factory(
     extra=0,
     can_order=True,
 )
+
+
+class PublishNowForm(forms.Form):
+    items = forms.ModelMultipleChoiceField(queryset=None)
+
+
+class PublishWhastAppStatusForm(PublishNowForm):
+    items = forms.ModelMultipleChoiceField(queryset=WhatsAppStatus.objects.all())
+
+    def publish(self):
+        for status in self.cleaned_data['items']:
+            enqueue_whatsapp_status(status)
+
+
+class PublishWhastAppMessagesForm(PublishNowForm):
+    items = forms.ModelMultipleChoiceField(queryset=WhatsAppMessage.objects.all())
+
+    def publish(self):
+        for message in self.cleaned_data['items']:
+            enqueue_whatsapp_message(message)

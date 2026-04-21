@@ -4,7 +4,7 @@ from django_q.tasks import async_task
 
 from whatsapp.models import WhatsAppStatus, WhatsAppAccount, WhatsAppMessage
 from whatsapp.tasks import publish_whatsapp_status, syncronize_whatsapp_account_groups, \
-    syncronize_whatsapp_account_contacts, enqueue_whatsapp_message
+    syncronize_whatsapp_account_contacts, enqueue_whatsapp_message, enqueue_whatsapp_status
 
 
 def update_whatsapp_contacts_and_groups():
@@ -24,12 +24,7 @@ def enqueue_active_status():
                        .all())
 
     for status in whatsapp_status:
-        async_task(
-            publish_whatsapp_status, status,
-            task_name=f'create_whatsapp_status_{status.pk}',
-            cluster='whatsapp',
-            # next_run=datetime.combine(localtime(), status.publish_at)
-        )
+        enqueue_whatsapp_status(status)
 
     return f"Programados {whatsapp_status.count()} estados de whatsapp"
 
@@ -40,14 +35,13 @@ def enqueue_active_messages():
     current_weekday = current_time.weekday()
 
     messages = (WhatsAppMessage.objects.select_related('account')
-                .exclude(frequency__isnull=True)
+                .exclude(frequency__isnull=True, account__active=False)
                 .filter(active=True, from_date__lte=current_time)
                 .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True))
                 .filter(from_time__lte=current_time, until_time__gte=current_time)
                 .filter(weekdays__day=current_weekday)
                 .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
                 .filter(can_publish=0)
-                .order_by('account', 'order')
                 .all())
 
     for message in messages:

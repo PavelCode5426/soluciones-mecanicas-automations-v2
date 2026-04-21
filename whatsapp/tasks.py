@@ -190,6 +190,15 @@ def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, 
     async_task(send_message, message, chat_id, typing_timeout, task_name=task_name, group=group, cluster=cluster)
 
 
+def enqueue_whatsapp_status(status: WhatsAppStatus):
+    async_task(
+        publish_whatsapp_status, status,
+        task_name=f'create_whatsapp_status_{status.pk}',
+        cluster='whatsapp',
+        # next_run=datetime.combine(localtime(), status.publish_at)
+    )
+
+
 def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
     if refresh:
         message.refresh_from_db()

@@ -59,4 +59,7 @@ urlpatterns = [
     path(r'messages/<int:pk>/toggle-status', views.WhatsAppMessageToggleStatusView.as_view(),
          name='messages.toggle-status'),
 
+    path(r'status/publish-now', views.PublishNowWhatsAppStatusView.as_view(), name='status.publish-now'),
+    path(r'messages/publish-now', views.PublishNowWhatsAppMessagesView.as_view(), name='messages.publish-now'),
+
 ]

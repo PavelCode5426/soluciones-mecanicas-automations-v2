@@ -322,3 +322,23 @@ class WhatsAppStatusSorterView(WhatsAppMessagesSorterView):
 
     def get_success_url(self):
         return reverse('whatsapp:accounts.sort-status', kwargs={'pk': self.account.pk})
+
+
+class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterView, FormView):
+    filterset_class = filters.WhatsAppStatusFilterSet
+    form_class = forms.PublishWhastAppStatusForm
+    success_message = "Estados enviados a publicar correctamente"
+    success_url = reverse_lazy('whatsapp:status.index')
+
+    def form_valid(self, form):
+        form.publish()
+        return super().form_valid(form)
+
+
+class PublishNowWhatsAppMessagesView(PublishNowWhatsAppStatusView):
+    filterset_class = filters.WhatsAppMessagesFilterSet
+    form_class = forms.PublishWhastAppMessagesForm
+    queryset = models.WhatsAppMessage.objects.all()
+    template_name = 'whatsapp/messages/publish_now.html'
+    success_message = "Mensajes enviados a publicar correctamente"
+    success_url = reverse_lazy('whatsapp:messages.index')
