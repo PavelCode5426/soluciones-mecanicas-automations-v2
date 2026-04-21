@@ -20,14 +20,13 @@ class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'active']
     actions = ['sync_facebook_groups']
 
+    @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
     def sync_facebook_groups(self, request, queryset):
         users = queryset.all()
         for user in users:
             async_task(syncronize_profile_groups, user, task_name=f"download_{user}_groups".lower(),
                        cluster='high_priority')
         self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
-
-    sync_facebook_groups.short_description = 'Actualizar grupos del perfil'
 
 
 @admin.register(FacebookGroup)
@@ -80,23 +79,22 @@ class FacebookPostAdmin(admin.ModelAdmin):
 
     image.short_description = 'Image'
 
+    @admin.action(description='Desactivar publicaciones seleccionadas')
     def disable_posts(self, request, queryset):
         total_items = queryset.update(active=False)
         self.message_user(request, f"Fueron desactivadas {total_items} publicaciones", level=messages.SUCCESS)
 
-    disable_posts.short_description = 'Desactivar publicaciones'
-
+    @admin.action(description='Activar publicaciones seleccionadas')
     def enable_posts(self, request, queryset):
         total_items = queryset.update(active=True)
         self.message_user(request, f"Fueron activadas {total_items} publicaciones", level=messages.SUCCESS)
-
-    enable_posts.short_description = 'Activar publicaciones'
 
 
 @admin.register(FacebookPostCampaign)
 class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
     list_display = ['name', 'profile', 'updated_at', 'active']
     readonly_fields = FacebookPostAdmin.readonly_fields + ["published_count"]
+    actions = ['add_to_queue'] + FacebookPostAdmin.actions
 
     filter_horizontal = ['categories']
     fieldsets = [
@@ -111,11 +109,10 @@ class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
         })
     ]
 
+    @admin.action(description='Agendar publicaciones los seleccionadas.')
     def add_to_queue(self, request, query):
         total_items = enqueue_facebook_campaign(query.all())
         self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
-
-    add_to_queue.short_description = 'Agendar campaña publicitaria'
 
 
 @admin.register(FacebookScheduledPost)

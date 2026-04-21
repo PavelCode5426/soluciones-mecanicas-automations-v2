@@ -262,10 +262,6 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
         updated = queryset.update(active=False)
         self.message_user(request, f'{updated} mensaje(s) desactivado(s).')
 
-    def save_model(self, request, obj, form, change):
-        obj.message_type = 'text' if not obj.file else get_message_type(obj.file)
-        obj.save()
-
     @admin.action(description='Enviar los mensajes seleccionados.')
     def send_messages(self, request, queryset):
         _messages = (queryset.filter(active=True).all())

@@ -7,6 +7,7 @@ from django_jsonform.models.fields import JSONField
 
 from core.models import WeekDay
 from ia_assistant.models import RAGApplication
+from whatsapp.helpers import get_message_type
 from whatsapp.managers import ProcessedLeadManager
 
 
@@ -27,6 +28,10 @@ class AbstractWhatsAppMessage(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        self.message_type = 'text' if not self.file else get_message_type(self.file)
+        super().save(*args, **kwargs)
 
     class Meta:
         abstract = True
