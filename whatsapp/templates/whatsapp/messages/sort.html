@@ -17,35 +17,23 @@
     <form method="post">
         {% csrf_token %}
         {{ form.management_form }}
-        <div class="table-responsive">
-            <table class="table table-striped mb-0" id="sortable-table">
-                <thead>
-                <tr>
-                    <th></th>
-                    <th>Mensaje</th>
-                    <th>Estado</th>
-                    <th class="text-end">
-                        <input type="submit" class="btn btn-outline-primary" value="Guardar"/>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for f in form %}
-                    <tr>
-                        <td width="25px">
-                            <i class="fas fa-arrows-alt handler"></i>
-                        </td>
+
+        <input type="submit" class="btn btn-outline-primary" value="Guardar"/>
+
+        <ul class="list-group mt-5" id="sortable-list">
+            {% for f in form %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-bars me-2"></i>
                         {{ f.id }}
                         {{ f.ORDER.as_hidden }}
                         {{ f.order.as_hidden }}
-                        <td>{{ f.instance.name }}</td>
-                        <td>{% status_badge f.instance.active %}</td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        {{ f.instance.name }}
+                    </div>
+                    <div>{% status_badge f.instance.active %}</div>
+                </li>
+            {% endfor %}
+        </ul>
     </form>
 {% endblock %}
 
