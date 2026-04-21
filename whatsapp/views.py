@@ -281,7 +281,8 @@ class WhatsAppAccountSynchronizeContactsView(SuccessMessageMixin, SingleFormView
 
 
 class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
-    template_name = 'whatsapp/messages/sort-messages.html'
+    success_message = "Mensajes ordenados correctamente."
+    template_name = 'whatsapp/messages/sort.html'
     form_class = forms.WhatAppSortMessageFormSet
 
     def dispatch(self, request, *args, **kwargs):
@@ -309,3 +310,15 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
 
     def get_success_url(self):
         return reverse('whatsapp:accounts.sort-messages', kwargs={'pk': self.account.pk})
+
+
+class WhatsAppStatusSorterView(WhatsAppMessagesSorterView):
+    success_message = "Estados ordenados correctamente"
+    template_name = "whatsapp/status/sort.html"
+    form_class = forms.WhatAppSortStatusFormSet
+
+    def get_queryset(self):
+        return self.account.status.all()
+
+    def get_success_url(self):
+        return reverse('whatsapp:accounts.sort-status', kwargs={'pk': self.account.pk})

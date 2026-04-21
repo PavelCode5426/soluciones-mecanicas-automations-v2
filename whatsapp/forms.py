@@ -189,3 +189,11 @@ WhatAppSortMessageFormSet = modelformset_factory(
     extra=0,
     can_order=True,
 )
+
+WhatAppSortStatusFormSet = modelformset_factory(
+    WhatsAppStatus,
+    fields=['order'],
+    widgets={'order': forms.HiddenInput()},
+    extra=0,
+    can_order=True,
+)
