@@ -16,7 +16,7 @@ def update_whatsapp_contacts_and_groups():
 
 def enqueue_active_status():
     whatsapp_status = (WhatsAppStatus.objects.select_related('account')
-                        .filter(active=True, account__active=True, from_date__lte=localtime())
+                       .filter(active=True, account__active=True, from_date__lte=localtime())
                        .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
                        # .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
                        .filter(weekdays__day=localtime().weekday())
@@ -43,6 +43,7 @@ def enqueue_active_messages():
                 .filter(can_publish=0)
                 .all())
 
+    messages.update(last_whatsapp_id=None)
     for message in messages:
         enqueue_whatsapp_message(message, refresh=False)
     return f"Programados {len(messages)} mensajes de whatsapp a las {localtime()}"

@@ -209,6 +209,10 @@ def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
     if refresh:
         message.refresh_from_db()
     if message.active and message.account.active:
+        if message.last_whatsapp_id:
+            message.last_whatsapp_id = None
+            message.save(update_fields=['last_whatsapp_id'])
+
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
             contacts = distribution_list.contacts.filter(active=True).all()
