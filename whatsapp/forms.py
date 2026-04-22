@@ -10,6 +10,7 @@ from rest_framework.reverse import reverse
 
 from core.forms.widgets import DatePickerInput, TimePickerInput
 from whatsapp.factories import create_whatsapp_service
+from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppStatus, WhatsAppContact, WhatsAppAccount, WhatsAppDistributionList, WhatsAppGroup, \
     WhatsAppMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups, enqueue_whatsapp_status, enqueue_whatsapp_message
@@ -91,9 +92,16 @@ class WhatsAppStatusForm(forms.ModelForm):
 class WhatsAppMessageForm(forms.ModelForm):
     from_date = forms.DateField(widget=DatePickerInput, initial=today)
 
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        instance.message_type = 'text' if not instance.file else get_message_type(instance.file)
+        if commit:
+            instance.save()
+        return instance
+
     class Meta:
         model = WhatsAppMessage
-        exclude = ['published_count', 'message_type', 'order']
+        exclude = ['published_count', 'order']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
