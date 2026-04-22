@@ -264,7 +264,9 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
 
     @admin.action(description='Enviar los mensajes seleccionados.')
     def send_messages(self, request, queryset):
-        _messages = (queryset.filter(active=True).all())
+        _messages = queryset.filter(active=True)
+        _messages.update(last_whatsapp_id=None)
+        _messages = _messages.all()
 
         for message in _messages:
             enqueue_whatsapp_message(message)

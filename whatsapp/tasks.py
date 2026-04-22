@@ -135,7 +135,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
 
         response = dict()
         if message.last_whatsapp_id:
-            service.forward_message(message.last_whatsapp_id, chat_id)
+            response = service.forward_message(message.last_whatsapp_id, chat_id)
         else:
             caption = message.message
             mimetype = message.message_type
@@ -184,6 +184,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
             service.set_chat_presence(chat_id, 'paused')
 
         if not isinstance(message, WhatsAppAutoReplyMessage):
+            print(response)
             message.last_whatsapp_id = response.get('id')
             message.published_count = F('published_count') + 1
             message.save(update_fields=['published_count', 'last_whatsapp_id'])
