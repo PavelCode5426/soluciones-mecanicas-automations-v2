@@ -24,24 +24,25 @@
         {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
     <td class="text-end">
-        <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown"
-                aria-expanded="false">
-            Acciones <i class="mdi mdi-chevron-down"></i>
-        </button>
-        <div class="dropdown-menu">
-            {% url 'whatsapp:accounts.delete' pk=object.pk as delete_url %}
-            {% url 'whatsapp:accounts.update' pk=object.pk as edit_url %}
-            {% url 'whatsapp:accounts.sort-messages' pk=object.pk as sort_messages_url %}
-            {% url 'whatsapp:accounts.sort-status' pk=object.pk as sort_status_url %}
-            {% url 'whatsapp:accounts.details' pk=object.pk as profile_url %}
+        <div class="dropdown">
+            <a role="button" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="las la-ellipsis-v font-20 text-muted"></i>
+            </a>
+            <div class="dropdown-menu">
+                {% url 'whatsapp:accounts.delete' pk=object.pk as delete_url %}
+                {% url 'whatsapp:accounts.update' pk=object.pk as edit_url %}
+                {% url 'whatsapp:accounts.sort-messages' pk=object.pk as sort_messages_url %}
+                {% url 'whatsapp:accounts.sort-status' pk=object.pk as sort_status_url %}
+                {% url 'whatsapp:accounts.details' pk=object.pk as profile_url %}
 
 
-            <a class="dropdown-item" href="{{ profile_url }}">Ver perfil</a>
-            <a class="dropdown-item" href="{{ sort_messages_url }}">Organizar mensajes</a>
-            <a class="dropdown-item" href="{{ sort_status_url }}">Organizar estados</a>
-            <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+                <a class="dropdown-item" href="{{ profile_url }}">Ver perfil</a>
+                <a class="dropdown-item" href="{{ sort_messages_url }}">Organizar mensajes</a>
+                <a class="dropdown-item" href="{{ sort_status_url }}">Organizar estados</a>
+                <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+            </div>
         </div>
     </td>
 {% endblock %}`

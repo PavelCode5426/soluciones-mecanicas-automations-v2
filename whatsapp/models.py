@@ -26,6 +26,7 @@ class AbstractWhatsAppMessage(models.Model):
     account = models.ForeignKey('WhatsAppAccount', on_delete=models.PROTECT)
     file = models.FileField(blank=True, null=True)
 
+    last_whatsapp_id = models.TextField(blank=True, null=True, editable=False)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 

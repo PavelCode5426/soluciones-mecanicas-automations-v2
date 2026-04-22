@@ -22,7 +22,7 @@
                     data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="sr-only">Toggle Dropdown</span> <i class="mdi mdi-chevron-down"></i>
             </button>
-            <div class="dropdown-menu" style="">
+            <div class="dropdown-menu">
                 <a class="dropdown-item" href="{{ publish_now_url }}">Publicar varios ahora</a>
             </div>
         </div>
@@ -39,24 +39,25 @@
     <td>{{ object.message_type }}</td>
     <td>{{ object.published_count }}</td>
     <td class="text-end">
-        <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown"
-                aria-expanded="false">
-            Acciones <i class="mdi mdi-chevron-down"></i>
-        </button>
-        <div class="dropdown-menu">
-            {% url 'whatsapp:messages.delete' pk=object.pk as delete_url %}
-            {% url 'whatsapp:messages.update' pk=object.pk as edit_url %}
-            {% url 'whatsapp:messages.duplicate' pk=object.pk as duplicate_url %}
+        <div class="dropdown">
+            <a role="button" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="las la-ellipsis-v font-20 text-muted"></i>
+            </a>
+            <div class="dropdown-menu">
+                {% url 'whatsapp:messages.delete' pk=object.pk as delete_url %}
+                {% url 'whatsapp:messages.update' pk=object.pk as edit_url %}
+                {% url 'whatsapp:messages.duplicate' pk=object.pk as duplicate_url %}
 
-            <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
-            <a class="dropdown-item" href="{{ duplicate_url }}">Duplicar</a>
-            <form method="post" action="{% url 'whatsapp:messages.publish-now' %}">
-                <input type="hidden" name="items" value="{{ object.pk }}">
-                {% csrf_token %}
-                <input class="dropdown-item" type="submit" value="Publicar ahora">
-            </form>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+                <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+                <a class="dropdown-item" href="{{ duplicate_url }}">Duplicar</a>
+                <form method="post" action="{% url 'whatsapp:messages.publish-now' %}">
+                    <input type="hidden" name="items" value="{{ object.pk }}">
+                    {% csrf_token %}
+                    <input class="dropdown-item" type="submit" value="Publicar ahora">
+                </form>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+            </div>
         </div>
     </td>
 {% endblock %}`
