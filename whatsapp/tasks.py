@@ -135,7 +135,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
 
         response = dict()
         if message.last_whatsapp_id:
-            response = service.forward_message(message.last_whatsapp_id, chat_id)
+            service.forward_message(message.last_whatsapp_id, chat_id)
         else:
             caption = message.message
             mimetype = message.message_type
