@@ -227,13 +227,13 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     search_fields = ['name', 'message']
     list_display = ['name', 'account', 'message_type', 'active', 'published_count']
     list_filter = ['account', 'active', 'message_type']
-    readonly_fields = ['published_count', 'file_preview']
+    readonly_fields = ['published_count', 'file_preview', 'last_whatsapp_id']
     filter_horizontal = ['weekdays', 'distribution_lists']
     actions = ['activar_mensajes', 'desactivar_mensajes', 'send_messages', 'message_to_status']
 
     fieldsets = [
         ("Información del mensaje", {
-            "fields": ["name", "account", "active"]
+            "fields": ["name", "account", "active", "last_whatsapp_id"]
         }),
         ("Contenido", {
             "fields": ["message", "file", "file_preview"]

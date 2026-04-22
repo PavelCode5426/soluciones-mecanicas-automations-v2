@@ -93,11 +93,10 @@ class WhatsAppMessageForm(forms.ModelForm):
 
     class Meta:
         model = WhatsAppMessage
-        exclude = ['published_count']
+        exclude = ['published_count', 'message_type', 'order']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
-            'order': forms.HiddenInput(),
         }
 
 
