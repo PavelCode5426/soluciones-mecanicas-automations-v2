@@ -130,64 +130,63 @@ def publish_whatsapp_status(status: WhatsAppStatus):
 
 def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
     message.refresh_from_db()
+    response = dict()
     if message.active and message.account.active:
         service = create_whatsapp_service(message.account)
 
-        response = dict()
-        if message.last_whatsapp_id:
-            response = service.forward_message(message.last_whatsapp_id, chat_id)
+        # if message.last_whatsapp_id:
+        #     response = service.forward_message(message.last_whatsapp_id, chat_id)
+        # else:
+        caption = message.message
+        mimetype = message.message_type
+        file = {
+            "mimetype": get_file_mimetype(message.file),
+            "data": base64.b64encode(message.file.read()).decode('utf-8'),
+        } if message.file else None
+        message_presence = "recording" if 'audio' in mimetype else "typing"
+
+        typing_timer = max(10, int(len(caption) * 0.03)) if typing_timeout is None else typing_timeout
+
+        while typing_timer > 0:
+            service.set_chat_presence(chat_id, message_presence)
+            typing_timer -= 5
+            time.sleep(5)
+
+        if message.message_type == 'list':
+            service.send_list_message({
+                "chatId": chat_id,
+                "reply_to": None,
+                "message": {
+                    "title": message.title,
+                    "description": message.description,
+                    "footer": message.footer,
+                    "button": message.button_label,
+                    "sections": message.sections
+                }})
+        elif file:
+            file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
+            if 'video' in mimetype:
+                response = service.send_video_message(file_message)
+            elif 'audio' in mimetype:
+                response = service.send_voice_message(file_message)
+            elif 'image' in mimetype:
+                response = service.send_image_message(file_message)
+            elif 'file' in mimetype:
+                response = service.send_file_message(file_message)
         else:
-            caption = message.message
-            mimetype = message.message_type
-            file = {
-                "mimetype": get_file_mimetype(message.file),
-                "data": base64.b64encode(message.file.read()).decode('utf-8'),
-            } if message.file else None
-            message_presence = "recording" if 'audio' in mimetype else "typing"
+            response = service.send_text_message({
+                "chatId": chat_id,
+                "reply_to": None,
+                "text": caption,
+                "linkPreview": False,
+                "linkPreviewHighQuality": False
+            })
+        service.set_chat_presence(chat_id, 'paused')
 
-            typing_timer = max(10, int(len(caption) * 0.03)) if typing_timeout is None else typing_timeout
-
-            while typing_timer > 0:
-                service.set_chat_presence(chat_id, message_presence)
-                typing_timer -= 5
-                time.sleep(5)
-
-            if message.message_type == 'list':
-                service.send_list_message({
-                    "chatId": chat_id,
-                    "reply_to": None,
-                    "message": {
-                        "title": message.title,
-                        "description": message.description,
-                        "footer": message.footer,
-                        "button": message.button_label,
-                        "sections": message.sections
-                    }})
-            elif file:
-                file_message = {"chatId": chat_id, "reply_to": None, "file": file, "caption": caption}
-                if 'video' in mimetype:
-                    response = service.send_video_message(file_message)
-                elif 'audio' in mimetype:
-                    response = service.send_voice_message(file_message)
-                elif 'image' in mimetype:
-                    response = service.send_image_message(file_message)
-                elif 'file' in mimetype:
-                    response = service.send_file_message(file_message)
-            else:
-                response = service.send_text_message({
-                    "chatId": chat_id,
-                    "reply_to": None,
-                    "text": caption,
-                    "linkPreview": False,
-                    "linkPreviewHighQuality": False
-                })
-            service.set_chat_presence(chat_id, 'paused')
-
-        if not isinstance(message, WhatsAppAutoReplyMessage):
-            print(response)
-            message.last_whatsapp_id = response.get('id')
-            message.published_count = F('published_count') + 1
-            message.save(update_fields=['published_count', 'last_whatsapp_id'])
+    if not isinstance(message, WhatsAppAutoReplyMessage):
+        message.last_whatsapp_id = response.get('id')
+        message.published_count = F('published_count') + 1
+        message.save(update_fields=['published_count', 'last_whatsapp_id'])
 
 
 def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
