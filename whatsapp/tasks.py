@@ -134,6 +134,7 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
     if message.active and message.account.active:
         service = create_whatsapp_service(message.account)
 
+        # TODO COMENTADO DADO QUE USO MOTOR GOWS DE WHATSAPP
         # if message.last_whatsapp_id:
         #     response = service.forward_message(message.last_whatsapp_id, chat_id)
         # else:
@@ -209,9 +210,10 @@ def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
     if refresh:
         message.refresh_from_db()
     if message.active and message.account.active:
-        if message.last_whatsapp_id:
-            message.last_whatsapp_id = None
-            message.save(update_fields=['last_whatsapp_id'])
+        # TODO REGREGAR ESTO ATRAS
+        # if message.last_whatsapp_id:
+        #     message.last_whatsapp_id = None
+        #     message.save(update_fields=['last_whatsapp_id'])
 
         contacts_and_groups = []
         for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():

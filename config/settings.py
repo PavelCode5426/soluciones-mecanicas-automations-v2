@@ -199,7 +199,7 @@ PLAYWRIGHT = dict(
 Q_CLUSTER = {
     "label": "Tareas pendientes",
     "name": "default",
-    "workers": 2,
+    "workers": 3,
     "timeout": 50 * 60,
     "recycle": 50,
     "retry": 60 * 60,
@@ -208,11 +208,11 @@ Q_CLUSTER = {
     "orm": "default",
     "ALT_CLUSTERS": {
         "high_priority": {
-            "workers": 1,
+            "workers": 5,
             'max_attempts': 3
         },
         "whatsapp": {
-            "workers": 2,
+            "workers": 5,
             'max_attempts': 1
         },
     },

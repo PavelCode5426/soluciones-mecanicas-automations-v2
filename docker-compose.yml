@@ -27,7 +27,7 @@ services:
       resources:
         limits:
           cpus: '1'
-          memory: '1.5G'
+          memory: '2G'
 volumes:
   storage:
 

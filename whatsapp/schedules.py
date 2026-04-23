@@ -33,17 +33,17 @@ def enqueue_active_messages():
     current_hour = current_time.hour
     current_weekday = current_time.weekday()
 
-    messages = (WhatsAppMessage.objects.select_related('account')
-                .exclude(frequency__isnull=True)
-                .filter(active=True, account__active=True, from_date__lte=current_time)
-                .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True))
-                .filter(from_time__lte=current_time, until_time__gte=current_time)
-                .filter(weekdays__day=current_weekday)
-                .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
-                .filter(can_publish=0)
-                .all())
+    messages = WhatsAppMessage.objects.select_related('account') \
+        .exclude(frequency__isnull=True) \
+        .filter(active=True, account__active=True, from_date__lte=current_time) \
+        .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
+        .filter(from_time__lte=current_time, until_time__gte=current_time) \
+        .filter(weekdays__day=current_weekday) \
+        .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField())) \
+        .filter(can_publish=0)
 
-    messages.update(last_whatsapp_id=None)
-    for message in messages:
+    #TODO REGRESAR ESTO ATRAS
+    # messages.update(last_whatsapp_id=None)
+    for message in messages.all():
         enqueue_whatsapp_message(message, refresh=False)
     return f"Programados {len(messages)} mensajes de whatsapp a las {localtime()}"
