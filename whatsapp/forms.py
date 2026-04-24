@@ -105,6 +105,8 @@ class WhatsAppMessageForm(forms.ModelForm):
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
+            'from_time': TimePickerInput(),
+            'until_time': TimePickerInput(),
         }
 
 
