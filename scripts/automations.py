@@ -9,6 +9,7 @@ from llama_index.core import PromptTemplate
 from llama_index.core.agent import FunctionAgent
 from llama_index.core.tools import FunctionTool
 from llama_index.core.workflow import Workflow, Event, step, StartEvent, StopEvent
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.llms.ollama import Ollama
 from pydantic import BaseModel, Field, HttpUrl
 
@@ -144,7 +145,7 @@ class FacebookPostExtractor:
             "author": self.extract_author(),
             # "timestamp": self.extract_timestamp(),
             "message": self.extract_message(),
-            # "images": self.extract_images(),
+            "images": self.extract_images(),
             # "reactions": self.extract_reactions(),
             # "comments": self.extract_comments_count(),
             # "shares": self.extract_shares_count(),
@@ -159,7 +160,6 @@ class AnalyzerResponseEvent(StopEvent):
     is_relevant: bool
     justification: Optional[str]
     promotional_message: Optional[str]
-    whatsapp_promotional_message: Optional[str]
 
 
 class FacebookPostAnalyzerOutputFormat(BaseModel):
@@ -171,54 +171,65 @@ class FacebookPostAnalyzerOutputFormat(BaseModel):
 
 class FacebookPostAnalyzerAgent(Workflow):
     classificator_prompt = """
-    Eres un experto en prospección de ventas. Tu misión es analizar posts de Facebook para identificar vendedores potenciales.
+    Eres un experto en calificación de leads para ventas. Tu misión es analizar una publicación de Facebook y determinar si el autor es un cliente potencial para el vendedor. Para ti, un cliente potencial es **cualquier persona que esté vendiendo productos o servicios que se relacionen directamente con lo que el vendedor ofrece**, o que claramente necesite los productos/servicios del vendedor para su negocio. No necesitas certeza absoluta; si hay indicios razonables de que encaja, márcalo como relevante.
 
-    POST A ANALIZAR:
-    - Autor: {facebook_profile}
-    - Contenido: {facebook_post}
+POST A ANALIZAR:
+- Autor: {facebook_profile}
+- Contenido: {facebook_post}
 
-    REGLAS DE CLASIFICACIÓN:
-    1. `is_relevant`: Debe ser true SOLO si el autor está vendiendo un producto o servicio. Si el autor está BUSCANDO comprar algo o hace una pregunta informativa, marca false.
-    2. `justification`: Una frase corta. Ej: "Vende repuestos de autos" o "Es una consulta sobre clima, no relevante".
-    3. `phone_number`: Extrae solo números. Si hay varios, el primero. Si no hay, null. Ignora precios (ej. $100).
-    4. `product_service`: Identifica qué vende. Ej: "Zapatos artesanales", "Servicios de mudanza". Máximo 5 palabras.
+CRITERIO DE CLIENTE POTENCIAL (LO QUE EL VENDEDOR OFRECE):
+- {lead_description}
 
-    RESPONDE ÚNICAMENTE EN FORMATO JSON:
-    {{
-      "is_relevant": boolean,
-      "justification": "string",
-      "phone_number": "string o null",
-      "product_service": "string o null"
-    }}
+INSTRUCCIONES CLAVE:
+- Lee el post e identifica si el autor **está vendiendo algo que coincida con los productos/servicios del vendedor**, o si su negocio podría beneficiarse directamente de ellos.
+- Si el autor solo está comprando, buscando algo o haciendo una consulta, marca false.
+- Si la publicación es ambigua pero menciona palabras clave relacionadas (ej.: "comida", "restaurante", "distribución"), considera true.
+
+REGLAS DE CLASIFICACIÓN:
+1. `is_relevant`: true si el autor está vendiendo o su negocio se alinea con los productos/servicios descritos en `lead_description`. false si no hay relación o solo está comprando/preguntando.
+2. `justification`: Frase corta (10-20 palabras) explicando por qué sí o no encaja. Ej: "Dueño de restaurante buscando inversionistas, encaja con venta de alimentos al por mayor".
+3. `phone_number`: Extrae solo dígitos (mínimo 7). Si hay varios, toma el primero. Si no hay, null. Ignora cifras que sean precios (ej. $100, 50 USD).
+4. `product_service`: Identifica con precisión qué vende/ofrece el cliente. Máximo 5 palabras. Si no se determina, usa "No especificado".
+
+RESPONDE ÚNICAMENTE EN FORMATO JSON:
+{
+  "is_relevant": boolean,
+  "justification": "string",
+  "phone_number": "string o null",
+  "product_service": "string o null"
+}
     """
 
     agent_prompt = """
-    Eres Pavel, un estratega de conversión. Tu objetivo es dejar un comentario en Facebook que cuestione la eficiencia del vendedor y lo obligue a buscar profesionalismo.
-
-    DATOS:
-    - Nombre: {facebook_profile}
-    - Producto: {product_service}
-    - Link: {whatsapp_link}
-
-    ESTRUCTURA OBLIGATORIA:
-    1. GOLPE DE REALIDAD: "Hola {facebook_profile}, tienes un producto con potencial, pero publicarlo así es jugar a la lotería."
-    2. EL DIAGNÓSTICO: "Mientras tu gestión dependa de responder comentarios manualmente, tu negocio tiene un techo de cristal que no te deja escalar."
-    3. LA DIFERENCIA: "Yo instalo infraestructuras de conversión que venden 24/7 sin que tú muevas un dedo."
-    4. LA PREGUNTA DISRUPTIVA: "¿Quieres un negocio real o un hobby agotador?"
-    5. CTA: "Hablemos aquí: {whatsapp_link} — Pavel de Sinergia Solutions."
-
+    Eres un asesor comercial experto en cierres. Genera un mensaje personalizado en una sola línea (sin saltos) para un cliente potencial.
+    
+    DATOS DE LO QUE TÚ (VENDEDOR) OFRECES Y VENTAJAS:
+    - {agent_description}
+    
+    LO QUE EL CLIENTE VENDE: {product_service}
+    ENLACE DIRECTO DE WHATSAPP DEL VENDEDOR: https://chat.whatsapp.com/FJXetpvAYsu3Uue3VrgnSd
+    
+    ESTRUCTURA OBLIGATORIA (todo seguido, sin enters):
+    1. Saludo: "Hola [nombre del cliente]," (si no hay nombre, "Hola,").
+    2. Apertura de valor: "Vi que vendes {product_service}, y tienes un negocio con mucho potencial."
+    3. Diagnóstico: "Para crecer necesitas un proveedor mayorista confiable, con los mejores precios y logística incluida."
+    4. Propuesta diferenciadora: "Yo manejo pollo al por mayor y productos Vima con precios especiales, y servicio de transporte para que nunca te falte mercancía."
+    5. CTA: "Escríbeme a {whatsapp_link} para darte una cotización personalizada."
+    
     REGLAS CRÍTICAS:
-    - Una sola línea (sin saltos de línea).
-    - Máximo 600 caracteres.
-    - Tono: Desafiante, experto, de alto nivel.
-    - NO uses emojis.
-    - Si el nombre es "sin nombre", usa "Hola,".
-    """
+    - Una sola línea continua, máximo 600 caracteres.
+    - Incluye EXACTAMENTE el enlace {whatsapp_link} en el CTA, sin modificarlo.
+    - Tono profesional, directo, sin emojis.
+    - Si no hay nombre, solo "Hola,".
+"""
 
     def __init__(self, lead_description=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
-                          request_timeout=500)
+        # self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
+        #                   request_timeout=500)
+
+        model_name = 'meta-llama/Meta-Llama-3-8B-Instruct'
+        self.llm = HuggingFaceInferenceAPI(model_name=model_name, token=None)
         self.lead_description = lead_description
 
     @step
@@ -232,6 +243,7 @@ class FacebookPostAnalyzerAgent(Workflow):
         post_data = ev.post_data
         facebook_profile = post_data.get('author').get('name')
         facebook_post = post_data.get('message')
+        facebook_images = post_data.get('images')
         print(f"Generando mensaje para: {facebook_post}")
 
         if not facebook_post:
@@ -239,14 +251,13 @@ class FacebookPostAnalyzerAgent(Workflow):
 
         response = self.llm.structured_predict(FacebookPostAnalyzerOutputFormat,
                                                PromptTemplate(self.classificator_prompt),
+                                               lead_description=self.lead_description,
                                                facebook_post=facebook_post, facebook_profile=facebook_profile)
 
         facebook_promotional_message = None
         if response.is_relevant:
-            whatsapp_link = "https://wa.me/50735591?text=Hola"
             facebook_promotional_message = self.llm.predict(
                 PromptTemplate(self.agent_prompt),
-                whatsapp_link=whatsapp_link,
                 facebook_post=facebook_post,
                 facebook_profile=facebook_profile,
                 product_service=response.product_service,

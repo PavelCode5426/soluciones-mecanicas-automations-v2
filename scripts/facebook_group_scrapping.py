@@ -1,4 +1,3 @@
-import asyncio
 import random
 import time
 from pathlib import Path
@@ -11,16 +10,20 @@ state_file = Path(__file__).parent.joinpath("states/facebook.json")
 timeout = 60 * 100000
 
 with sync_playwright() as pw:
-    device = pw.devices['iPhone 12']
     browser = pw.chromium.launch(headless=False, slow_mo=1500, timeout=timeout).new_context(
         storage_state=str(state_file),
-        # viewport={"width": 390, "height": 644},
-        # record_video_dir="videos/", record_video_size={"width": 390, "height": 644}
     )
 
     page = browser.new_page()
-    group_url = ["https://www.facebook.com/groups/feed/"]
-    page.goto(random.choice(group_url), timeout=timeout, wait_until='commit')
+    group_url = ["https://www.facebook.com/groups/search/group_posts", None]
+    search_keyword = "Pollo en venta"
+
+    group_url = random.choice(group_url)
+
+    url = group_url if group_url else f'https://www.facebook.com/search/top/'
+    if search_keyword:
+        url += f'?q={search_keyword}'
+    page.goto(url, wait_until='commit')
 
     facebook_articles = []
     seen_ids = set()
@@ -51,15 +54,28 @@ with sync_playwright() as pw:
 
 
         async def analyzer_facebook_post():
-            textarea = article.get_by_text("Comentar como")
+            lead_description = """Soy Ivonne, comercial de una empresa mayorista de alimentos. Vendo pollo y productos Vima a 
+                los mejores precios, con servicio de transporte incluido. Busco dueños de negocios de alimentos (
+                restaurantes, pollerías, supermercados, tiendas) que necesiten proveedor mayorista y quieran entrar a mi 
+                cartera de clientes. Escribirme al privado por teléfono +53 55161004"""
 
-            post_analyser = FacebookPostAnalyzerAgent()
-            response = await post_analyser.run(raw_html=post_html, )
+            post_analyser = FacebookPostAnalyzerAgent(lead_description=lead_description)
+            response = await post_analyser.run(raw_html=post_html)
+
             if response.is_relevant:
-                print("Mensaje relevante")
-                # textarea.click()
-                # page.keyboard.type(response.promotional_message)
-                # page.keyboard.press('Enter')
+                article.locator('[aria-label="Dejar un comentario"]').click()
+
+                modal = page.get_by_role('dialog')
+
+                textarea = modal.get_by_text("Comentar como")
+                textarea.scroll_into_view_if_needed()
+                textarea.highlight()
+                textarea.click(force=True)
+
+                page.keyboard.type(response.promotional_message)
+                page.keyboard.press('Enter')
+
+                modal.locator('[aria-label="Cerrar"]').click()
 
 
         run_async(analyzer_facebook_post())

@@ -155,15 +155,16 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
 
 
 class SocialNetworkAnalyzerAgent(Workflow):
-    def __init__(self, system_prompt=None, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, timeout=None, **kwargs)
         self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
                           request_timeout=500)
-        self.system_prompt = system_prompt
+        self.classificator_prompt = kwargs.get('classificator_prompt')
+        self.agent_prompt = kwargs.get('agent_prompt')
+        self.agent_description = kwargs.get('agent_description')
 
 
 class FacebookPostAnalyzerAgent(SocialNetworkAnalyzerAgent):
-
     @step
     def start_workflow(self, ev: StartEvent) -> PostParsedEvent:
         raw_html = ev.get('raw_html', "")
@@ -179,12 +180,24 @@ class FacebookPostAnalyzerAgent(SocialNetworkAnalyzerAgent):
         if not facebook_post:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        response = self.llm.structured_predict(SocialNetworkPostAnalyzerOutputFormat,
-                                               PromptTemplate(self.system_prompt),
-                                               post=facebook_post, profile=facebook_profile)
+        response = self.llm.structured_predict(
+            SocialNetworkPostAnalyzerOutputFormat, PromptTemplate(self.classificator_prompt),
+            facebook_post=facebook_post, facebook_profile=facebook_profile)
 
-        return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
-                                     promotional_message=response.promotional_message)
+        promotional_message = None
+        if response.is_relevant:
+            promotional_message = self.llm.predict(
+                PromptTemplate(self.agent_prompt),
+                facebook_post=facebook_post,
+                facebook_profile=facebook_profile,
+                product_service=response.product_service,
+                extracted_phone=response.phone_number
+            )
+
+        return AnalyzerResponseEvent(
+            is_relevant=response.is_relevant, justification=response.justification,
+            promotional_message=promotional_message
+        )
 
 
 class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
@@ -198,12 +211,13 @@ class WhatsAppLeadAnalyzer(SocialNetworkAnalyzerAgent):
         if not messages:
             return AnalyzerResponseEvent(is_relevant=False, justification=None, promotional_message=None)
 
-        response = self.llm.structured_predict(SocialNetworkPostAnalyzerOutputFormat,
-                                               PromptTemplate(self.system_prompt),
-                                               messages=messages, groups=groups, profile=profile)
+        response = self.llm.structured_predict(
+            SocialNetworkPostAnalyzerOutputFormat, PromptTemplate(self.agent_prompt),
+            messages=messages, groups=groups, profile=profile)
 
-        return AnalyzerResponseEvent(is_relevant=response.is_relevant, justification=response.justification,
-                                     promotional_message=response.promotional_message)
+        return AnalyzerResponseEvent(
+            is_relevant=response.is_relevant, justification=response.justification,
+            promotional_message=response.promotional_message)
 
 
 class FacebookAccountAgent:

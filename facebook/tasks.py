@@ -1,7 +1,6 @@
 import random
 
-from django.db.models import QuerySet, Q, ExpressionWrapper, F, DecimalField
-from django.utils.timezone import now
+from django.db.models import QuerySet
 from django_q.tasks import async_task
 
 from facebook.models import FacebookGroup, FacebookProfile, FacebookPostCampaign, FacebookLeadExplorer
@@ -36,15 +35,18 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
         if post.distribution_count:
             groups = groups[:post.distribution_count]
         for group in groups:
-            task_name = f"{group.name} -> Post:{post.id}"
+            task_name = f"{group.name}| {post.id} | {post.profile}"
             for_enqueue.append(
-                dict(args=(group, post,), kwargs=dict(task_name=task_name, group=f'facebook_campaign_{post.id}'))
+                {
+                    "args": (group, post,),
+                    "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}'}
+                }
             )
 
-        random.shuffle(for_enqueue)
-        for task in for_enqueue:
-            async_task(service.publish_new_campaign, *task['args'], **task['kwargs'])
+            random.shuffle(for_enqueue)
+            for task in for_enqueue:
+                async_task(service.publish_new_campaign, *task['args'], **task['kwargs'])
 
-        total_items += len(for_enqueue)
+            total_items += len(for_enqueue)
 
-    return total_items
+        return total_items

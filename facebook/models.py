@@ -41,7 +41,6 @@ class FacebookProfile(models.Model):
     context = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
     posts_footer = models.TextField(null=True, blank=True)
-    leads_explorer_prompt = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
@@ -96,9 +95,14 @@ class FacebookPostCampaign(AbstractFacebookPost):
 
 
 class FacebookLeadExplorer(models.Model):
-    description = models.TextField(null=True, blank=True)
     profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
-    group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT)
+    group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT,
+                                       blank=True)
+    search_keyword = models.CharField(max_length=250, null=True, blank=True)
+    agent_description = models.TextField(null=True, blank=True)
+    classificator_prompt = models.TextField(null=True, blank=True)
+    agent_prompt = models.TextField(null=True, blank=True)
+
     limit = models.IntegerField(default=100)
     leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)

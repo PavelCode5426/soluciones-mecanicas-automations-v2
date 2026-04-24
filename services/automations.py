@@ -1,14 +1,11 @@
-import asyncio
 import random
 import time
 
-import nest_asyncio
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db.models import F
 from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
-from workflows import Context
 
 from core.helpers import run_async
 from facebook.models import FacebookPostCampaign, FacebookLeadExplorer, FacebookScheduledPost, AbstractFacebookPost
@@ -20,9 +17,9 @@ def get_playwright() -> PlaywrightContextManager:
     return sync_playwright()
 
 
-
-
 class FacebookAutomationService:
+    blocked_message = "Limitamos la frecuencia con la que puedes publicar, comentar o realizar otras acciones durante un período determinado para proteger a la comunidad frente al spam."
+
     def __init__(self, profile: FacebookProfile):
         self.profile = profile
 
@@ -93,7 +90,11 @@ class FacebookAutomationService:
                 try:
                     browser = self.get_browser(pw)
                     page = browser.new_page()
-                    page.goto(group.url, wait_until='load')
+
+                    url = group.url if group else f'https://www.facebook.com/search/top/'
+                    if explorer.search_keyword:
+                        url += f'?q={explorer.search_keyword}'
+                    page.goto(url, wait_until='load')
 
                     count = 0
                     while count <= 5:
@@ -116,14 +117,29 @@ class FacebookAutomationService:
                         except Exception:
                             pass
 
-                        textarea = article.get_by_role('textbox')
                         try:
-                            post_analyser = FacebookPostAnalyzerAgent(self.profile.leads_explorer_prompt)
-                            response = run_async(post_analyser.run(raw_html=article.inner_html()))
+
+                            post_analyzer = FacebookPostAnalyzerAgent(
+                                agent_prompt=explorer.agent_prompt,
+                                agent_description=explorer.agent_description,
+                                classificator_prompt=explorer.classificator_prompt,
+                            )
+                            response = run_async(post_analyzer.run(raw_html=article.inner_html()))
+
                             if response.is_relevant:
-                                textarea.click()
+                                article.locator('[aria-label="Dejar un comentario"]').click()
+
+                                modal = page.get_by_role('dialog')
+
+                                textarea = modal.get_by_text("Comentar como")
+                                textarea.scroll_into_view_if_needed()
+                                textarea.highlight()
+                                textarea.click(force=True)
+
                                 page.keyboard.type(response.promotional_message)
                                 page.keyboard.press('Enter')
+
+                                modal.locator('[aria-label="Cerrar"]').click()
                                 leads_found += 1
 
                         except Exception as e:
@@ -248,3 +264,9 @@ class FacebookAutomationService:
         time.sleep(random.randint(5, 15))
         publish_button.click()
         page.locator('span', has_text='Publicando').wait_for(state='hidden')
+
+        self.__check_blocked_account(page)
+
+    def __check_blocked_account(self, page):
+        if page.get_by_text(self.blocked_message):
+            raise Exception('Cuenta bloqueada por Facebook')
