@@ -225,7 +225,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
 class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppMessageAdminForm
     search_fields = ['name', 'message']
-    list_display = ['name', 'account', 'message_type', 'active', 'published_count']
+    list_display = ['name', 'account', 'message_type', 'active','schedule_time', 'published_count']
     list_filter = ['account', 'active', 'message_type']
     readonly_fields = ['published_count', 'file_preview', 'last_whatsapp_id']
     filter_horizontal = ['weekdays', 'distribution_lists']
@@ -244,13 +244,15 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
         ("Planificación", {
             "fields": ["order", "frequency", "from_date", "until_date", "from_time", "until_time", "weekdays",
                        "sync_schedule"],
-            'classes': ('collapse',),
         }),
         ("Estadísticas", {
             "fields": ["published_count"],
             'classes': ('collapse',),
         }),
     ]
+
+    def schedule_time(self, obj):
+        return f'{obj.from_time}-{obj.until_time}'
 
     @admin.action(description='Activar mensajes los seleccionados.')
     def activar_mensajes(self, request, queryset):

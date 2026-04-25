@@ -15,7 +15,7 @@ with sync_playwright() as pw:
     )
 
     page = browser.new_page()
-    group_url = ["https://www.facebook.com/groups/search/group_posts", None]
+    group_url = ["https://www.facebook.com/search/top/", None]
     search_keyword = "Pollo en venta"
 
     group_url = random.choice(group_url)
@@ -23,7 +23,7 @@ with sync_playwright() as pw:
     url = group_url if group_url else f'https://www.facebook.com/search/top/'
     if search_keyword:
         url += f'?q={search_keyword}'
-    page.goto(url, wait_until='commit')
+    page.goto(url, wait_until='load')
 
     facebook_articles = []
     seen_ids = set()
