@@ -40,6 +40,8 @@ class FacebookProfile(models.Model):
     name = models.CharField(max_length=250)
     context = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
+    can_search_leads = models.BooleanField(default=False)
+    can_post_in_groups = models.BooleanField(default=True)
     posts_footer = models.TextField(null=True, blank=True)
 
     def __str__(self):

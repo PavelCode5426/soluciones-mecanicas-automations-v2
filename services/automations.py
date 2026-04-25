@@ -83,7 +83,7 @@ class FacebookAutomationService:
     def group_lead_explorer(self, explorer: FacebookLeadExplorer):
         self.refresh_profile()
         explorer.refresh_from_db()
-        if explorer.active and self.profile.active:
+        if all([explorer.active, self.profile.active, self.profile.can_search_leads]):
             leads_found = 0
             group = explorer.group_category.groups.filter(active=True).order_by('?').first()
             with get_playwright() as pw:
@@ -160,7 +160,7 @@ class FacebookAutomationService:
         self.refresh_profile()
         group.refresh_from_db()
         post.refresh_from_db()
-        if post.active and group.active and self.profile.active:
+        if all([post.active, group.active, self.profile.active, self.profile.can_post_in_groups]):
             screenshot, exception = self.__publish_campaign(group.url, post)
             file_name = f"{group}_screenshot.jpeg".lower()
             group.screenshot.delete(False)
@@ -179,7 +179,7 @@ class FacebookAutomationService:
     def publish_new_post(self, post: FacebookScheduledPost):
         self.refresh_profile()
         post.refresh_from_db()
-        if post.active and self.profile.active:
+        if all([post.active, self.profile.active]):
             screenshot, exception = self.__publish_post(post)
 
     def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):

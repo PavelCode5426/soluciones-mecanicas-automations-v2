@@ -17,8 +17,9 @@ admin.site.index_title = "Bienvenido al Panel"
 
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
-    list_display = ['name', 'active']
+    list_display = ['name', 'active', 'can_search_leads', 'can_post_in_groups']
     actions = ['sync_facebook_groups']
+
 
     @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
     def sync_facebook_groups(self, request, queryset):
