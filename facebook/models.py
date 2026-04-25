@@ -97,7 +97,7 @@ class FacebookPostCampaign(AbstractFacebookPost):
 class FacebookLeadExplorer(models.Model):
     profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
     group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT,
-                                       blank=True)
+                                       blank=True, null=True)
     search_keyword = models.CharField(max_length=250, null=True, blank=True)
     agent_description = models.TextField(null=True, blank=True)
     classificator_prompt = models.TextField(null=True, blank=True)

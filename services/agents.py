@@ -3,6 +3,7 @@ from typing import Optional
 
 import chromadb
 from bs4 import BeautifulSoup
+from django.conf import settings
 from llama_index.core import PromptTemplate
 from llama_index.core import StorageContext, load_index_from_storage, SimpleDirectoryReader, VectorStoreIndex
 from llama_index.core.agent import FunctionAgent
@@ -11,6 +12,7 @@ from llama_index.core.memory import StaticMemoryBlock, FactExtractionMemoryBlock
 from llama_index.core.tools import QueryEngineTool
 from llama_index.core.workflow import Workflow, Event, step, StartEvent, StopEvent
 from llama_index.embeddings.ollama import OllamaEmbedding
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.llms.ollama import Ollama
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from pydantic import BaseModel, Field
@@ -157,8 +159,13 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
 class SocialNetworkAnalyzerAgent(Workflow):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, timeout=None, **kwargs)
-        self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
-                          request_timeout=500)
+
+        # self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
+        #                   request_timeout=500)
+
+        model_name = 'meta-llama/Meta-Llama-3-8B-Instruct'
+        self.llm = HuggingFaceInferenceAPI(model_name=model_name, token=settings.HUGGINGFACE_TOKEN)
+
         self.classificator_prompt = kwargs.get('classificator_prompt')
         self.agent_prompt = kwargs.get('agent_prompt')
         self.agent_description = kwargs.get('agent_description')
