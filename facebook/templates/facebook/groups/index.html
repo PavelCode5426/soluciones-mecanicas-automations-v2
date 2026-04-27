@@ -1,0 +1,27 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+
+{% block title %}Grupos de Facebook{% endblock %}
+{% block page_title %}Grupos de Facebook{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+    <th>Estado</th>
+    <th>URL</th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{% object_link object.profile url='facebook:accounts.details' %}</td>
+    <td>
+        {% url 'facebook:groups.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td>{{ object.url }}</td>
+{% endblock %}
+
+{% block empty %}
+    {% include 'components/empty.html' with text="No existen grupos en el sistema" %}
+{% endblock %}

@@ -1,0 +1,47 @@
+`{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+{% load django_bootstrap5 %}
+
+{% block title %}Agentes de Facebook{% endblock %}
+{% block page_title %}Agentes de Facebook{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Estado</th>
+    <th class="text-end">
+        {% url 'facebook:agents.create' as create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary"><i class="fa fa-plus"></i> Crear Nuevo</a>
+    </th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{% object_link object url='facebook:agents.details' %}</td>
+    <td>
+        {% url 'facebook:agents.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td class="text-end">
+        <div class="dropdown">
+            <a role="button" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="las la-ellipsis-v font-20 text-muted"></i>
+            </a>
+            <div class="dropdown-menu">
+                {% url 'facebook:agents.delete' pk=object.pk as delete_url %}
+                {% url 'facebook:agents.update' pk=object.pk as edit_url %}
+                {% url 'facebook:agents.details' pk=object.pk as profile_url %}
+
+
+                <a class="dropdown-item" href="{{ profile_url }}">Ver perfil</a>
+                <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+            </div>
+        </div>
+    </td>
+{% endblock %}`
+
+{% block empty %}
+    {% url 'facebook:agents.create' as create_url %}
+    {% include 'components/empty.html' with url=create_url text="No existen agentes en el sistema" %}
+{% endblock %}
