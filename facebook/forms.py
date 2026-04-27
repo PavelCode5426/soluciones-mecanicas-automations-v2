@@ -10,6 +10,8 @@ class FacebookAccountForm(forms.ModelForm):
 
 
 class FacebookAgentForm(forms.ModelForm):
+    name = forms.CharField(required=True)
+
     class Meta:
         model = models.FacebookLeadExplorer
         exclude = ['leads_found']

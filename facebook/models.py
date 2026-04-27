@@ -97,6 +97,7 @@ class FacebookPostCampaign(AbstractFacebookPost):
 
 
 class FacebookLeadExplorer(models.Model):
+    name = models.CharField(max_length=250, null=True, blank=True)
     profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
     group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT,
                                        blank=True, null=True)
@@ -108,6 +109,9 @@ class FacebookLeadExplorer(models.Model):
     limit = models.IntegerField(default=100)
     leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.profile
 
     class Meta:
         verbose_name = "Agente Comercial"

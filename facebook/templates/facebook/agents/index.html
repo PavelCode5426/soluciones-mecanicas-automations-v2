@@ -8,6 +8,7 @@
 
 {% block table_headers %}
     <th>Nombre</th>
+    <th>Perfil</th>
     <th>Estado</th>
     <th class="text-end">
         {% url 'facebook:agents.create' as create_url %}
@@ -16,6 +17,7 @@
 {% endblock %}
 
 {% block table_data %}
+    <td>{{ object.name }}</td>
     <td>{% object_link object url='facebook:agents.details' %}</td>
     <td>
         {% url 'facebook:agents.toggle-status' pk=object.pk as change_status_url %}
