@@ -20,7 +20,7 @@ class FacebookAgentForm(forms.ModelForm):
 
 class FacebookDistributionListCreateForm(forms.ModelForm):
     class Meta:
-        model = models.FacebookGroupCategory
+        model = models.FacebookDistributionList
         exclude = ['groups', 'active']
 
 
@@ -31,7 +31,7 @@ class FacebookDistributionListUpdateForm(forms.ModelForm):
         self.fields['groups'].queryset = models.FacebookGroup.objects.filter(profile=kwargs['instance'].profile)
 
     class Meta:
-        model = models.FacebookGroupCategory
+        model = models.FacebookDistributionList
         fields = forms.ALL_FIELDS
 
 

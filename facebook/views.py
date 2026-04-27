@@ -117,7 +117,7 @@ class FacebookAgentToggleStatusView(SuccessMessageMixin, ToggleStatusView):
 
 class FacebookDistributionListsListView(ListView):
     template_name = 'facebook/distribucion_lists/index.html'
-    queryset = models.FacebookGroupCategory.objects.all()
+    queryset = models.FacebookDistributionList.objects.all()
 
 
 class FacebookDistributionListsCreateView(SuccessMessageMixin, CreateView):
@@ -137,7 +137,7 @@ class FacebookDistributionListsCreateView(SuccessMessageMixin, CreateView):
 class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy('facebook:distribution-lists.index')
     form_class = forms.FacebookDistributionListUpdateForm
-    queryset = models.FacebookGroupCategory.objects.all()
+    queryset = models.FacebookDistributionList.objects.all()
     template_name = 'facebook/distribucion_lists/create_or_update.html'
     extra_context = {
         "page_title": "Actualizar lista de distribución: ",
@@ -149,13 +149,13 @@ class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
 class FacebookDistributionListsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:distribution-lists.index')
-    queryset = models.FacebookGroupCategory.objects.all()
+    queryset = models.FacebookDistributionList.objects.all()
     success_message = "Lista de distribución object activada/desactivada exitosamente"
 
 
 class FacebookDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
     success_url = reverse_lazy('whatsapp:distribution-lists.index')
-    queryset = models.FacebookGroupCategory.objects.all()
+    queryset = models.FacebookDistributionList.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
         "page_title": "Eliminar lista de distribución: ",

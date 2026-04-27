@@ -5,7 +5,7 @@ from django_q.admin import QueueAdmin
 from django_q.models import OrmQ
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPostCampaign, \
+from facebook.models import FacebookProfile, FacebookGroup, FacebookDistributionList, FacebookPostCampaign, \
     FacebookAgent, \
     FacebookHistory, FacebookScheduledPost
 from facebook.tasks import syncronize_profile_groups, enqueue_facebook_campaign, enqueue_lead_explorer
@@ -42,7 +42,7 @@ class FacebookGroudAdmin(admin.ModelAdmin):
     image.short_description = 'Image'
 
 
-@admin.register(FacebookGroupCategory)
+@admin.register(FacebookDistributionList)
 class FacebookGroupCategoryAdmin(admin.ModelAdmin):
     list_display = ['name', 'profile', 'total_groups']
     list_filter = ["profile"]
@@ -62,9 +62,9 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
             obj_id = request.resolver_match.kwargs.get('object_id')
             if obj_id:
                 try:
-                    category = FacebookGroupCategory.objects.get(pk=obj_id)
+                    category = FacebookDistributionList.objects.get(pk=obj_id)
                     kwargs["queryset"] = FacebookGroup.objects.filter(profile=category.profile)
-                except FacebookGroupCategory.DoesNotExist:
+                except FacebookDistributionList.DoesNotExist:
                     pass
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 

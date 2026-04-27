@@ -22,11 +22,11 @@ class FacebookGroup(models.Model):
         verbose_name_plural = "Grupos"
 
 
-class FacebookGroupCategory(models.Model):
-    profile = models.ForeignKey('FacebookProfile', related_name='group_categories', null=True, blank=True,
+class FacebookDistributionList(models.Model):
+    profile = models.ForeignKey('FacebookProfile', related_name='distribution_lists', null=True, blank=True,
                                 on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
-    groups = models.ManyToManyField(FacebookGroup, related_name='categories', blank=True)
+    groups = models.ManyToManyField(FacebookGroup, related_name='distribution_lists', blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.profile})"
@@ -79,7 +79,7 @@ class FacebookScheduledPost(AbstractFacebookPost):
 class FacebookPostCampaign(AbstractFacebookPost):
     profile = models.ForeignKey(FacebookProfile, related_name='campaigns', null=True, blank=True,
                                 on_delete=models.PROTECT)
-    distribution_lists = models.ManyToManyField(FacebookGroupCategory, related_name='campaigns', blank=True)
+    distribution_lists = models.ManyToManyField(FacebookDistributionList, related_name='campaigns', blank=True)
     from_date = models.DateField(default=now)
     until_date = models.DateField(null=True, blank=True)
 
@@ -100,7 +100,7 @@ class FacebookPostCampaign(AbstractFacebookPost):
 class FacebookAgent(models.Model):
     name = models.CharField(max_length=250)
     profile = models.ForeignKey(FacebookProfile, related_name='agents', on_delete=models.PROTECT)
-    distribution_list = models.ForeignKey(FacebookGroupCategory, related_name='agents', on_delete=models.PROTECT,
+    distribution_list = models.ForeignKey(FacebookDistributionList, related_name='agents', on_delete=models.PROTECT,
                                           blank=True, null=True)
     search_keyword = models.CharField(max_length=250, null=True, blank=True)
     agent_description = models.TextField(null=True, blank=True)
