@@ -2,10 +2,9 @@ import datetime
 
 from dateutil.utils import today
 from django.db import models
-from django.utils.timezone import now
 from django_jsonform.models.fields import JSONField
 
-from core.models import WeekDay
+from core.models import WeekDay, Schedule
 from ia_assistant.models import RAGApplication
 from whatsapp.helpers import get_message_type
 from whatsapp.managers import ProcessedLeadManager
@@ -49,7 +48,6 @@ class ScheduledMessage(models.Model):
         (8, "Publicar cada 8h"),
     ])
 
-    publish_at = models.TimeField(default=now)
     order = models.IntegerField(default=0)
     weekdays = models.ManyToManyField(WeekDay, blank=True)
     published_count = models.BigIntegerField(default=0)
@@ -188,7 +186,6 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
 
     distribution_lists = models.ManyToManyField(WhatsAppDistributionList, related_name='messages', blank=True)
 
-    publish_at = None
     from_time = models.TimeField(default=datetime.time(0, 0))
     until_time = models.TimeField(default=datetime.time(23, 59))
     weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
@@ -258,3 +255,9 @@ class WhatsAppProcessedLead(WhatsAppLead):
         verbose_name = 'Cliente Procesado'
         verbose_name_plural = 'Clientes Procesados'
         proxy = True
+
+
+class WhatsAppScheduleMessage(models.Model):
+    order = models.IntegerField(default=0)
+    message = models.ForeignKey(WhatsAppMessage, related_name='schedules', on_delete=models.PROTECT)
+    schedule = models.ForeignKey(Schedule, related_name='messages', on_delete=models.PROTECT)
