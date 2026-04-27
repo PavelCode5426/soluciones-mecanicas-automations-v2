@@ -16,11 +16,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.WARNING("Initializing database.."))
-        for x in range(0, 23):
+        for x in range(0, 24):
             time = datetime.time(hour=x)
+            name = time.strftime('%I:%M %p')
             Schedule.objects.update_or_create(
-                defaults={"name": time.strftime("%H:%M")},
-                create_defaults={"name": time.strftime("%H:%M"), "time": time},
+                defaults={"name": name},
+                create_defaults={"name": name, "time": time},
                 time=time
             )
 

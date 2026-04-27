@@ -5,15 +5,17 @@ from django import forms
 from django.core.cache import cache
 from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
+from django.db.models import Max
 from django.forms import modelformset_factory
 from rest_framework.reverse import reverse
 
 from core.forms import PublishNowForm
 from core.forms.widgets import DatePickerInput, TimePickerInput
+from core.models import Schedule
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
 from whatsapp.models import WhatsAppStatus, WhatsAppContact, WhatsAppAccount, WhatsAppDistributionList, WhatsAppGroup, \
-    WhatsAppMessage
+    WhatsAppMessage, WhatsAppScheduleMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups, enqueue_whatsapp_status, enqueue_whatsapp_message
 
 ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')], widget=forms.Select)
@@ -84,11 +86,12 @@ class WhatsAppStatusForm(forms.ModelForm):
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
-            'publish_at': TimePickerInput(),
         }
 
 
 class WhatsAppMessageForm(forms.ModelForm):
+    schedules = forms.ModelMultipleChoiceField(Schedule.objects.all())
+
     def save(self, commit=True):
         instance = super().save(commit=commit)
         instance.message_type = 'text' if not instance.file else get_message_type(instance.file)
@@ -96,9 +99,22 @@ class WhatsAppMessageForm(forms.ModelForm):
             instance.save()
         return instance
 
+    def _save_m2m(self):
+        super(WhatsAppMessageForm, self)._save_m2m()
+        schedules = self.cleaned_data['schedules']
+        WhatsAppScheduleMessage.objects.filter(message=self.instance).exclude(schedule__in=schedules).delete()
+        for schedule in schedules:
+            last_order = WhatsAppScheduleMessage.objects \
+                             .filter(schedule=schedule, message__account=self.instance.account) \
+                             .aggregate(Max("order"))["order__max"] or 0
+
+            WhatsAppScheduleMessage.objects.get_or_create(
+                defaults={'message': self.instance, 'schedule': schedule, 'order': last_order + 1},
+                message=self.instance, schedule=schedule)
+
     class Meta:
         model = WhatsAppMessage
-        exclude = ['published_count', 'order']
+        exclude = ['published_count', 'order', 'frequency']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
@@ -205,9 +221,6 @@ WhatAppSortStatusFormSet = modelformset_factory(
 )
 
 
-
-
-
 class PublishWhastAppStatusForm(PublishNowForm):
     items = forms.ModelMultipleChoiceField(queryset=WhatsAppStatus.objects.all())
 
@@ -222,9 +235,3 @@ class PublishWhastAppMessagesForm(PublishNowForm):
     def publish(self):
         for message in self.cleaned_data['items']:
             enqueue_whatsapp_message(message)
-
-
-
-
-
-

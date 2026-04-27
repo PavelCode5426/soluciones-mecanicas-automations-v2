@@ -41,14 +41,6 @@ class ScheduledMessage(models.Model):
     from_date = models.DateField(null=True, blank=True, default=today)
     until_date = models.DateField(null=True, blank=True)
 
-    frequency = models.IntegerField(default=8, null=True, choices=[
-        (None, "Sin intervalo"),
-        (2, "Publicar cada 2h"),
-        (4, "Publicar cada 4h"),
-        (8, "Publicar cada 8h"),
-    ])
-
-    order = models.IntegerField(default=0)
     weekdays = models.ManyToManyField(WeekDay, blank=True)
     published_count = models.BigIntegerField(default=0)
 
@@ -147,8 +139,9 @@ class WhatsAppStatus(AbstractWhatsAppMessage, ScheduledMessage):
     account = models.ForeignKey(WhatsAppAccount, related_name='status', on_delete=models.PROTECT)
     file = models.FileField(upload_to='whatsapp_status', blank=True)
 
-    frequency = None
-    weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_status', blank=True)
+    order = models.IntegerField(default=0)
+    schedule = models.ForeignKey(Schedule, null=True, on_delete=models.PROTECT)
+    weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_status')
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
@@ -185,6 +178,14 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
     file = models.FileField(upload_to='whatsapp_messages', blank=True, null=True)
 
     distribution_lists = models.ManyToManyField(WhatsAppDistributionList, related_name='messages', blank=True)
+
+    order = models.IntegerField(default=0)
+    frequency = models.IntegerField(default=8, null=True, choices=[
+        (None, "Sin intervalo"),
+        (2, "Publicar cada 2h"),
+        (4, "Publicar cada 4h"),
+        (8, "Publicar cada 8h"),
+    ])
 
     from_time = models.TimeField(default=datetime.time(0, 0))
     until_time = models.TimeField(default=datetime.time(23, 59))

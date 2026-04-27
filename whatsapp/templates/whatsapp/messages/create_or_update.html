@@ -34,7 +34,7 @@
             <p class="text-muted mb-0">Define frecuencia, fechas y horarios de envío</p>
         </div>
         <div class="card-body">
-            {% bootstrap_field form.frequency %}
+{#            {% bootstrap_field form.frequency %}#}
             {% bootstrap_field form.distribution_lists %}
             <div class="row row-cols-2 row-cols-lg-4">
                 {% bootstrap_field form.from_date %}
@@ -42,6 +42,7 @@
                 {% bootstrap_field form.from_time %}
                 {% bootstrap_field form.until_time %}
             </div>
+            {% bootstrap_field form.schedules %}
             {% bootstrap_field form.weekdays %}
         </div>
     </div>

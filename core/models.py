@@ -32,3 +32,4 @@ class Schedule(models.Model):
     class Meta:
         verbose_name = "Horario"
         verbose_name_plural = "Horarios"
+        ordering = ['time']

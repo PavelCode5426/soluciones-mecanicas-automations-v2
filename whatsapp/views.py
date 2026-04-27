@@ -5,6 +5,7 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView, D
 from django_filters.views import FilterView
 
 from core.generics import ToggleStatusView, SingleFormView, DuplicateView
+from core.models import Schedule
 from whatsapp import filters
 from whatsapp import models, forms
 from whatsapp.mixins import WhatsAppAccountViewMixins
@@ -224,6 +225,10 @@ class WhatsAppMessageUpdateView(SuccessMessageMixin, UpdateView):
         "cancel_url": success_url
     }
     success_message = "Mensaje {name} actualizado exitosamente"
+
+    def get_initial(self):
+        schedules = Schedule.objects.filter(messages__message=self.get_object()).order_by('time').all()
+        return {'schedules': schedules, **super().get_initial()}
 
 
 class WhatsAppMessageDeleteView(SuccessMessageMixin, DeleteView):
