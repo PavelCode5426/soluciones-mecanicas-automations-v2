@@ -1,0 +1,38 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+
+{% block title %}Listas de Distribución de Facebook{% endblock %}
+{% block page_title %}Listas de Distribución de Facebook{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+    <th>Estado</th>
+    <th class="text-end">
+        {% url 'facebook:distribution-lists.create' as create_url %}
+        <a href="{{ create_url }}" class="btn btn-primary"><i class="fa fa-plus"></i> Crear Nuevo</a>
+    </th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{% object_link object.account url='facebook:accounts.details' %}</td>
+    <td>
+        {% url 'facebook:distribution-lists.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td class="text-end">
+        {% url 'facebook:distribution-lists.delete' pk=object.pk as delete_url %}
+        {% url 'facebook:distribution-lists.update' pk=object.pk as edit_url %}
+
+        {% include 'components/update_link.html' with url=edit_url %}
+        {% include 'components/delete_link.html' with url=delete_url %}
+    </td>
+{% endblock %}
+
+{% block empty %}
+    {% url 'facebook:distribution-lists.create' as create_url %}
+
+    {% include 'components/empty.html' with url=create_url text="No existen listas de distribución" %}
+{% endblock %}

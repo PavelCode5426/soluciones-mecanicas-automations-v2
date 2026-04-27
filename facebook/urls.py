@@ -24,6 +24,14 @@ urlpatterns = [
     path(r'agents/<int:pk>', views.FacebookAgentDetailView.as_view(), name='agents.details'),
     path(r'agents/<int:pk>/toggle-status', views.FacebookAgentToggleStatusView.as_view(), name='agents.toggle-status'),
 
-
+    path(r'distribution-lists', views.FacebookDistributionListsListView.as_view(), name='distribution-lists.index'),
+    path(r'distribution-lists/create', views.FacebookDistributionListsCreateView.as_view(),
+         name='distribution-lists.create'),
+    path(r'distribution-lists/<int:pk>/edit', views.FacebookDistributionListsUpdateView.as_view(),
+         name='distribution-lists.update'),
+    path(r'distribution-lists/<int:pk>/delete', views.FacebookDistributionListsDeleteView.as_view(),
+         name='distribution-lists.delete'),
+    path(r'distribution-lists/<int:pk>/toggle-status', views.FacebookDistributionListsToggleStatusView.as_view(),
+         name='distribution-lists.toggle-status'),
 
 ]

@@ -113,3 +113,54 @@ class FacebookAgentToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     success_url = reverse_lazy('facebook:agents.index')
     queryset = models.FacebookLeadExplorer.objects.all()
     success_message = "Agente object activada/desactivada exitosamente"
+
+
+class FacebookDistributionListsListView(ListView):
+    template_name = 'whatsapp/distribucion_lists/index.html'
+    queryset = models.FacebookGroupCategory.objects.all()
+
+
+class FacebookDistributionListsCreateView(SuccessMessageMixin, CreateView):
+    # success_url = reverse_lazy('whatsapp:distribution-lists.update')
+    form_class = forms.FacebookDistributionListCreateForm
+    template_name = 'layout/admin_form_layout.html'
+    extra_context = {
+        "page_title": "Crear nueva lista de distribución",
+        "cancel_url": reverse_lazy('whatsapp:distribution-lists.index')
+    }
+    success_message = "Lista de distribución creada exitosamente"
+
+    def get_success_url(self):
+        return str(reverse_lazy('facebook:distribution-lists.update', kwargs=dict(pk=self.object.pk)))
+
+
+class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    form_class = forms.FacebookDistributionListUpdateForm
+    queryset = models.FacebookGroupCategory.objects.all()
+    template_name = 'whatsapp/distribucion_lists/create_or_update.html'
+    extra_context = {
+        "page_title": "Actualizar lista de distribución: ",
+        "cancel_url": success_url
+    }
+    success_message = "Lista de distribución {name} actualizada exitosamente"
+
+
+class FacebookDistributionListsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
+    http_method_names = ['post']
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    queryset = models.FacebookGroupCategory.objects.all()
+    success_message = "Lista de distribución object activada/desactivada exitosamente"
+
+
+class FacebookDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
+    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    queryset = models.FacebookGroupCategory.objects.all()
+    template_name = 'layout/admin_delete_layout.html'
+    extra_context = {
+        "page_title": "Eliminar lista de distribución: ",
+        "modal_title": "Eliminar lista de distribución: ",
+        "modal_description": "Eliminar lista de distribución",
+        "cancel_url": success_url
+    }
+    success_message = "Lista de distribución object eliminada exitosamente"
