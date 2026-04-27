@@ -8,7 +8,7 @@
 {% block table_headers %}
     <th>Nombre</th>
     <th>Cuenta</th>
-    <th>Fecha</th>
+    <th>Horario</th>
     <th>Estado</th>
     <th class="text-end">
         {% url 'whatsapp:status.create' as create_url %}
@@ -32,7 +32,7 @@
 {% block table_data %}
     <td>{{ object.name }}</td>
     <td>{% object_link object.account url='whatsapp:accounts.details' %}</td>
-    <td>{{ object.updated_at }}</td>
+    <td>{{ object.schedule }}</td>
     <td>
         {% url 'whatsapp:status.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
