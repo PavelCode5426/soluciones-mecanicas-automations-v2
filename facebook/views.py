@@ -116,7 +116,7 @@ class FacebookAgentToggleStatusView(SuccessMessageMixin, ToggleStatusView):
 
 
 class FacebookDistributionListsListView(ListView):
-    template_name = 'whatsapp/distribucion_lists/index.html'
+    template_name = 'facebook/distribucion_lists/index.html'
     queryset = models.FacebookGroupCategory.objects.all()
 
 
@@ -138,7 +138,7 @@ class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy('whatsapp:distribution-lists.index')
     form_class = forms.FacebookDistributionListUpdateForm
     queryset = models.FacebookGroupCategory.objects.all()
-    template_name = 'whatsapp/distribucion_lists/create_or_update.html'
+    template_name = 'facebook/distribucion_lists/create_or_update.html'
     extra_context = {
         "page_title": "Actualizar lista de distribución: ",
         "cancel_url": success_url
