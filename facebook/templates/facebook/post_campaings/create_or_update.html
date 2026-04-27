@@ -1,0 +1,46 @@
+{% extends 'layout/admin_form_layout.html' %}
+{% load django_bootstrap5 %}
+
+{% block form %}
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Información de la campaña</h4>
+            <p class="text-muted mb-0">Completa los datos básicos del mensaje</p>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-4">
+                {% bootstrap_field form.name %}
+                {% bootstrap_field form.profile %}
+                {% bootstrap_field form.active %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Contenido del mensaje</h4>
+            <p class="text-muted mb-0">Redacta el texto y adjunta archivos</p>
+        </div>
+        <div class="card-body">
+            {% bootstrap_field form.title %}
+            {% bootstrap_field form.text %}
+            {% bootstrap_field form.hashtags %}
+            {% bootstrap_field form.file %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Planificación del mensaje</h4>
+            <p class="text-muted mb-0">Define frecuencia, fechas y horarios de envío</p>
+        </div>
+        <div class="card-body">
+            {% bootstrap_field form.frequency %}
+            {% bootstrap_field form.distribution_lists %}
+            <div class="row">
+                {% bootstrap_field form.from_date %}
+                {% bootstrap_field form.until_date %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

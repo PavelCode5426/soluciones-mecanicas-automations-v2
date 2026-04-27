@@ -18,4 +18,4 @@ class FacebookPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FacebookPostCampaign
-        exclude = ['categories']
+        exclude = ['distribution_lists']

@@ -1,0 +1,51 @@
+`{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+{% load django_bootstrap5 %}
+
+{% block title %}Publicar mensajes de Facebook{% endblock %}
+{% block page_title %}Publicar mensajes de Facebook{% endblock %}
+
+{% block table %}
+    <form method="post" class="table-responsive">
+        {% csrf_token %}
+        <table class="table table-sm table-hover mb-0">
+            <thead>
+            <tr>
+                <th></th>
+                <th>Nombre</th>
+                <th>Cuenta</th>
+                <th>Estado</th>
+                <th>Tipo</th>
+                <th>Publicaciones</th>
+                <th class="text-end">
+                    <input class="btn btn-primary" type="submit" value="Publicar ahora">
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for object in object_list %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="items" value="{{ object.id }}">
+                    </td>
+                    <td>{{ object.name }}</td>
+                    <td>{{ object.account }}</td>
+                    <td>{% status_badge object.active %}</td>
+                    <td>{{ object.message_type }}</td>
+                    <td colspan="2">{{ object.published_count }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+
+
+{% block empty %}
+    {% url 'whatsapp:messages.create' as create_url %}
+    {% include 'components/empty.html' with url=create_url text="No existen mensajes en el sistema" %}
+{% endblock %}
+
+
+

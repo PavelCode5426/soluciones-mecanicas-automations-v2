@@ -16,3 +16,12 @@ class FacebookGroupsFilterSet(FacebookGenericFilterSet):
 
     class Meta:
         fields = ['profile', 'search']
+
+
+class FacebookPostCampaingFilterSet(FacebookGenericFilterSet):
+
+    def search_method(self, queryset, name, value):
+        return queryset.filter(Q(name__icontains=value))
+
+    class Meta:
+        fields = ['account', 'search']

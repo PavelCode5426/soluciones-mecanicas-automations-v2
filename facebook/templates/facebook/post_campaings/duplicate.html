@@ -1,0 +1,24 @@
+{% extends 'layout/admin_layout.html' %}
+{% load django_bootstrap5 %}
+{% load static %}
+
+{% block title %}Duplicar mensaje{% endblock %}
+
+{% block page_content %}
+    <div class="container-md">
+        <form class="card" method="post">
+            {% csrf_token %}
+            <div class="card-header bg-primary">
+                <h4 class="card-title text-white">¿Desea duplicar el mensaje {{ object }}?</h4>
+            </div><!--end card-header-->
+            <div class="card-body">
+                <p class="card-text text-muted">Al confirmar, se generará una copia con todas las características del
+                    estado original.</p>
+            </div><!--end card-body-->
+            <p class="card-footer m-0">
+                <input class="btn btn-primary" type="submit" value="Duplicar mensaje">
+                <a class="btn" href="{{ cancel_url }}">Cancelar</a>
+            </p>
+        </form>
+    </div>
+{% endblock %}

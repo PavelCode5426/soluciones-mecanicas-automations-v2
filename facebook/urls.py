@@ -34,4 +34,16 @@ urlpatterns = [
     path(r'distribution-lists/<int:pk>/toggle-status', views.FacebookDistributionListsToggleStatusView.as_view(),
          name='distribution-lists.toggle-status'),
 
+    path(r'post-campaign', views.FacebookPostCampaignListView.as_view(), name='post-campaign.index'),
+    path(r'post-campaign/create', views.FacebookPostCampaignCreateView.as_view(), name='post-campaign.create'),
+    path(r'post-campaign/<int:pk>/edit', views.FacebookPostCampaignUpdateView.as_view(), name='post-campaign.update'),
+    path(r'post-campaign/<int:pk>/delete', views.FacebookPostCampaignDeleteView.as_view(),
+         name='post-campaign.delete'),
+    path(r'post-campaign/<int:pk>/toggle-status', views.FacebookPostCampaignToggleStatusView.as_view(),
+         name='post-campaign.toggle-status'),
+    path(r'post-campaign/<int:pk>/duplicate', views.FacebookPostCampaignDuplicateView.as_view(),
+         name='post-campaign.duplicate'),
+
+    path(r'post-campaign/publish-now', views.PublishNowFacebookPostCampaignView.as_view(), name='post-campaign.publish-now'),
+
 ]

@@ -1,9 +1,9 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy
-from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from django_filters.views import FilterView
 
-from core.generics import ToggleStatusView
+from core.generics import ToggleStatusView, DuplicateView
 from facebook import forms, filters
 from facebook import models
 
@@ -135,7 +135,7 @@ class FacebookDistributionListsCreateView(SuccessMessageMixin, CreateView):
 
 
 class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
-    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    success_url = reverse_lazy('facebook:distribution-lists.index')
     form_class = forms.FacebookDistributionListUpdateForm
     queryset = models.FacebookGroupCategory.objects.all()
     template_name = 'facebook/distribucion_lists/create_or_update.html'
@@ -164,3 +164,72 @@ class FacebookDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
         "cancel_url": success_url
     }
     success_message = "Lista de distribución object eliminada exitosamente"
+
+
+class FacebookPostCampaignListView(FilterView):
+    template_name = 'facebook/post_campaings/index.html'
+    queryset = models.FacebookPostCampaign.objects.all()
+    filterset_class = filters.FacebookPostCampaingFilterSet
+
+
+class FacebookPostCampaignCreateView(SuccessMessageMixin, CreateView):
+    success_url = reverse_lazy('facebook:post-campaign.index')
+    form_class = forms.FacebookPostCampaignForm
+    template_name = 'facebook/post_campaings/create_or_update.html'
+    extra_context = {
+        "page_title": "Crear un nuevo mensaje",
+        "cancel_url": success_url
+    }
+    success_message = "Nueva campaña creada exitosamente"
+
+
+class FacebookPostCampaignUpdateView(SuccessMessageMixin, UpdateView):
+    success_url = reverse_lazy('facebook:post-campaign.index')
+    form_class = forms.FacebookPostCampaignForm
+    queryset = models.FacebookPostCampaign.objects.all()
+    template_name = 'facebook/post_campaings/create_or_update.html'
+    extra_context = {
+        "page_title": "Actualizar campaña: ",
+        "cancel_url": success_url
+    }
+    success_message = "Mensaje {name} actualizado exitosamente"
+
+
+class FacebookPostCampaignDeleteView(SuccessMessageMixin, DeleteView):
+    success_url = reverse_lazy('facebook:post-campaign.index')
+    queryset = models.FacebookPostCampaign.objects.all()
+    template_name = 'layout/admin_delete_layout.html'
+    extra_context = {
+        "page_title": "Eliminar campaña: ",
+        "modal_title": "Eliminar campaña: ",
+        "modal_description": "Eliminar campaña",
+        "cancel_url": success_url
+    }
+    success_message = "Campaña {name} eliminada exitosamente"
+
+
+class FacebookPostCampaignToggleStatusView(SuccessMessageMixin, ToggleStatusView):
+    http_method_names = ['post']
+    success_url = reverse_lazy('facebook:post-campaign.index')
+    queryset = models.FacebookPostCampaign.objects.all()
+    success_message = "Campaña {name} activado/desactivado exitosamente"
+
+
+class FacebookPostCampaignDuplicateView(DuplicateView):
+    success_url = reverse_lazy('facebook:post-campaign.index')
+    success_message = "Campaña duplicada correctamente correctamente"
+    queryset = models.FacebookPostCampaign.objects.all()
+    template_name = 'facebook/post_campaings/duplicate.html'
+
+
+class PublishNowFacebookPostCampaignView(SuccessMessageMixin, FilterView, FormView):
+    filterset_class = filters.FacebookPostCampaingFilterSet
+    form_class = forms.PublishFacebookPostCampaignForm
+    queryset = models.FacebookPostCampaign.objects.filter(active=True).all()
+    template_name = 'facebook/post_campaings/publish_now.html'
+    success_message = "Estados enviados a publicar correctamente"
+    success_url = reverse_lazy('facebook:post-campaign.index')
+
+    def form_valid(self, form):
+        form.publish()
+        return super().form_valid(form)

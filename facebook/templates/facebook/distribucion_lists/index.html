@@ -17,7 +17,7 @@
 
 {% block table_data %}
     <td>{{ object.name }}</td>
-    <td>{% object_link object.account url='facebook:accounts.details' %}</td>
+    <td>{% object_link object.profile url='facebook:accounts.details' %}</td>
     <td>
         {% url 'facebook:distribution-lists.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}

@@ -79,12 +79,12 @@ class FacebookScheduledPost(AbstractFacebookPost):
 class FacebookPostCampaign(AbstractFacebookPost):
     profile = models.ForeignKey(FacebookProfile, related_name='campaigns', null=True, blank=True,
                                 on_delete=models.PROTECT)
-    categories = models.ManyToManyField(FacebookGroupCategory, related_name='campaigns', blank=True)
-    from_date = models.DateField(null=True, blank=True, default=now)
+    distribution_lists = models.ManyToManyField(FacebookGroupCategory, related_name='campaigns', blank=True)
+    from_date = models.DateField(default=now)
     until_date = models.DateField(null=True, blank=True)
 
     published_count = models.BigIntegerField(default=0)
-    distribution_count = models.IntegerField(default=0)
+    distribution_count = models.IntegerField(default=5)
     frequency = models.IntegerField(default=0, choices=[
         (2, "Publicar cada 2h"),
         (4, "Publicar cada 4h"),

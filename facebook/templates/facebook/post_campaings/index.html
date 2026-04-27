@@ -1,0 +1,67 @@
+`{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+{% load django_bootstrap5 %}
+
+{% block title %}Mensajes de WhatsApp{% endblock %}
+{% block page_title %}Mensajes de WhatsApp{% endblock %}
+
+
+{% block table_headers %}
+    <th>Nombre</th>
+    <th>Cuenta</th>
+    <th>Estado</th>
+    <th>Tipo</th>
+    <th>Publicaciones</th>
+    <th class="text-end">
+        {% url 'facebook:post-campaign.create' as create_url %}
+        {% url 'facebook:post-campaign.publish-now' as publish_now_url %}
+
+        <div class="btn-group">
+            <a href="{{ create_url }}" class="btn btn-primary me-0"><i class="fa fa-plus"></i> Crear Nuevo</a>
+            <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span> <i class="mdi mdi-chevron-down"></i>
+            </button>
+            <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{ publish_now_url }}">Publicar varios ahora</a>
+            </div>
+        </div>
+    </th>
+{% endblock %}
+
+{% block table_data %}
+    <td>{{ object.name }}</td>
+    <td>{{ object.profile }}</td>
+    <td>
+        {% url 'facebook:post-campaign.toggle-status' pk=object.pk as change_status_url %}
+        {% toggle_status_badge object.active submit_url=change_status_url %}
+    </td>
+    <td>{{ object.published_count }}</td>
+    <td class="text-end">
+        <div class="dropdown">
+            <a role="button" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="las la-ellipsis-v font-20 text-muted"></i>
+            </a>
+            <div class="dropdown-menu">
+                {% url 'facebook:post-campaign.delete' pk=object.pk as delete_url %}
+                {% url 'facebook:post-campaign.update' pk=object.pk as edit_url %}
+                {% url 'facebook:post-campaign.duplicate' pk=object.pk as duplicate_url %}
+
+                <a class="dropdown-item" href="{{ edit_url }}">Editar</a>
+                <a class="dropdown-item" href="{{ duplicate_url }}">Duplicar</a>
+                <form method="post" action="{% url 'facebook:post-campaign.publish-now' %}">
+                    <input type="hidden" name="items" value="{{ object.pk }}">
+                    {% csrf_token %}
+                    <input class="dropdown-item" type="submit" value="Publicar ahora">
+                </form>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item text-danger" href="{{ delete_url }}">Eliminar</a>
+            </div>
+        </div>
+    </td>
+{% endblock %}`
+
+{% block empty %}
+    {% url 'facebook:post-campaign.create' as create_url %}
+    {% include 'components/empty.html' with url=create_url text="No existen mensajes en el sistema" %}
+{% endblock %}

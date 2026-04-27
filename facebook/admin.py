@@ -97,10 +97,10 @@ class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
     readonly_fields = FacebookPostAdmin.readonly_fields + ["published_count"]
     actions = ['add_to_queue'] + FacebookPostAdmin.actions
 
-    filter_horizontal = ['categories']
+    filter_horizontal = ['distribution_lists']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', "categories"]
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', "distribution_lists"]
         }),
         ("Panificador de la publicación", {
             "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']

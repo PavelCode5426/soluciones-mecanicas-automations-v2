@@ -8,6 +8,7 @@ from django.core.files.temp import NamedTemporaryFile
 from django.forms import modelformset_factory
 from rest_framework.reverse import reverse
 
+from core.forms import PublishNowForm
 from core.forms.widgets import DatePickerInput, TimePickerInput
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
@@ -204,8 +205,7 @@ WhatAppSortStatusFormSet = modelformset_factory(
 )
 
 
-class PublishNowForm(forms.Form):
-    items = forms.ModelMultipleChoiceField(queryset=None)
+
 
 
 class PublishWhastAppStatusForm(PublishNowForm):
@@ -222,3 +222,9 @@ class PublishWhastAppMessagesForm(PublishNowForm):
     def publish(self):
         for message in self.cleaned_data['items']:
             enqueue_whatsapp_message(message)
+
+
+
+
+
+

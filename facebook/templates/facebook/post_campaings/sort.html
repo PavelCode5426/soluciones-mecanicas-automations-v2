@@ -1,0 +1,53 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+{% load static %}
+{% load django_bootstrap5 %}
+
+{% block title %}Ordenar mensajes de {{ account }}a{% endblock %}
+{% block page_title %}Ordenar mensajes de {{ account }}{% endblock %}
+
+{% block empty %}
+    {% url 'whatsapp:status.create' as create_url %}
+    {% include 'components/empty.html' with url=create_url text="No existen estados en el sistema" %}
+{% endblock %}
+
+{% block table %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.management_form }}
+
+        <div class="mb-3">
+            <p class="text-muted">
+                Aquí puede organizar el orden de los mensajes. Arrastre cada elemento con el ícono de barras para
+                reordenarlos según su preferencia y luego guarde los cambios.
+            </p>
+        </div>
+
+        <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>
+
+        <ul class="list-group mt-4" id="sortable-list">
+            {% for f in form %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-bars me-2"></i>
+                        {{ f.id }}
+                        {{ f.ORDER.as_hidden }}
+                        {{ f.order.as_hidden }}
+                        {{ f.instance.name }}
+                    </div>
+                    <div>{% status_badge f.instance.active %}</div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        {% if object_list.count > 10 %}
+            <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>
+        {% endif %}
+    </form>
+{% endblock %}
+
+{% block page_scripts %}
+    <script src="{% static 'libs/sortablejs/Sortable.min.js' %}"></script>
+    <script src="{% static 'libs/sortablejs/MultiDrag.js' %}"></script>
+    <script src="{% static 'js/sort-messages.js' %}"></script>
+{% endblock %}
