@@ -2,7 +2,7 @@ from django import forms
 
 
 class DatePickerInput(forms.DateInput):
-    # input_type = 'date'
+    input_type = 'date'
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, format='%Y-%m-%d', **kwargs)
