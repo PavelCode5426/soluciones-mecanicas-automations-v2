@@ -94,13 +94,14 @@ class FacebookPostCampaign(AbstractFacebookPost):
     class Meta:
         verbose_name = "Campaña"
         verbose_name_plural = "Campañas"
+        ordering = ['created_at']
 
 
-class FacebookLeadExplorer(models.Model):
+class FacebookAgent(models.Model):
     name = models.CharField(max_length=250)
-    profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
-    group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT,
-                                       blank=True, null=True)
+    profile = models.ForeignKey(FacebookProfile, related_name='agents', on_delete=models.PROTECT)
+    distribution_list = models.ForeignKey(FacebookGroupCategory, related_name='agents', on_delete=models.PROTECT,
+                                          blank=True, null=True)
     search_keyword = models.CharField(max_length=250, null=True, blank=True)
     agent_description = models.TextField(null=True, blank=True)
     classificator_prompt = models.TextField(null=True, blank=True)

@@ -8,7 +8,7 @@ from django.utils.timezone import now
 from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playwright
 
 from core.helpers import run_async
-from facebook.models import FacebookPostCampaign, FacebookLeadExplorer, FacebookScheduledPost, AbstractFacebookPost
+from facebook.models import FacebookPostCampaign, FacebookAgent, FacebookScheduledPost, AbstractFacebookPost
 from facebook.models import FacebookProfile, FacebookGroup
 from services.agents import FacebookPostAnalyzerAgent
 
@@ -80,12 +80,12 @@ class FacebookAutomationService:
             page.close()
             return groups
 
-    def group_lead_explorer(self, explorer: FacebookLeadExplorer):
+    def group_lead_explorer(self, explorer: FacebookAgent):
         self.refresh_profile()
         explorer.refresh_from_db()
         if all([explorer.active, self.profile.active, self.profile.can_search_leads]):
             leads_found = 0
-            group = explorer.group_category.groups.filter(active=True).order_by('?').first()
+            group = explorer.distribution_list.groups.filter(active=True).order_by('?').first()
             with get_playwright() as pw:
                 try:
                     browser = self.get_browser(pw)

@@ -2,7 +2,7 @@ from django.db.models import Q, ExpressionWrapper, F, DecimalField
 from django.utils.timezone import localtime
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookPostCampaign, FacebookLeadExplorer
+from facebook.models import FacebookProfile, FacebookPostCampaign, FacebookAgent
 from facebook.tasks import enqueue_lead_explorer, enqueue_facebook_campaign
 from services.automations import FacebookAutomationService
 
@@ -15,8 +15,8 @@ def check_profile_status():
     return "Comprobación de estado agendada correctamente"
 
 
-def enqueue_active_lead_explorers():
-    leads_explorers = FacebookLeadExplorer.objects.filter(active=True).order_by('?').all()
+def enqueue_active_agents():
+    leads_explorers = FacebookAgent.objects.filter(active=True).order_by('?').all()
     for explorer in leads_explorers:
         enqueue_lead_explorer(explorer)
     return "OK"

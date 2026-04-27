@@ -14,7 +14,7 @@ class FacebookAccountForm(forms.ModelForm):
 
 class FacebookAgentForm(forms.ModelForm):
     class Meta:
-        model = models.FacebookLeadExplorer
+        model = models.FacebookAgent
         exclude = ['leads_found']
 
 

@@ -6,7 +6,7 @@ from django_q.models import OrmQ
 from django_q.tasks import async_task
 
 from facebook.models import FacebookProfile, FacebookGroup, FacebookGroupCategory, FacebookPostCampaign, \
-    FacebookLeadExplorer, \
+    FacebookAgent, \
     FacebookHistory, FacebookScheduledPost
 from facebook.tasks import syncronize_profile_groups, enqueue_facebook_campaign, enqueue_lead_explorer
 
@@ -129,9 +129,9 @@ class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
     ]
 
 
-@admin.register(FacebookLeadExplorer)
+@admin.register(FacebookAgent)
 class FacebookLeadExplorerAdmin(admin.ModelAdmin):
-    list_display = ['profile', 'group_category']
+    list_display = ['profile', 'distribution_list']
     list_filter = ["profile"]
     actions = ['add_to_queue']
 

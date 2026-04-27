@@ -77,11 +77,11 @@ class FacebookGroupsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
 
 class FacebookAgentListView(ListView):
     template_name = 'facebook/agents/index.html'
-    queryset = models.FacebookLeadExplorer.objects.all()
+    queryset = models.FacebookAgent.objects.all()
 
 
 class FacebookAgentDetailView(DetailView):
-    queryset = models.FacebookLeadExplorer.objects.all()
+    queryset = models.FacebookAgent.objects.all()
     template_name = 'whatsapp/accounts/details.html'
 
 
@@ -99,7 +99,7 @@ class FacebookAgentCreateView(SuccessMessageMixin, CreateView):
 class FacebookAgentUpdateView(SuccessMessageMixin, UpdateView):
     success_url = reverse_lazy('facebook:agents.index')
     form_class = forms.FacebookAgentForm
-    queryset = models.FacebookLeadExplorer.objects.all()
+    queryset = models.FacebookAgent.objects.all()
     template_name = 'layout/admin_form_layout.html'
     extra_context = {
         "page_title": "Actualizar agente: ",
@@ -111,7 +111,7 @@ class FacebookAgentUpdateView(SuccessMessageMixin, UpdateView):
 class FacebookAgentToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:agents.index')
-    queryset = models.FacebookLeadExplorer.objects.all()
+    queryset = models.FacebookAgent.objects.all()
     success_message = "Agente object activada/desactivada exitosamente"
 
 

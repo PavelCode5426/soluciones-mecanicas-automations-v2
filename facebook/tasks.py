@@ -3,7 +3,7 @@ import random
 from django.db.models import QuerySet
 from django_q.tasks import async_task
 
-from facebook.models import FacebookGroup, FacebookProfile, FacebookPostCampaign, FacebookLeadExplorer
+from facebook.models import FacebookGroup, FacebookProfile, FacebookPostCampaign, FacebookAgent
 from services.automations import FacebookAutomationService
 
 
@@ -18,7 +18,7 @@ def syncronize_profile_groups(profile: FacebookProfile):
     return groups
 
 
-def enqueue_lead_explorer(explorer: FacebookLeadExplorer):
+def enqueue_lead_explorer(explorer: FacebookAgent):
     service = FacebookAutomationService(explorer.profile)
     task_name = f"Leads Explorer {explorer.profile}"
     group_name = f'facebook_leads_explorer_{explorer.profile}'
