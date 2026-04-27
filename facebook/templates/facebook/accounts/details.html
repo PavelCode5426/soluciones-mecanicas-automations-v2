@@ -1,0 +1,200 @@
+{% extends 'layout/admin_layout.html' %}
+{% load django_bootstrap5 %}
+{% load components %}
+
+
+{#{% block page_content %}#}
+{#    <div class="row">#}
+{#        <div class="col-lg-4">#}
+{#            <div class="card">#}
+{#                <div class="card-body">#}
+{#                    <div class="media p-3  align-items-center">#}
+{#                        <img src="{{ object.avatar.url }}" alt="user" class="rounded-circle thumb-lg">#}
+{#                        <div class="media-body ms-3 align-self-center">#}
+{#                            <h5 class="m-0">{{ object.name }}</h5>#}
+{#                            <p class="mb-0 text-muted">{{ object.chat_id }}</p>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{##}
+{#        <div class="col-lg-2">#}
+{#            <form method="post" action="{% url 'whatsapp:accounts.update-groups' pk=object.pk %}" class="card">#}
+{#                {% csrf_token %}#}
+{#                <div class="card-body">#}
+{#                    <span class="text-muted fw-semibold">Grupos</span>#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <h2 class="font-18 my-1">{{ object.groups.count }}</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="d-grid">#}
+{#                        <button type="submit" class="btn btn-soft-primary btn-sm">Actualizar</button>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{##}
+{#        <div class="col-lg-2">#}
+{#            <form method="post" action="{% url 'whatsapp:accounts.update-contacts' pk=object.pk %}" class="card">#}
+{#                {% csrf_token %}#}
+{#                <div class="card-body">#}
+{#                    <span class="text-muted fw-semibold">Contactos</span>#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <h2 class="font-18 my-1">{{ object.contacts.count }}</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="d-grid">#}
+{#                        <button type="submit" class="btn btn-soft-primary btn-sm">Actualizar</button>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{##}
+{#        <div class="col-lg-2">#}
+{#            <form class="card" action="{% url 'whatsapp:messages.index' %}">#}
+{#                <input value="{{ object.pk }}" type="hidden" name="account">#}
+{#                <div class="card-body">#}
+{#                    <span class="text-muted fw-semibold">Mensajes</span>#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <h2 class="font-18 my-1">{{ object.messages.count }}</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="d-grid">#}
+{#                        <button type="submit" class="btn btn-soft-primary btn-sm"> Ver mensajes</button>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{##}
+{#        <div class="col-lg-2">#}
+{#            <form class="card" action="{% url 'whatsapp:status.index' %}">#}
+{#                <input value="{{ object.pk }}" type="hidden" name="account">#}
+{#                <div class="card-body">#}
+{#                    <span class="text-muted fw-semibold">Estados</span>#}
+{#                    <div class="row">#}
+{#                        <div class="col">#}
+{#                            <h2 class="font-18 my-1">{{ object.status.count }}</h2>#}
+{#                        </div>#}
+{#                    </div>#}
+{#                    <div class="d-grid">#}
+{#                        <button type="submit" class="btn btn-soft-primary btn-sm"> Ver estados</button>#}
+{#                    </div>#}
+{#                </div>#}
+{#            </form>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{##}
+{#    <div class="card">#}
+{#        <div class="card-header">#}
+{#            <div class="row align-items-center">#}
+{#                <div class="col">#}
+{#                    <h4 class="card-title">Últimos mensajes publicados</h4>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="card-body">#}
+{#            <div class="table-responsive">#}
+{#                <table class="table table-hover mb-0">#}
+{#                    <thead>#}
+{#                    <tr>#}
+{#                        <th>Nombre</th>#}
+{#                        <th>Tipo</th>#}
+{#                        <th>Publicaciones</th>#}
+{#                        <th>Estado</th>#}
+{#                        <th>Fecha</th>#}
+{#                        <th class="text-end">#}
+{#                            <form action="{% url 'whatsapp:messages.publish-now' %}">#}
+{#                                <input type="hidden" name="account" value="{{ object.pk }}">#}
+{#                                <input type="submit" class="btn btn-primary" value="Enviar nuevos mensajes"/>#}
+{#                            </form>#}
+{#                        </th>#}
+{#                    </tr>#}
+{#                    </thead>#}
+{#                    <tbody>#}
+{#                    {% for message in last_messages %}#}
+{#                        <tr>#}
+{#                            <td>{{ message.name }}</td>#}
+{#                            <td>{{ message.message_type }}</td>#}
+{#                            <td>{{ message.published_count }}</td>#}
+{#                            <td>{% status_badge message %}</td>#}
+{#                            <td>{{ message.updated_at }}</td>#}
+{#                            <td class="text-end">#}
+{#                                {% url 'whatsapp:messages.delete' pk=message.pk as delete_url %}#}
+{#                                {% url 'whatsapp:messages.update' pk=message.pk as edit_url %}#}
+{##}
+{#                                {% include 'components/update_link.html' with url=edit_url %}#}
+{#                                {% include 'components/delete_link.html' with url=delete_url %}#}
+{#                            </td>#}
+{#                        </tr>#}
+{#                    {% empty %}#}
+{#                        <tr>#}
+{#                            <td class="text-center" colspan="6">Sin mensajes publicados</td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
+{#                </table>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{##}
+{#    <div class="card">#}
+{#        <div class="card-header">#}
+{#            <div class="row align-items-center">#}
+{#                <div class="col">#}
+{#                    <h4 class="card-title">Últimos estados publicados</h4>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="card-body">#}
+{#            <div class="table-responsive">#}
+{#                <table class="table table-hover mb-0">#}
+{#                    <thead>#}
+{#                    <tr>#}
+{#                        <th>Nombre</th>#}
+{#                        <th>Tipo</th>#}
+{#                        <th>Publicaciones</th>#}
+{#                        <th>Estado</th>#}
+{#                        <th>Fecha</th>#}
+{#                        <th class="text-end">#}
+{#                            <form action="{% url 'whatsapp:status.publish-now' %}">#}
+{#                                <input type="hidden" name="account" value="{{ object.pk }}">#}
+{#                                <input type="submit" class="btn btn-primary" value="Publicar nuevos estados"/>#}
+{#                            </form>#}
+{#                        </th>#}
+{#                    </tr>#}
+{#                    </thead>#}
+{#                    <tbody>#}
+{#                    {% for status in last_statues %}#}
+{#                        <tr>#}
+{#                            <td>{{ status.name }}</td>#}
+{#                            <td>{{ status.message_type }}</td>#}
+{#                            <td>{{ status.published_count }}</td>#}
+{#                            <td>{% status_badge status %}</td>#}
+{#                            <td>{{ status.updated_at }}</td>#}
+{#                            <td class="text-end">#}
+{#                                {% url 'whatsapp:status.delete' pk=status.pk as delete_url %}#}
+{#                                {% url 'whatsapp:status.update' pk=status.pk as edit_url %}#}
+{##}
+{#                                {% include 'components/update_link.html' with url=edit_url %}#}
+{#                                {% include 'components/delete_link.html' with url=delete_url %}#}
+{#                            </td>#}
+{#                        </tr>#}
+{#                    {% empty %}#}
+{#                        <tr>#}
+{#                            <td class="text-center" colspan="6">Sin estados publicados</td>#}
+{#                        </tr>#}
+{#                    {% endfor %}#}
+{#                    </tbody>#}
+{#                </table>#}
+{#            </div>#}
+{#        </div>#}
+{#    </div>#}
+{##}
+{##}
+{#{% endblock %}#}
