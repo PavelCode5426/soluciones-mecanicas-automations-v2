@@ -82,7 +82,7 @@ class WhatsAppStatusForm(forms.ModelForm):
 
     class Meta:
         model = WhatsAppStatus
-        exclude = ['published_count']
+        exclude = ['published_count','order']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
