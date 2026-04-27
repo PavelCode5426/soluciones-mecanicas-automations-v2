@@ -23,8 +23,7 @@ class FacebookGroup(models.Model):
 
 
 class FacebookDistributionList(models.Model):
-    profile = models.ForeignKey('FacebookProfile', related_name='distribution_lists', null=True, blank=True,
-                                on_delete=models.PROTECT)
+    profile = models.ForeignKey('FacebookProfile', related_name='distribution_lists', on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     groups = models.ManyToManyField(FacebookGroup, related_name='distribution_lists', blank=True)
 

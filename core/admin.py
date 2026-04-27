@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from core.models import WeekDay
+from core.models import WeekDay, Schedule
 
 
 # Register your models here.
@@ -19,4 +19,8 @@ client_admin = ClientAdminSite(name='admin')
 
 @admin.register(WeekDay)
 class WeekDayAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
     list_display = ['name']

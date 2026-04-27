@@ -148,13 +148,13 @@ class FacebookDistributionListsUpdateView(SuccessMessageMixin, UpdateView):
 
 class FacebookDistributionListsToggleStatusView(SuccessMessageMixin, ToggleStatusView):
     http_method_names = ['post']
-    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    success_url = reverse_lazy('facebook:distribution-lists.index')
     queryset = models.FacebookDistributionList.objects.all()
     success_message = "Lista de distribución object activada/desactivada exitosamente"
 
 
 class FacebookDistributionListsDeleteView(SuccessMessageMixin, DeleteView):
-    success_url = reverse_lazy('whatsapp:distribution-lists.index')
+    success_url = reverse_lazy('facebook:distribution-lists.index')
     queryset = models.FacebookDistributionList.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {

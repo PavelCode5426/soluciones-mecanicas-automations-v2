@@ -19,3 +19,16 @@ class Media(models.Model):
     file = models.FileField(upload_to='medias')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class Schedule(models.Model):
+    name = models.CharField(max_length=100)
+    time = models.TimeField()
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name}"
+
+    class Meta:
+        verbose_name = "Horario"
+        verbose_name_plural = "Horarios"
