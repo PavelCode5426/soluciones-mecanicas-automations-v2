@@ -5,7 +5,7 @@ from facebook import models
 
 
 class FacebookGenericFilterSet(FilterSet):
-    account = filters.ModelChoiceFilter(queryset=models.FacebookProfile.objects.all(), label="Cuentas")
+    profile = filters.ModelChoiceFilter(queryset=models.FacebookProfile.objects.all(), label="Cuentas")
     search = filters.CharFilter(method='search_method', label="Buscar...")
 
 
@@ -15,4 +15,4 @@ class FacebookGroupsFilterSet(FacebookGenericFilterSet):
         return queryset.filter(Q(name__icontains=value))
 
     class Meta:
-        fields = ['account', 'search']
+        fields = ['profile', 'search']
