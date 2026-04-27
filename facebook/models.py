@@ -97,7 +97,7 @@ class FacebookPostCampaign(AbstractFacebookPost):
 
 
 class FacebookLeadExplorer(models.Model):
-    name = models.CharField(max_length=250, null=True, blank=True)
+    name = models.CharField(max_length=250)
     profile = models.ForeignKey(FacebookProfile, related_name='lead_explorers', on_delete=models.PROTECT)
     group_category = models.ForeignKey(FacebookGroupCategory, related_name='lead_explorers', on_delete=models.PROTECT,
                                        blank=True, null=True)
