@@ -111,7 +111,7 @@ class FacebookLeadExplorer(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.name
+        return self.name or 'Sin nombre'
 
     class Meta:
         verbose_name = "Agente Comercial"
