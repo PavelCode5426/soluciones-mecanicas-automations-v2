@@ -36,7 +36,6 @@ class WhatsAppStatusAdminForm(forms.ModelForm):
                 from_date=instance.from_date,
                 until_date=instance.until_date,
                 publish_at=instance.publish_at,
-                published_count=instance.published_count
             )
             status = WhatsAppStatus.objects.filter(active=True, account=instance.account).exclude(pk=instance.pk).all()
             for _status in status:
@@ -62,7 +61,6 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
                 until_date=instance.until_date,
                 from_time=instance.from_time,
                 until_time=instance.until_time,
-                # published_count=instance.published_count
             )
             messages = WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(
                 pk=instance.pk).all()
@@ -90,8 +88,6 @@ class WhatsAppStatusForm(forms.ModelForm):
 
 
 class WhatsAppMessageForm(forms.ModelForm):
-    from_date = forms.DateField(widget=DatePickerInput, initial=today)
-
     def save(self, commit=True):
         instance = super().save(commit=commit)
         instance.message_type = 'text' if not instance.file else get_message_type(instance.file)

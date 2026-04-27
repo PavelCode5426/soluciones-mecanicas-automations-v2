@@ -43,6 +43,10 @@ class DuplicateView(DeleteView):
         success_url = self.get_success_url()
         self.object.id = None
         self.object.name += " (Copia)"
+        self.object.whatsapp_last_id = None
+        self.object.created_at = None
+        self.object.updated_at = None
+        self.object.published_count = 0
         self.object.save()
         return HttpResponseRedirect(success_url)
 

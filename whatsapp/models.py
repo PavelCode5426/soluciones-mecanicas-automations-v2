@@ -190,7 +190,7 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
 
     publish_at = None
     from_time = models.TimeField(default=datetime.time(0, 0))
-    until_time = models.TimeField(default=datetime.time(11, 59))
+    until_time = models.TimeField(default=datetime.time(23, 59))
     weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
 
     def __str__(self):

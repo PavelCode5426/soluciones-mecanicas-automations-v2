@@ -189,7 +189,6 @@ REST_FRAMEWORK = {
 BOOTSTRAP5 = {
     # "field_renderers": "core.forms.renderes.ExtraFieldRenderer"
 }
-
 PLAYWRIGHT = dict(
     headless=env('PW_HEADLESS', cast=bool, default=True),
     slow_mo=500,

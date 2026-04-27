@@ -9,9 +9,9 @@ register = template.Library()
 @register.simple_tag
 def status_badge(valor, texto_activo="Activo", texto_inactivo="Inactivo"):
     if valor:
-        html = f'<span class="badge bg-success">{texto_activo}</span>'
+        html = f'<span class="badge bg-success my-auto">{texto_activo}</span>'
     else:
-        html = f'<span class="badge bg-danger">{texto_inactivo}</span>'
+        html = f'<span class="badge bg-danger my-auto">{texto_inactivo}</span>'
     return mark_safe(html)
 
 
@@ -26,7 +26,7 @@ def toggle_status_badge(context, valor, submit_url, texto_activo="Activo", texto
     else:
         submit = f'<input type="submit" class="btn btn-xs btn-danger" value="{texto_inactivo}"/>'
 
-    return mark_safe('<form method="post" action="{}">{}{}</form>'.format(submit_url, submit, csrf_input))
+    return mark_safe('<form class="my-auto" method="post" action="{}">{}{}</form>'.format(submit_url, submit, csrf_input))
 
 
 @register.simple_tag
