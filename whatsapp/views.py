@@ -9,6 +9,7 @@ from core.models import Schedule
 from whatsapp import filters
 from whatsapp import models, forms
 from whatsapp.mixins import WhatsAppAccountViewMixins
+from whatsapp.models import WhatsAppScheduleMessage
 from whatsapp.tasks import syncronize_whatsapp_account_groups, syncronize_whatsapp_account_contacts
 
 
@@ -292,10 +293,46 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
 
     def dispatch(self, request, *args, **kwargs):
         self.account = get_object_or_404(models.WhatsAppAccount, id=self.kwargs['pk'])
+        self.schedule = get_object_or_404(Schedule, pk=self.kwargs['schedule_pk'])
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.account.messages.all()
+        return WhatsAppScheduleMessage.objects \
+            .filter(schedule=self.schedule, message__account=self.account).order_by('order').all()
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(object_list=self.get_queryset(), account=self.account, schedule=self.schedule,
+                                        **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.method == 'POST':
+            return {'data': self.request.POST, 'queryset': self.get_queryset(), **kwargs}
+        return {'queryset': self.get_queryset(), **kwargs}
+
+    def form_valid(self, formset):
+        for form in formset.ordered_forms:
+            instance = form.save(commit=False)
+            instance.order = form.cleaned_data['ORDER']
+            instance.save()
+        return super().form_valid(formset)
+
+    def get_success_url(self):
+        return reverse('whatsapp:accounts.sort-messages',
+                       kwargs={'pk': self.account.pk, 'schedule_pk': self.schedule.pk})
+
+
+class WhatsAppStatusSorterView(SuccessMessageMixin, FormView):
+    success_message = "Estados ordenados correctamente"
+    template_name = "whatsapp/status/sort.html"
+    form_class = forms.WhatAppSortStatusFormSet
+
+    def dispatch(self, request, *args, **kwargs):
+        self.account = get_object_or_404(models.WhatsAppAccount, id=self.kwargs['pk'])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return self.account.status.all()
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(object_list=self.get_queryset(), account=self.account, **kwargs)
@@ -312,18 +349,6 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
             instance.order = form.cleaned_data['ORDER']
             instance.save()
         return super().form_valid(formset)
-
-    def get_success_url(self):
-        return reverse('whatsapp:accounts.sort-messages', kwargs={'pk': self.account.pk})
-
-
-class WhatsAppStatusSorterView(WhatsAppMessagesSorterView):
-    success_message = "Estados ordenados correctamente"
-    template_name = "whatsapp/status/sort.html"
-    form_class = forms.WhatAppSortStatusFormSet
-
-    def get_queryset(self):
-        return self.account.status.all()
 
     def get_success_url(self):
         return reverse('whatsapp:accounts.sort-status', kwargs={'pk': self.account.pk})
@@ -363,3 +388,13 @@ class WhatsAppMessageDuplicateView(DuplicateView):
     success_message = "Estado duplicado correctamente correctamente"
     queryset = models.WhatsAppMessage.objects.all()
     template_name = 'whatsapp/messages/duplicate.html'
+
+
+class WhatsAppAccountScheduleDetailView(DetailView):
+    queryset = models.WhatsAppAccount.objects.all()
+    template_name = 'whatsapp/accounts/schedules/index.html'
+    context_object_name = 'account'
+
+    def get_context_data(self, **kwargs):
+        schedules = Schedule.objects.filter(messages__message__account=self.get_object()).order_by('time').distinct()
+        return super().get_context_data(object_list=schedules, **kwargs)

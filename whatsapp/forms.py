@@ -82,7 +82,7 @@ class WhatsAppStatusForm(forms.ModelForm):
 
     class Meta:
         model = WhatsAppStatus
-        exclude = ['published_count','order']
+        exclude = ['published_count', 'order']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
@@ -205,7 +205,7 @@ class WhatsAppDistributionListUpdateForm(forms.ModelForm):
 
 
 WhatAppSortMessageFormSet = modelformset_factory(
-    WhatsAppMessage,
+    WhatsAppScheduleMessage,
     fields=['order'],
     widgets={'order': forms.HiddenInput()},
     extra=0,

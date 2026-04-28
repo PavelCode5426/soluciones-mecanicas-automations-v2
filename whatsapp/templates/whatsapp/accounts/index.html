@@ -31,7 +31,7 @@
             <div class="dropdown-menu">
                 {% url 'whatsapp:accounts.delete' pk=object.pk as delete_url %}
                 {% url 'whatsapp:accounts.update' pk=object.pk as edit_url %}
-                {% url 'whatsapp:accounts.sort-messages' pk=object.pk as sort_messages_url %}
+                {% url 'whatsapp:accounts.schedules' pk=object.pk as sort_messages_url %}
                 {% url 'whatsapp:accounts.sort-status' pk=object.pk as sort_status_url %}
                 {% url 'whatsapp:accounts.details' pk=object.pk as profile_url %}
 

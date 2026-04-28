@@ -38,7 +38,7 @@ class FacebookDistributionListUpdateForm(forms.ModelForm):
 class FacebookPostCampaignForm(forms.ModelForm):
     class Meta:
         model = models.FacebookPostCampaign
-        exclude = ['published_count','distribution_count']
+        exclude = ['published_count', 'distribution_count']
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),

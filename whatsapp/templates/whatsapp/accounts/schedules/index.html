@@ -1,0 +1,16 @@
+{% extends 'layout/admin_table_layout.html' %}
+{% load components %}
+
+{% block title %}Horarios de {{ account }}{% endblock %}
+{% block page_title %}Horarios de {{ account }}{% endblock %}
+
+
+{% block table_headers %}
+    <th>Horario</th>
+{% endblock %}
+
+{% block table_data %}
+    <td>
+        {% object_link object url='whatsapp:accounts.sort-messages' pk=account.pk schedule_pk=object.pk %}
+    </td>
+{% endblock %}

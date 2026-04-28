@@ -25,20 +25,32 @@
 
         <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>
 
-        <ul class="list-group mt-4" id="sortable-list">
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 my-4" id="sortable-list">
             {% for f in form %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="fas fa-bars me-2"></i>
+                <div class="col">
+                    <div class="card">
                         {{ f.id }}
                         {{ f.ORDER.as_hidden }}
                         {{ f.order.as_hidden }}
-                        {{ f.instance.name }}
+
+                        <img class="card-img-top img-fluid bg-light-alt" src="{{ f.instance.file.url }}"/>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title text-truncate mb-0">{{ f.instance.name }}</h5>
+                            <div class="badge bg-light text-dark">
+                                <img class="rounded-circle me-1" src="{{ f.instance.account.avatar }}" alt=""
+                                     height="20">
+                                {{ f.instance.account }}
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text text-muted">{{ f.instance.message }}</p>
+                        </div>
                     </div>
-                    <div>{% status_badge f.instance.active %}</div>
-                </li>
+                </div>
             {% endfor %}
-        </ul>
+        </div>
+
 
         {% if object_list.count > 10 %}
             <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>

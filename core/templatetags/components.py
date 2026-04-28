@@ -26,10 +26,12 @@ def toggle_status_badge(context, valor, submit_url, texto_activo="Activo", texto
     else:
         submit = f'<input type="submit" class="btn btn-xs btn-danger" value="{texto_inactivo}"/>'
 
-    return mark_safe('<form class="my-auto" method="post" action="{}">{}{}</form>'.format(submit_url, submit, csrf_input))
+    return mark_safe(
+        '<form class="my-auto" method="post" action="{}">{}{}</form>'.format(submit_url, submit, csrf_input))
 
 
 @register.simple_tag
-def object_link(account, url):
-    url = reverse_lazy(url, kwargs={"pk": account.pk})
-    return mark_safe('<a class="btn" href="{}">{}</a>'.format(url, account))
+def object_link(object, url, **kwargs):
+    url_kwargs = {"pk": object.pk, **kwargs}
+    url = reverse_lazy(url, kwargs=url_kwargs)
+    return mark_safe('<a class="btn" href="{}">{}</a>'.format(url, object))

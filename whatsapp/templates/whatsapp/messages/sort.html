@@ -33,9 +33,9 @@
                         {{ f.id }}
                         {{ f.ORDER.as_hidden }}
                         {{ f.order.as_hidden }}
-                        {{ f.instance.name }}
+                        {{ f.instance.message }}
                     </div>
-                    <div>{% status_badge f.instance.active %}</div>
+                    <div>{% status_badge f.instance.message.active %}</div>
                 </li>
             {% endfor %}
         </ul>
