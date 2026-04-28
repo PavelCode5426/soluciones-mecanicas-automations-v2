@@ -185,7 +185,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["name", "account", 'message', 'file', 'file_preview', 'active']
         }),
         ("Planificar estado", {
-            "fields": ["order", 'publish_at', 'from_date', 'until_date', 'weekdays', 'sync_schedule']
+            "fields": ["order", 'from_date', 'until_date', 'weekdays', 'sync_schedule']
         }),
         ("Estadísticas", {
             "fields": ["published_count"],

@@ -124,7 +124,7 @@ class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
             "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image']
         }),
         ("Panificador de la publicación", {
-            "fields": ['active', 'publish_at']
+            "fields": ['active']
         }),
     ]
 
