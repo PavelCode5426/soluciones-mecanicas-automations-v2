@@ -26,26 +26,22 @@
         <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>
 
 
-        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 my-4" id="sortable-list">
+        <div class="row row-cols-3 row-cols-md-4 row-cols-lg-6 g-4 my-4" id="sortable-list">
             {% for f in form %}
                 <div class="col">
                     {{ f.id }}
                     {{ f.ORDER.as_hidden }}
                     {{ f.order.as_hidden }}
 
-                    <div class="card" style="max-height: 150px">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center">
-                                {% if f.instance.file %}
-                                    <img class="img-thumbnail rounded flex-shrink-0" src="{{ f.instance.file.url }}"
-                                         alt="" style="width: 60px; height: 60px; object-fit: cover;">
-                                {% endif %}
-                                <div class="ms-3 overflow-hidden">
-                                    <h6 class="mb-0 fw-bold text-truncate">{{ f.instance.name }}</h6>
-                                    <p class="text-muted mb-2 small text-truncate">{{ f.instance.message|default:'Sin texto en el estado' }}</p>
-                                    {% status_badge f.instance.active %}
-                                </div>
-                            </div>
+                    <div class="card">
+                        {% if f.instance.file %}
+                            <img src="{{ f.instance.file.url }}" class="card-img-top img-fluid bg-light-alt"
+                                 style="object-fit: cover;"/>
+                        {% endif %}
+                        <div class="card-body p-2 d-flex flex-column">
+                            <h6 class="fw-bold text-truncate mb-1">{{ f.instance.name }}</h6>
+                            <p class="text-muted small mb-1 line-clamp-4 flex-grow-1">{{ f.instance.message|default:'Sin texto en el estado' }}</p>
+                            <div>{% status_badge f.instance.active %}</div>
                         </div>
                     </div>
                 </div>
