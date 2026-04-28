@@ -26,32 +26,32 @@
         <input type="submit" class="btn btn-outline-primary" value="Guardar order actual"/>
 
 
-        <div class="row row-cols-4 row-cols-md-8 row-cols-lg-12 g-4 my-4" id="sortable-list">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 my-4" id="sortable-list">
             {% for f in form %}
                 <div class="col">
-                    <div class="card">
-                        {{ f.id }}
-                        {{ f.ORDER.as_hidden }}
-                        {{ f.order.as_hidden }}
+                    {{ f.id }}
+                    {{ f.ORDER.as_hidden }}
+                    {{ f.order.as_hidden }}
 
-                        {% if f.instance.file %}
-                            <img class="card-img-top img-fluid bg-light-alt" src="{{ f.instance.file.url }}"/>
-                        {% endif %}
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="card-title text-truncate mb-0">{{ f.instance.name }}</h5>
-                            <div class="badge bg-light text-dark">
-                                <img class="rounded-circle me-1" src="{{ f.instance.account.avatar }}" alt=""
-                                     height="20">
-                                {{ f.instance.account }}
-                            </div>
-                        </div>
+                    <div class="card" style="max-height: 150px">
                         <div class="card-body">
-                            <p class="card-text text-muted">{{ f.instance.message }}</p>
+                            <div class="d-flex align-items-center">
+                                {% if f.instance.file %}
+                                    <img class="img-thumbnail rounded flex-shrink-0" src="{{ f.instance.file.url }}"
+                                         alt="" style="width: 60px; height: 60px; object-fit: cover;">
+                                {% endif %}
+                                <div class="ms-3 overflow-hidden">
+                                    <h6 class="mb-0 fw-bold text-truncate">{{ f.instance.name }}</h6>
+                                    <p class="text-muted mb-2 small text-truncate">{{ f.instance.message|default:'Sin texto en el estado' }}</p>
+                                    {% status_badge f.instance.active %}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
         </div>
+
 
 
         {% if object_list.count > 10 %}
