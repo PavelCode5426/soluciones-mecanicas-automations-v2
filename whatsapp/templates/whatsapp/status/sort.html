@@ -34,7 +34,9 @@
                         {{ f.ORDER.as_hidden }}
                         {{ f.order.as_hidden }}
 
-                        <img class="card-img-top img-fluid bg-light-alt" src="{{ f.instance.file.url|default_if_none:'' }}"/>
+                        {% if f.instance.file %}
+                            <img class="card-img-top img-fluid bg-light-alt" src="{{ f.instance.file.url }}"/>
+                        {% endif %}
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h5 class="card-title text-truncate mb-0">{{ f.instance.name }}</h5>
                             <div class="badge bg-light text-dark">
