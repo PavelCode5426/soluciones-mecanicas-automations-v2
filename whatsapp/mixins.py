@@ -9,6 +9,10 @@ from whatsapp import models
 #         kwargs.setdefault('request', self.request)
 #         return kwargs
 
+class WhatsAppAccountViewMixins:
+    def get_queryset(self):
+        return models.WhatsAppAccount.objects.all()
+
 
 class WhatsAppStatusViewMixins:
     def get_queryset(self):
@@ -23,11 +27,6 @@ class WhatsAppContactViewMixins:
 class WhatsAppGroupViewMixins:
     def get_queryset(self):
         return models.WhatsAppGroup.objects.filter(account__created_by=get_request().user).all()
-
-
-class WhatsAppAccountViewMixins:
-    def get_queryset(self):
-        return models.WhatsAppAccount.objects.all()
 
 
 class WhatsAppDistributionListViewMixins:

@@ -1,4 +1,5 @@
 from crum import get_current_user
+from data_fetcher.global_request_context import get_request
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -47,7 +48,6 @@ class UserTrackedModel(models.Model):
         null=True,
         blank=True,
         related_name='%(class)s_created',
-        editable=False
     )
     updated_by = models.ForeignKey(
         User,
@@ -65,9 +65,9 @@ class UserTrackedModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        current_user = get_current_user()
+        current_user = get_request().user
         if not self.pk:
-            if current_user:
+            if current_user and self.created_by is None:
                 self.created_by = current_user
         if current_user:
             self.updated_by = current_user

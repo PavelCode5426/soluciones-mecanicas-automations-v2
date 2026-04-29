@@ -184,7 +184,7 @@ class WhatsAppUpdateAccountForm(WhatsAppCreateAccountForm):
 
     class Meta:
         model = WhatsAppAccount
-        fields = forms.ALL_FIELDS
+        exclude = ['created_by']
 
 
 class WhatsAppDistributionListCreateForm(forms.ModelForm):
