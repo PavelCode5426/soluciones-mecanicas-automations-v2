@@ -39,7 +39,7 @@ class PreviewFileMixin:
 # Register your models here.
 @admin.register(WhatsAppAccount)
 class WhatsAppAccountAdmin(AllObjectsModelAdmin):
-    list_display = ['name', 'session', 'active']
+    list_display = ['name', 'session', 'active','created_by']
     readonly_fields = ['name', 'session', 'chat_id']
     actions = ['sync_whatsapp_groups', 'sync_whatsapp_contacts']
 
