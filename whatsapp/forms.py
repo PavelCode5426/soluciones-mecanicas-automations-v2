@@ -25,7 +25,7 @@ ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')]
 class CurrentUserAccount:
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['account'].queryset = WhatsAppAccount.objects.all()
+        self.fields['account'].queryset = WhatsAppAccount.user_objects.all()
 
 
 class RemoveActiveOnCreateMixin(forms.Form):

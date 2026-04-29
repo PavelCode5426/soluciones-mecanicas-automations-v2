@@ -3,8 +3,8 @@ from data_fetcher.global_request_context import get_request
 from django.contrib.auth import get_user_model
 from django.db import models
 
-from core.managers import SoftDeleteManager, UserTrackedManager, SoftDeleteUserTrackedManager, \
-    AllObjectsSoftDeleteUserTrackedManager, AllObjectsUserTrackedManager, AllObjectsSoftDeleteManager
+from core.managers import SoftDeleteManager, UserTrackedManager, AllObjectsSoftDeleteUserTrackedManager, \
+    AllObjectsUserTrackedManager, AllObjectsSoftDeleteManager
 
 User = get_user_model()
 
@@ -58,8 +58,8 @@ class UserTrackedModel(models.Model):
         editable=False
     )
 
-    objects = UserTrackedManager()
-    all_objects = AllObjectsUserTrackedManager()
+    objects = AllObjectsUserTrackedManager()
+    user_objects = UserTrackedManager()
 
     class Meta:
         abstract = True
@@ -75,8 +75,8 @@ class UserTrackedModel(models.Model):
 
 
 class SoftDeleteUserTrackedModel(UserTrackedModel, SoftDeleteModel):
-    objects = SoftDeleteUserTrackedManager()
-    all_objects = AllObjectsSoftDeleteUserTrackedManager()
+    objects = AllObjectsSoftDeleteUserTrackedManager()
+    user_objects = UserTrackedManager()
 
     class Meta:
         abstract = True
