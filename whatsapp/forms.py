@@ -22,6 +22,12 @@ from whatsapp.tasks import syncronize_whatsapp_account_groups, enqueue_whatsapp_
 ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')], widget=forms.Select)
 
 
+class CurrentUserAccount:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['account'].queryset = WhatsAppAccount.objects.all()
+
+
 class RemoveActiveOnCreateMixin(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -78,7 +84,7 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
         fields = forms.ALL_FIELDS
 
 
-class WhatsAppStatusForm(forms.ModelForm):
+class WhatsAppStatusForm(CurrentUserAccount, forms.ModelForm):
     from_date = forms.DateField(widget=DatePickerInput, initial=today)
 
     class Meta:
@@ -90,7 +96,7 @@ class WhatsAppStatusForm(forms.ModelForm):
         }
 
 
-class WhatsAppMessageForm(forms.ModelForm):
+class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
     schedules = forms.ModelMultipleChoiceField(Schedule.objects.all())
 
     def save(self, commit=True):
@@ -187,13 +193,13 @@ class WhatsAppUpdateAccountForm(WhatsAppCreateAccountForm):
         exclude = ['created_by']
 
 
-class WhatsAppDistributionListCreateForm(forms.ModelForm):
+class WhatsAppDistributionListCreateForm(CurrentUserAccount, forms.ModelForm):
     class Meta:
         model = WhatsAppDistributionList
         exclude = ['contacts', 'groups', 'active']
 
 
-class WhatsAppDistributionListUpdateForm(forms.ModelForm):
+class WhatsAppDistributionListUpdateForm(CurrentUserAccount, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(WhatsAppDistributionListUpdateForm, self).__init__(*args, **kwargs)
         self.fields['account'].disabled = True
