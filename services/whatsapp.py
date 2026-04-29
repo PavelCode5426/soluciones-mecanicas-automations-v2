@@ -36,6 +36,12 @@ class WAHAService:
         response.raise_for_status()
         return response.json()
 
+    def session_information(self):
+        response = requests.get(f"{self._api_url}/api/sessions/{self._session}", headers=self._headers,
+                                 auth=self._auth)
+        response.raise_for_status()
+        return response.json()
+
     def update_session(self, webhook_urls: list[str]):
         data = {"name": self._session, "config": self.__get_session_config(webhook_urls)}
         response = requests.put(f"{self._api_url}/api/sessions/{self._session}", headers=self._headers,

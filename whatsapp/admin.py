@@ -64,27 +64,28 @@ class WhatsAppAccountAdmin(AllObjectsModelAdmin):
         #     service.create_session()
 
         obj.save()
-        profile = service.get_profile_info()
-        obj.name = profile['name']
-        obj.chat_id = profile['id']
+        if service.session_information().get('status') == 'WORKING':
+            profile = service.get_profile_info()
+            obj.name = profile['name']
+            obj.chat_id = profile['id']
 
-        img_temp = NamedTemporaryFile()
-        with urlopen(profile['picture']) as response:
-            img_temp.write(response.read())
-            img_temp.flush()
-            obj.avatar.save(f"{obj.name}.jpg", File(img_temp), save=False)
+            img_temp = NamedTemporaryFile()
+            with urlopen(profile['picture']) as response:
+                img_temp.write(response.read())
+                img_temp.flush()
+                obj.avatar.save(f"{obj.name}.jpg", File(img_temp), save=False)
 
-        obj.save()
-        cache.delete(obj.session)
+            obj.save()
+            cache.delete(obj.session)
 
-        syncronize_whatsapp_account_groups(obj)
-        # syncronize_whatsapp_account_contacts(obj)
-        webhooks_urls = []
-        if obj.can_auto_reply:
-            webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:chats-webhook')))
-        if obj.can_find_leads:
-            webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:groups-webhook')))
-        service.update_session(webhooks_urls)
+            syncronize_whatsapp_account_groups(obj)
+            # syncronize_whatsapp_account_contacts(obj)
+            webhooks_urls = []
+            if obj.can_auto_reply:
+                webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:chats-webhook')))
+            if obj.can_find_leads:
+                webhooks_urls.append(request.build_absolute_uri(reverse('whatsapp:groups-webhook')))
+            service.update_session(webhooks_urls)
 
     @admin.action(description='Actualizar grupos de la cuenta')
     def sync_whatsapp_groups(self, request, queryset):
