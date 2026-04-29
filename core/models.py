@@ -58,7 +58,7 @@ class UserTrackedModel(models.Model):
         editable=False
     )
 
-    objects = AllObjectsUserTrackedManager()
+    all_objects = AllObjectsUserTrackedManager()
     user_objects = UserTrackedManager()
 
     class Meta:
@@ -75,7 +75,7 @@ class UserTrackedModel(models.Model):
 
 
 class SoftDeleteUserTrackedModel(UserTrackedModel, SoftDeleteModel):
-    objects = AllObjectsSoftDeleteUserTrackedManager()
+    all_objects = AllObjectsSoftDeleteUserTrackedManager()
     user_objects = SoftDeleteUserTrackedManager()
 
     class Meta:
