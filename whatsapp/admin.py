@@ -288,6 +288,7 @@ class WhatsAppMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
                 "message_type": message.message_type,
                 "from_date": message.from_date,
                 "until_date": message.until_date,
+                "created_by": message.created_by
             }
 
             instance, created = WhatsAppStatus.objects.update_or_create(

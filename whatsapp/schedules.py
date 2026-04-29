@@ -7,7 +7,7 @@ from whatsapp.tasks import syncronize_whatsapp_account_groups, \
 
 
 def update_whatsapp_contacts_and_groups():
-    accounts = WhatsAppAccount.objects.all()
+    accounts = WhatsAppAccount.all_objects.all()
 
     for account in accounts:
         syncronize_whatsapp_account_groups(account)
@@ -15,7 +15,7 @@ def update_whatsapp_contacts_and_groups():
 
 
 def enqueue_active_status():
-    whatsapp_status = (WhatsAppStatus.objects.select_related('account')
+    whatsapp_status = (WhatsAppStatus.all_objects.select_related('account')
                        .filter(active=True, account__active=True, from_date__lte=localtime())
                        .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
                        # .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
@@ -33,7 +33,7 @@ def enqueue_active_messages():
     current_hour = current_time.hour
     current_weekday = current_time.weekday()
 
-    messages = WhatsAppMessage.objects.select_related('account') \
+    messages = WhatsAppMessage.all_objects.select_related('account') \
         .exclude(frequency__isnull=True) \
         .filter(active=True, account__active=True, from_date__lte=current_time) \
         .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
@@ -42,7 +42,7 @@ def enqueue_active_messages():
         .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField())) \
         .filter(can_publish=0)
 
-    #TODO REGRESAR ESTO ATRAS
+    # TODO REGRESAR ESTO ATRAS
     # messages.update(last_whatsapp_id=None)
     for message in messages.all():
         enqueue_whatsapp_message(message, refresh=False)

@@ -44,19 +44,21 @@ def syncronize_whatsapp_account_groups(account: WhatsAppAccount):
         participant_count = group['ParticipantCount']
 
         if name:
-            WhatsAppGroup.objects.update_or_create(
+            WhatsAppGroup.all_objects.update_or_create(
                 defaults=dict(
                     name=name,
                     is_locked=is_locked,
                     is_ephemeral=is_ephemeral,
-                    participant_count=participant_count
+                    participant_count=participant_count,
+                    created_by=account.created_by
                 ),
                 create_defaults=dict(
                     name=name,
                     is_locked=is_locked,
                     is_ephemeral=is_ephemeral,
                     participant_count=participant_count,
-                    account=account
+                    account=account,
+                    created_by=account.created_by
                 ),
                 chat_id=chat_id, account=account
             )
@@ -82,9 +84,9 @@ def syncronize_whatsapp_account_contacts(account: WhatsAppAccount):
         push_name = contact['pushname']
 
         if name:
-            WhatsAppContact.objects.update_or_create(
+            WhatsAppContact.all_objects.update_or_create(
                 defaults=dict(name=name, push_name=push_name),
-                create_defaults=dict(name=name, push_name=push_name, account=account),
+                create_defaults=dict(name=name, push_name=push_name, account=account, created_by=account.created_by),
                 chat_id=chat_id, account=account
             )
 
