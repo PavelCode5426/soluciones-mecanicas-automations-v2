@@ -152,7 +152,7 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
     filter_horizontal = ['groups', 'contacts']
-    readonly_fields = ['account']
+    readonly_fields = []
 
     def get_readonly_fields(self, request, obj=None):
         return self.readonly_fields if obj else []
