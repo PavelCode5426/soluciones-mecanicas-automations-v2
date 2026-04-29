@@ -4,13 +4,13 @@ from dateutil.utils import today
 from django.db import models
 from django_jsonform.models.fields import JSONField
 
-from core.models import WeekDay, Schedule, SoftDeleteUserTrackedModel
+from core.models import WeekDay, Schedule, SoftDeleteUserTrackedModel, SoftDeleteModel
 from ia_assistant.models import RAGApplication
 from whatsapp.helpers import get_message_type
 from whatsapp.managers import ProcessedLeadManager
 
 
-class AbstractWhatsAppMessage(SoftDeleteUserTrackedModel):
+class AbstractWhatsAppMessage(SoftDeleteModel):
     name = models.CharField(max_length=250)
     message_type = models.CharField(choices=[
         ('text', 'Text'),
@@ -79,7 +79,7 @@ class WhatsAppAccount(SoftDeleteUserTrackedModel):
         verbose_name_plural = 'Cuentas'
 
 
-class WhatsAppGroup(SoftDeleteUserTrackedModel):
+class WhatsAppGroup(SoftDeleteModel):
     account = models.ForeignKey(WhatsAppAccount, related_name='groups', on_delete=models.PROTECT)
     name = models.CharField(editable=False, max_length=250)
     chat_id = models.CharField(editable=False, max_length=250)
@@ -99,7 +99,7 @@ class WhatsAppGroup(SoftDeleteUserTrackedModel):
         verbose_name_plural = 'Grupos'
 
 
-class WhatsAppContact(SoftDeleteUserTrackedModel):
+class WhatsAppContact(SoftDeleteModel):
     chat_id = models.CharField(max_length=250)
     name = models.CharField(blank=True, null=True, max_length=250)
     push_name = models.CharField(blank=True, null=True, max_length=250)
@@ -155,7 +155,7 @@ class WhatsAppStatus(AbstractWhatsAppMessage, ScheduledMessage):
         ordering = ['account', 'order']
 
 
-class WhatsAppDistributionList(SoftDeleteUserTrackedModel):
+class WhatsAppDistributionList(SoftDeleteModel):
     name = models.CharField(max_length=250)
     account = models.ForeignKey(WhatsAppAccount, related_name='distribution_lists', on_delete=models.PROTECT)
     contacts = models.ManyToManyField(WhatsAppContact, related_name='distribution_lists', blank=True)

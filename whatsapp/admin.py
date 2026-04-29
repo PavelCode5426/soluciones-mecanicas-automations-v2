@@ -102,7 +102,7 @@ class WhatsAppAccountAdmin(AllObjectsModelAdmin):
 
 
 @admin.register(WhatsAppGroup)
-class WhatsAppGroupAdmin(AllObjectsModelAdmin):
+class WhatsAppGroupAdmin(admin.ModelAdmin):
     search_fields = ['name', 'chat_id']
     list_display = ['name', 'account', 'participant_count', 'chat_id', 'active']
     readonly_fields = ['name', 'chat_id', 'participant_count', 'is_locked', 'is_ephemeral']
@@ -110,7 +110,7 @@ class WhatsAppGroupAdmin(AllObjectsModelAdmin):
 
 
 @admin.register(WhatsAppLead)
-class WhatsAppLeadAdmin(AllObjectsModelAdmin):
+class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
     readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
     list_filter = ['account', 'processed']
@@ -131,14 +131,14 @@ class WhatsAppLeadAdmin(AllObjectsModelAdmin):
 
 
 @admin.register(WhatsAppProcessedLead)
-class WhatsAppLeadAdmin(AllObjectsModelAdmin):
+class WhatsAppLeadAdmin(admin.ModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
     readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed', 'message_reply']
     list_filter = ['account']
 
 
 @admin.register(WhatsAppContact)
-class WhatsAppContactAdmin(AllObjectsModelAdmin):
+class WhatsAppContactAdmin(admin.ModelAdmin):
     search_fields = ['name', 'chat_id']
     list_display = ['name', 'account', 'active']
     readonly_fields = ['chat_id', 'push_name']
@@ -146,7 +146,7 @@ class WhatsAppContactAdmin(AllObjectsModelAdmin):
 
 
 @admin.register(WhatsAppDistributionList)
-class WhatsAppDistributionListAdmin(AllObjectsModelAdmin):
+class WhatsAppDistributionListAdmin(admin.ModelAdmin):
     search_fields = ['name']
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
@@ -173,7 +173,7 @@ class WhatsAppDistributionListAdmin(AllObjectsModelAdmin):
 
 
 @admin.register(WhatsAppStatus)
-class WhatsAppStatusAdmin(AllObjectsModelAdmin, PreviewFileMixin):
+class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppStatusAdminForm
     search_fields = ['name']
     list_display = ['name', 'account', 'published_count', 'active', 'updated_at']
@@ -223,7 +223,7 @@ class WhatsAppStatusAdmin(AllObjectsModelAdmin, PreviewFileMixin):
 
 
 @admin.register(WhatsAppMessage)
-class WhatsAppMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
+class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppMessageAdminForm
     search_fields = ['name', 'message']
     list_display = ['name', 'account', 'message_type', 'active', 'schedule_time', 'published_count']
@@ -288,7 +288,6 @@ class WhatsAppMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
                 "message_type": message.message_type,
                 "from_date": message.from_date,
                 "until_date": message.until_date,
-                "created_by": message.created_by
             }
 
             instance, created = WhatsAppStatus.objects.update_or_create(
@@ -300,7 +299,7 @@ class WhatsAppMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
 
 
 @admin.register(WhatsAppAutoReplyMessage)
-class WhatsAppAutoReplyMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
+class WhatsAppAutoReplyMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
     list_display = ['name', 'trigger_message', 'message_type', 'account', 'active', 'created_at']
     list_filter = ['message_type', 'active', 'account']
     search_fields = ['name', 'trigger_message', 'message']

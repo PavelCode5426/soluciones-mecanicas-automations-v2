@@ -1,3 +1,5 @@
+from data_fetcher.global_request_context import get_request
+
 from whatsapp import models
 
 
@@ -10,7 +12,7 @@ from whatsapp import models
 
 class WhatsAppStatusViewMixins:
     def get_queryset(self):
-        return models.WhatsAppStatus.objects.all()
+        return models.WhatsAppStatus.objects.filter(account__created_by=get_request().user).all()
 
 
 class WhatsAppContactViewMixins:
@@ -20,7 +22,7 @@ class WhatsAppContactViewMixins:
 
 class WhatsAppGroupViewMixins:
     def get_queryset(self):
-        return models.WhatsAppGroup.objects.all()
+        return models.WhatsAppGroup.objects.filter(account__created_by=get_request().user).all()
 
 
 class WhatsAppAccountViewMixins:
@@ -30,9 +32,9 @@ class WhatsAppAccountViewMixins:
 
 class WhatsAppDistributionListViewMixins:
     def get_queryset(self):
-        return models.WhatsAppDistributionList.objects.all()
+        return models.WhatsAppDistributionList.objects.filter(account__created_by=get_request().user).all()
 
 
 class WhatsAppMessageViewMixins:
     def get_queryset(self):
-        return models.WhatsAppMessage.objects.all()
+        return models.WhatsAppMessage.objects.filter(account__created_by=get_request().user).all()
