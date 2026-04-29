@@ -10,6 +10,7 @@ from django.utils.timezone import now
 from django_q.tasks import async_task
 from rest_framework.reverse import reverse
 
+from core.admin import AllObjectsModelAdmin
 from whatsapp import forms
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
@@ -37,7 +38,7 @@ class PreviewFileMixin:
 
 # Register your models here.
 @admin.register(WhatsAppAccount)
-class WhatsAppAccountAdmin(admin.ModelAdmin):
+class WhatsAppAccountAdmin(AllObjectsModelAdmin):
     list_display = ['name', 'session', 'active']
     readonly_fields = ['name', 'session', 'chat_id']
     actions = ['sync_whatsapp_groups', 'sync_whatsapp_contacts']
@@ -101,7 +102,7 @@ class WhatsAppAccountAdmin(admin.ModelAdmin):
 
 
 @admin.register(WhatsAppGroup)
-class WhatsAppGroupAdmin(admin.ModelAdmin):
+class WhatsAppGroupAdmin(AllObjectsModelAdmin):
     search_fields = ['name', 'chat_id']
     list_display = ['name', 'account', 'participant_count', 'chat_id', 'active']
     readonly_fields = ['name', 'chat_id', 'participant_count', 'is_locked', 'is_ephemeral']
@@ -109,7 +110,7 @@ class WhatsAppGroupAdmin(admin.ModelAdmin):
 
 
 @admin.register(WhatsAppLead)
-class WhatsAppLeadAdmin(admin.ModelAdmin):
+class WhatsAppLeadAdmin(AllObjectsModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
     readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed']
     list_filter = ['account', 'processed']
@@ -130,14 +131,14 @@ class WhatsAppLeadAdmin(admin.ModelAdmin):
 
 
 @admin.register(WhatsAppProcessedLead)
-class WhatsAppLeadAdmin(admin.ModelAdmin):
+class WhatsAppLeadAdmin(AllObjectsModelAdmin):
     list_display = ['chat_name', 'chat_id', 'group', 'created_at']
     readonly_fields = ['chat_id', 'chat_name', 'message', 'media_url', 'processed', 'message_reply']
     list_filter = ['account']
 
 
 @admin.register(WhatsAppContact)
-class WhatsAppContactAdmin(admin.ModelAdmin):
+class WhatsAppContactAdmin(AllObjectsModelAdmin):
     search_fields = ['name', 'chat_id']
     list_display = ['name', 'account', 'active']
     readonly_fields = ['chat_id', 'push_name']
@@ -145,7 +146,7 @@ class WhatsAppContactAdmin(admin.ModelAdmin):
 
 
 @admin.register(WhatsAppDistributionList)
-class WhatsAppDistributionListAdmin(admin.ModelAdmin):
+class WhatsAppDistributionListAdmin(AllObjectsModelAdmin):
     search_fields = ['name']
     list_display = ['name', 'account', 'active']
     list_filter = ['account']
@@ -172,7 +173,7 @@ class WhatsAppDistributionListAdmin(admin.ModelAdmin):
 
 
 @admin.register(WhatsAppStatus)
-class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
+class WhatsAppStatusAdmin(AllObjectsModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppStatusAdminForm
     search_fields = ['name']
     list_display = ['name', 'account', 'published_count', 'active', 'updated_at']
@@ -222,10 +223,10 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
 
 
 @admin.register(WhatsAppMessage)
-class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
+class WhatsAppMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
     form = forms.WhatsAppMessageAdminForm
     search_fields = ['name', 'message']
-    list_display = ['name', 'account', 'message_type', 'active','schedule_time', 'published_count']
+    list_display = ['name', 'account', 'message_type', 'active', 'schedule_time', 'published_count']
     list_filter = ['account', 'active', 'message_type']
     readonly_fields = ['published_count', 'file_preview', 'last_whatsapp_id']
     filter_horizontal = ['weekdays', 'distribution_lists']
@@ -298,7 +299,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
 
 
 @admin.register(WhatsAppAutoReplyMessage)
-class WhatsAppAutoReplyMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
+class WhatsAppAutoReplyMessageAdmin(AllObjectsModelAdmin, PreviewFileMixin):
     list_display = ['name', 'trigger_message', 'message_type', 'account', 'active', 'created_at']
     list_filter = ['message_type', 'active', 'account']
     search_fields = ['name', 'trigger_message', 'message']

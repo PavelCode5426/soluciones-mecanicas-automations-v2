@@ -68,7 +68,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    'crum.CurrentRequestUserMiddleware',
+    # 'crum.CurrentRequestUserMiddleware',
+    "data_fetcher.middleware.GlobalRequestMiddleware",
     'core.middleware.LoginRequiredMiddleware',
 ]
 

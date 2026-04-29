@@ -1,5 +1,6 @@
 from urllib.request import urlopen
 
+from data_fetcher.global_request_context import get_request
 from dateutil.utils import today
 from django import forms
 from django.core.cache import cache
@@ -135,7 +136,7 @@ class WhatsAppContactForm(RemoveActiveOnCreateMixin, forms.ModelForm):
 class WhatsAppCreateAccountForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        self.request = get_request()
         super(WhatsAppCreateAccountForm, self).__init__(*args, **kwargs)
 
     def save(self, commit=True):
