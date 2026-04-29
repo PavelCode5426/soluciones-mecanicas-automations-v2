@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import models
 
 from core.managers import SoftDeleteManager, UserTrackedManager, AllObjectsSoftDeleteUserTrackedManager, \
-    AllObjectsUserTrackedManager, AllObjectsSoftDeleteManager
+    AllObjectsUserTrackedManager, AllObjectsSoftDeleteManager, SoftDeleteUserTrackedManager
 
 User = get_user_model()
 
@@ -76,7 +76,7 @@ class UserTrackedModel(models.Model):
 
 class SoftDeleteUserTrackedModel(UserTrackedModel, SoftDeleteModel):
     objects = AllObjectsSoftDeleteUserTrackedManager()
-    user_objects = UserTrackedManager()
+    user_objects = SoftDeleteUserTrackedManager()
 
     class Meta:
         abstract = True
