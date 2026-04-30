@@ -25,7 +25,7 @@ class FacebookAccountsCreateView(SuccessMessageMixin, CreateView):
         "page_title": "Crear nueva cuenta",
         "cancel_url": success_url
     }
-    success_message = "Cuenta creada exitosamente"
+    success_message = "Cuenta %(name)s creada exitosamente"
 
 
 class FacebookAccountsUpdateView(SuccessMessageMixin, FacebookProfileViewMixins, UpdateView):
@@ -36,13 +36,15 @@ class FacebookAccountsUpdateView(SuccessMessageMixin, FacebookProfileViewMixins,
         "page_title": "Actualizar cuenta: ",
         "cancel_url": success_url
     }
-    success_message = "Cuenta object actualizada exitosamente"
+    success_message = "Cuenta %(name)s actualizada exitosamente"
 
 
 class FacebookAccountsToggleStatusView(SuccessMessageMixin, FacebookProfileViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:accounts.index')
-    success_message = "Cuenta object activada/desactivada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Cuenta {self.get_object()} activada/desactivada  exitosamente"
 
 
 class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins, DeleteView):
@@ -54,7 +56,9 @@ class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins,
         "modal_description": "Eliminar cuenta: ",
         "cancel_url": success_url
     }
-    success_message = "Cuenta object eliminada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Cuenta {self.get_object()} eliminada exitosamente"
 
 
 class FacebookGroupsListView(FilterByProfileViewMixins, FilterView):
@@ -68,7 +72,7 @@ class FacebookGroupsToggleStatusView(SuccessMessageMixin, FilterByProfileViewMix
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:groups.index')
     queryset = models.FacebookGroup.objects.all()
-    success_message = "Grupo object activado/desactivado exitosamente"
+    success_message = "Grupo activado/desactivado exitosamente"
 
 
 class FacebookAgentListView(FilterByProfileViewMixins, ListView):
@@ -89,7 +93,7 @@ class FacebookAgentCreateView(SuccessMessageMixin, CreateView):
         "page_title": "Crear nuevo agente",
         "cancel_url": success_url
     }
-    success_message = "Agente creado exitosamente"
+    success_message = "Agente %(name)s creado exitosamente"
 
 
 class FacebookAgentUpdateView(SuccessMessageMixin, FilterByProfileViewMixins, UpdateView):
@@ -101,14 +105,16 @@ class FacebookAgentUpdateView(SuccessMessageMixin, FilterByProfileViewMixins, Up
         "page_title": "Actualizar agente: ",
         "cancel_url": success_url
     }
-    success_message = "Agente object actualizado exitosamente"
+    success_message = "Agente %(name)s actualizado exitosamente"
 
 
 class FacebookAgentToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:agents.index')
     queryset = models.FacebookAgent.objects.all()
-    success_message = "Agente object activada/desactivada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Agente {self.get_object()} activado/desactivado exitosamente"
 
 
 class FacebookDistributionListsListView(FilterByProfileViewMixins, ListView):
@@ -124,7 +130,7 @@ class FacebookDistributionListsCreateView(SuccessMessageMixin, FilterByProfileVi
         "page_title": "Crear nueva lista de distribución",
         "cancel_url": reverse_lazy('whatsapp:distribution-lists.index')
     }
-    success_message = "Lista de distribución creada exitosamente"
+    success_message = "Lista de distribución %(name)s creada exitosamente"
 
     def get_success_url(self):
         return str(reverse_lazy('facebook:distribution-lists.update', kwargs=dict(pk=self.object.pk)))
@@ -139,14 +145,16 @@ class FacebookDistributionListsUpdateView(SuccessMessageMixin, FilterByProfileVi
         "page_title": "Actualizar lista de distribución: ",
         "cancel_url": success_url
     }
-    success_message = "Lista de distribución {name} actualizada exitosamente"
+    success_message = "Lista de distribución %(name)s actualizada exitosamente"
 
 
 class FacebookDistributionListsToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:distribution-lists.index')
     queryset = models.FacebookDistributionList.objects.all()
-    success_message = "Lista de distribución object activada/desactivada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Lista de distribución {self.get_object()} activado/desactivado exitosamente"
 
 
 class FacebookDistributionListsDeleteView(SuccessMessageMixin, FilterByProfileViewMixins, DeleteView):
@@ -159,7 +167,9 @@ class FacebookDistributionListsDeleteView(SuccessMessageMixin, FilterByProfileVi
         "modal_description": "Eliminar lista de distribución",
         "cancel_url": success_url
     }
-    success_message = "Lista de distribución object eliminada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Lista de distribución {self.get_object()} eliminada exitosamente"
 
 
 class FacebookPostCampaignListView(FilterByProfileViewMixins, FilterView):
@@ -176,7 +186,7 @@ class FacebookPostCampaignCreateView(SuccessMessageMixin, CreateView):
         "page_title": "Crear un nuevo mensaje",
         "cancel_url": success_url
     }
-    success_message = "Nueva campaña creada exitosamente"
+    success_message = "Nueva campaña %(name)s creada exitosamente"
 
 
 class FacebookPostCampaignUpdateView(SuccessMessageMixin, FilterByProfileViewMixins, UpdateView):
@@ -188,7 +198,7 @@ class FacebookPostCampaignUpdateView(SuccessMessageMixin, FilterByProfileViewMix
         "page_title": "Actualizar campaña: ",
         "cancel_url": success_url
     }
-    success_message = "Mensaje {name} actualizado exitosamente"
+    success_message = "Campaña %(name)s actualizada exitosamente"
 
 
 class FacebookPostCampaignDeleteView(SuccessMessageMixin, FilterByProfileViewMixins, DeleteView):
@@ -201,21 +211,27 @@ class FacebookPostCampaignDeleteView(SuccessMessageMixin, FilterByProfileViewMix
         "modal_description": "Eliminar campaña",
         "cancel_url": success_url
     }
-    success_message = "Campaña {name} eliminada exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Campaña {self.get_object()} eliminada exitosamente"
 
 
 class FacebookPostCampaignToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:post-campaign.index')
     queryset = models.FacebookPostCampaign.objects.all()
-    success_message = "Campaña {name} activado/desactivado exitosamente"
+
+    def get_success_message(self, cleaned_data):
+        return f"Campaña {self.get_object()} activado/desactivado exitosamente"
 
 
 class FacebookPostCampaignDuplicateView(FilterByProfileViewMixins, DuplicateView):
     success_url = reverse_lazy('facebook:post-campaign.index')
-    success_message = "Campaña duplicada correctamente correctamente"
     queryset = models.FacebookPostCampaign.objects.all()
     template_name = 'facebook/post_campaings/duplicate.html'
+
+    def get_success_message(self, cleaned_data):
+        return f"Campaña {self.get_object()} duplicada exitosamente"
 
 
 class PublishNowFacebookPostCampaignView(SuccessMessageMixin, FilterByProfileViewMixins, FilterView, FormView):
@@ -223,7 +239,7 @@ class PublishNowFacebookPostCampaignView(SuccessMessageMixin, FilterByProfileVie
     form_class = forms.PublishFacebookPostCampaignForm
     queryset = models.FacebookPostCampaign.objects.filter(active=True).all()
     template_name = 'facebook/post_campaings/publish_now.html'
-    success_message = "Estados enviados a publicar correctamente"
+    success_message = "Campañas enviadas a publicar correctamente"
     success_url = reverse_lazy('facebook:post-campaign.index')
 
     def form_valid(self, form):

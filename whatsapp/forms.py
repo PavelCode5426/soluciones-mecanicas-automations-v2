@@ -131,7 +131,7 @@ class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
 
 
 class WhatsAppContactForm(RemoveActiveOnCreateMixin, forms.ModelForm):
-    push_name = forms.CharField(disabled=True)
+    push_name = forms.CharField(disabled=True,required=False)
     chat_id = forms.CharField(disabled=True)
 
     class Meta:
