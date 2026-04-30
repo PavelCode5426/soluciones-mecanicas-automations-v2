@@ -39,13 +39,13 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
             for_enqueue.append(
                 {
                     "args": (group, post,),
-                    "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}', "cluster": 'default'}
+                    "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}'}
                 }
             )
 
             random.shuffle(for_enqueue)
             for task in for_enqueue:
-                async_task(service.publish_new_campaign, *task['args'], **task['kwargs'])
+                async_task(service.publish_new_campaign, *task['args'], **task['kwargs'],cluster="default")
 
             total_items += len(for_enqueue)
 
