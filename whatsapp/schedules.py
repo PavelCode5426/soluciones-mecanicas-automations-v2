@@ -15,12 +15,21 @@ def update_whatsapp_contacts_and_groups():
 
 
 def enqueue_active_status():
-    whatsapp_status = (WhatsAppStatus.all_objects.select_related('account')
-                       .filter(active=True, account__active=True, from_date__lte=localtime())
-                       .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
-                       # .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
-                       .filter(weekdays__day=localtime().weekday())
-                       .all())
+    current_time = localtime()
+    current_weekday = current_time.weekday()
+
+    # whatsapp_status = (WhatsAppStatus.all_objects.select_related('account')
+    #                    .filter(active=True, account__active=True, from_date__lte=localtime())
+    #                    .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
+    #                    # .filter(publish_at=localtime(), weekdays__day=localtime().weekday())
+    #                    .filter(weekdays__day=localtime().weekday())
+    #                    .all())
+
+    whatsapp_status = WhatsAppStatus.objects.select_related('account') \
+        .filter(active=True, account__active=True, from_date__lte=current_time) \
+        .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
+        .filter(weekdays__day=current_weekday, schedule__time=current_time) \
+        .order_by('account', 'order').all()
 
     for status in whatsapp_status:
         enqueue_whatsapp_status(status)
@@ -33,7 +42,7 @@ def enqueue_active_messages():
     current_hour = current_time.hour
     current_weekday = current_time.weekday()
 
-    messages = WhatsAppMessage.all_objects.select_related('account') \
+    messages = WhatsAppMessage.objects.select_related('account') \
         .exclude(frequency__isnull=True) \
         .filter(active=True, account__active=True, from_date__lte=current_time) \
         .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
@@ -42,8 +51,15 @@ def enqueue_active_messages():
         .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField())) \
         .filter(can_publish=0)
 
+    next_version_messages = WhatsAppMessage.objects.select_related('account') \
+        .filter(active=True, account__active=True, from_date__lte=current_time) \
+        .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
+        .filter(weekdays__day=current_weekday) \
+        .filter(schedules__schedule__time=current_time) \
+        .order_by('account', 'schedules__order').all()
+
     # TODO REGRESAR ESTO ATRAS
     # messages.update(last_whatsapp_id=None)
     for message in messages.all():
         enqueue_whatsapp_message(message, refresh=False)
-    return f"Programados {len(messages)} mensajes de whatsapp a las {localtime()}"
+    return f"Programados {len(next_version_messages)} mensajes de whatsapp a las {localtime()}"

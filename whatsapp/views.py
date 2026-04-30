@@ -240,8 +240,7 @@ class WhatsAppMessageToggleStatusView(SuccessMessageMixin, WhatsAppMessageViewMi
     success_message = "Mensaje {name} activado/desactivado exitosamente"
 
 
-class WhatsAppAccountDetailView(WhatsAppMessageViewMixins, DetailView):
-    queryset = models.WhatsAppAccount.objects.all()
+class WhatsAppAccountDetailView(WhatsAppAccountViewMixins, DetailView):
     template_name = 'whatsapp/accounts/details.html'
 
     def get_context_data(self, **kwargs):
