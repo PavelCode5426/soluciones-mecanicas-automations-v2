@@ -357,6 +357,7 @@ class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterByAccountViewMixin
     template_name = 'whatsapp/status/publish_now.html'
     success_message = "Estados enviados a publicar correctamente"
     success_url = reverse_lazy('whatsapp:status.index')
+    queryset = models.WhatsAppStatus.objects.all()
 
     def get_queryset(self):
         return super().get_queryset().filter(active=True).all()
@@ -366,30 +367,30 @@ class PublishNowWhatsAppStatusView(SuccessMessageMixin, FilterByAccountViewMixin
         return super().form_valid(form)
 
 
-class PublishNowWhatsAppMessagesView(FilterByAccountViewMixins, PublishNowWhatsAppStatusView):
+class PublishNowWhatsAppMessagesView(PublishNowWhatsAppStatusView):
     filterset_class = filters.WhatsAppMessagesFilterSet
     form_class = forms.PublishWhastAppMessagesForm
     template_name = 'whatsapp/messages/publish_now.html'
     success_message = "Mensajes enviados a publicar correctamente"
     success_url = reverse_lazy('whatsapp:messages.index')
-
-    def get_queryset(self):
-        return super().get_queryset().filter(active=True).all()
+    queryset = models.WhatsAppMessage.objects.all()
 
 
 class WhatsAppStatusDuplicateView(FilterByAccountViewMixins, DuplicateView):
     success_url = reverse_lazy('whatsapp:status.index')
+    queryset = models.WhatsAppStatus.objects.all()
     success_message = "Estado duplicado correctamente correctamente"
     template_name = 'whatsapp/status/duplicate.html'
 
 
 class WhatsAppMessageDuplicateView(FilterByAccountViewMixins, DuplicateView):
     success_url = reverse_lazy('whatsapp:messages.index')
+    queryset = models.WhatsAppMessage.objects.all()
     success_message = "Estado duplicado correctamente correctamente"
     template_name = 'whatsapp/messages/duplicate.html'
 
 
-class WhatsAppAccountScheduleDetailView(DetailView):
+class WhatsAppAccountScheduleDetailView(WhatsAppAccountViewMixins, DetailView):
     queryset = models.WhatsAppAccount.objects.all()
     template_name = 'whatsapp/accounts/schedules/index.html'
     context_object_name = 'account'
