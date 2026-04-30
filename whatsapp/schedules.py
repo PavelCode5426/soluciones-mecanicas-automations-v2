@@ -28,13 +28,13 @@ def enqueue_active_status():
     whatsapp_status = WhatsAppStatus.objects.select_related('account') \
         .filter(active=True, account__active=True, from_date__lte=current_time) \
         .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
-        .filter(weekdays__day=current_weekday, schedule__time=current_time) \
+        .filter(weekdays__day=current_weekday, schedule__time__hour=current_time.hour) \
         .order_by('account', 'order').all()
 
     for status in whatsapp_status:
         enqueue_whatsapp_status(status)
 
-    return f"Programados {whatsapp_status.count()} estados de whatsapp"
+    return f"Programados {len(whatsapp_status)} estados de whatsapp a las {localtime()}"
 
 
 def enqueue_active_messages():
@@ -55,11 +55,11 @@ def enqueue_active_messages():
         .filter(active=True, account__active=True, from_date__lte=current_time) \
         .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)) \
         .filter(weekdays__day=current_weekday) \
-        .filter(schedules__schedule__time=current_time) \
+        .filter(schedules__schedule__time__hour=current_time.hour) \
         .order_by('account', 'schedules__order').all()
 
     # TODO REGRESAR ESTO ATRAS
     # messages.update(last_whatsapp_id=None)
-    for message in next_version_messages.all():
+    for message in next_version_messages:
         enqueue_whatsapp_message(message, refresh=False)
     return f"Programados {len(next_version_messages)} mensajes de whatsapp a las {localtime()}"
