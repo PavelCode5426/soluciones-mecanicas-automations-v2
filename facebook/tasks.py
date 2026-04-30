@@ -39,7 +39,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
             for_enqueue.append(
                 {
                     "args": (group, post,),
-                    "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}'}
+                    "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}', "cluster": 'default'}
                 }
             )
 
