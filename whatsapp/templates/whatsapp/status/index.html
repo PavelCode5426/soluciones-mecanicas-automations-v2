@@ -30,7 +30,10 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
+    <td>
+        {% object_link object 'whatsapp:status.update' %}
+    </td>
+
     <td>{% object_link object.account url='whatsapp:accounts.details' %}</td>
     <td>{{ object.schedule }}</td>
     <td>

@@ -32,6 +32,6 @@ def toggle_status_badge(context, valor, submit_url, texto_activo="Activo", texto
 
 @register.simple_tag
 def object_link(object, url, **kwargs):
-    url_kwargs = {"pk": object.pk, **kwargs}
+    url_kwargs = {"pk": getattr(object, 'pk', None), **kwargs}
     url = reverse_lazy(url, kwargs=url_kwargs)
     return mark_safe('<a class="btn" href="{}">{}</a>'.format(url, object))
