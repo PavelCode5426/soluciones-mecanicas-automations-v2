@@ -30,7 +30,8 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
     for post in posts:
         for_enqueue = []
         service = FacebookAutomationService(post.profile)
-        groups = FacebookGroup.objects.filter(active=True, distribution_lists__campaigns=post).order_by('?').all()
+        groups = FacebookGroup.objects.filter(active=True, distribution_lists__active=True,
+                                              distribution_lists__campaigns=post).order_by('?').all()
 
         if post.distribution_count:
             groups = groups[:post.distribution_count]
@@ -45,7 +46,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
 
             random.shuffle(for_enqueue)
             for task in for_enqueue:
-                async_task(service.publish_new_campaign, *task['args'], **task['kwargs'],cluster="default")
+                async_task(service.publish_new_campaign, *task['args'], **task['kwargs'], cluster="default")
 
             total_items += len(for_enqueue)
 

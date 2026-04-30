@@ -26,6 +26,7 @@ class FacebookDistributionList(SoftDeleteModel):
     profile = models.ForeignKey('FacebookProfile', related_name='distribution_lists', on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     groups = models.ManyToManyField(FacebookGroup, related_name='distribution_lists', blank=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.name} ({self.profile})"
