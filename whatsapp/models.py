@@ -36,6 +36,9 @@ class AbstractWhatsAppMessage(SoftDeleteModel):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.name
+
 
 class ScheduledMessage(models.Model):
     from_date = models.DateField(null=True, blank=True, default=today)

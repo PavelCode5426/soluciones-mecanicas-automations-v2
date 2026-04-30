@@ -65,6 +65,9 @@ class AbstractFacebookPost(SoftDeleteModel):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return self.name
+
 
 class FacebookScheduledPost(AbstractFacebookPost):
     profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
