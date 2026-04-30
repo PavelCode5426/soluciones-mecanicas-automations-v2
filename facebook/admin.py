@@ -15,11 +15,17 @@ admin.site.site_title = "Sinergia Marketing Automations"
 admin.site.index_title = "Bienvenido al Panel"
 
 
+class PreviewFileMixin:
+    def file_preview(self, obj):
+        return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
+
+    file_preview.short_description = "Previsualizar"
+
+
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'active', 'can_search_leads', 'can_post_in_groups']
     actions = ['sync_facebook_groups']
-
 
     @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
     def sync_facebook_groups(self, request, queryset):
@@ -69,16 +75,11 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
         return super().formfield_for_manytomany(db_field, request, **kwargs)
 
 
-class FacebookPostAdmin(admin.ModelAdmin):
+class FacebookPostAdmin(PreviewFileMixin, admin.ModelAdmin):
     search_fields = ['name', 'text']
     list_filter = ["profile"]
     actions = ['disable_posts', 'enable_posts']
-    readonly_fields = ["image", "created_at", "updated_at"]
-
-    def image(self, obj):
-        return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
-
-    image.short_description = 'Image'
+    readonly_fields = ["file_preview", "created_at", "updated_at"]
 
     @admin.action(description='Desactivar publicaciones seleccionadas')
     def disable_posts(self, request, queryset):
@@ -100,10 +101,10 @@ class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
     filter_horizontal = ['distribution_lists']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image', "distribution_lists"]
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'file_preview', "distribution_lists"]
         }),
         ("Panificador de la publicación", {
-            "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'frequency']
+            "fields": ['active', 'from_date', 'until_date', 'distribution_count', 'schedules']
         }),
         ("Indicadores de la publicación", {
             "fields": ['published_count', "created_at", "updated_at"]
@@ -121,7 +122,7 @@ class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
     list_display = ['name', 'profile', 'updated_at', 'active']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'image']
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'file_preview', 'image']
         }),
         ("Panificador de la publicación", {
             "fields": ['active']
@@ -145,26 +146,22 @@ class FacebookLeadExplorerAdmin(admin.ModelAdmin):
 
 
 @admin.register(FacebookHistory)
-class FacebookHistoryAdmin(admin.ModelAdmin):
+class FacebookHistoryAdmin(PreviewFileMixin, admin.ModelAdmin):
     list_display = ["title", "profile", "active"]
     list_filter = ["profile"]
     filter_horizontal = ['weekdays']
+    readonly_fields = ["created_at", "updated_at", "published_count", "file_preview"]
     fieldsets = [
         ("Detalles de la historia", {
-            "fields": ['profile', 'title', 'file', 'image']
+            "fields": ['profile', 'title', 'file', 'file_preview']
         }),
         ("Estados de la historia", {
-            "fields": ['active', 'publish_at', 'from_date', 'until_date', 'weekdays']
+            "fields": ['active', 'from_date', 'until_date', 'schedule', 'weekdays']
         }),
         ("Indicadores de la historia", {
             "fields": ['published_count', "created_at", "updated_at"]
         })
     ]
-
-    def image(self, obj):
-        return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
-
-    image.short_description = 'Image'
 
 
 class NewQueueAdmin(QueueAdmin):

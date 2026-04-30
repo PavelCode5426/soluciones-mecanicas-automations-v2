@@ -46,7 +46,7 @@ class FacebookDistributionListUpdateForm(CurrentUserProfile):
 
 class FacebookPostCampaignForm(CurrentUserProfile):
     def __init__(self, *args, **kwargs):
-        super(CurrentUserProfile, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.fields['distribution_lists'].queryset = models.FacebookDistributionList.objects \
             .filter(profile__created_by=get_request().user).all()
 

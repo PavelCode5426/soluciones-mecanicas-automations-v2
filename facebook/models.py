@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 
-from core.models import WeekDay, SoftDeleteModel, SoftDeleteUserTrackedModel
+from core.models import WeekDay, SoftDeleteModel, SoftDeleteUserTrackedModel, Schedule
 
 
 # Create your models here.
@@ -71,7 +71,6 @@ class AbstractFacebookPost(SoftDeleteModel):
 
 class FacebookScheduledPost(AbstractFacebookPost):
     profile = models.ForeignKey(FacebookProfile, related_name='posts', null=True, blank=True, on_delete=models.PROTECT)
-    publish_at = models.DateTimeField(null=True, blank=True, default=now)
 
     class Meta:
         verbose_name = "Publicación"
@@ -84,14 +83,10 @@ class FacebookPostCampaign(AbstractFacebookPost):
     distribution_lists = models.ManyToManyField(FacebookDistributionList, related_name='campaigns', blank=True)
     from_date = models.DateField(default=now)
     until_date = models.DateField(null=True, blank=True)
+    schedules = models.ManyToManyField(Schedule, related_name='campaigns', blank=True)
 
     published_count = models.BigIntegerField(default=0)
     distribution_count = models.IntegerField(default=5)
-    frequency = models.IntegerField(default=0, choices=[
-        (2, "Publicar cada 2h"),
-        (4, "Publicar cada 4h"),
-        (8, "Publicar cada 8h"),
-    ])
 
     class Meta:
         verbose_name = "Campaña"
@@ -128,10 +123,11 @@ class FacebookHistory(SoftDeleteModel):
     file = models.ImageField(upload_to='facebook_histories', null=True, blank=True)
     active = models.BooleanField(default=True)
 
-    publish_at = models.TimeField(null=True, blank=True)
     from_date = models.DateField(null=True, blank=True, default=now)
     until_date = models.DateField(null=True, blank=True)
     weekdays = models.ManyToManyField(WeekDay, related_name='facebook_histories', blank=False)
+    schedule = models.ForeignKey(Schedule, null=True, on_delete=models.PROTECT)
+
     published_count = models.BigIntegerField(default=0)
 
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

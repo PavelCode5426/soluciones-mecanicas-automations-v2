@@ -1,4 +1,4 @@
-from django.db.models import Q, ExpressionWrapper, F, DecimalField
+from django.db.models import Q
 from django.utils.timezone import localtime
 from django_q.tasks import async_task
 
@@ -25,10 +25,9 @@ def enqueue_active_agents():
 def enqueue_active_facebook_campaigns():
     current_hour = localtime().hour
     posts = (FacebookPostCampaign.objects.select_related('profile')
-             .filter(active=True, from_date__lte=localtime())
+             .filter(active=True, profile__active=True, from_date__lte=localtime())
              .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
-             .annotate(can_publish=ExpressionWrapper(current_hour % F('frequency'), DecimalField()))
-             .filter(can_publish=0)
+             .filter(schedules__time__hour=current_hour)
              .order_by('?').all())
 
     total_items = enqueue_facebook_campaign(posts)
