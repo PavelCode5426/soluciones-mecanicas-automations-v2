@@ -23,6 +23,8 @@ ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')]
 
 
 class CurrentUserAccount:
+    account = forms.ModelChoiceField(queryset=WhatsAppAccount.objects.none(), required=True)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['account'].queryset = WhatsAppAccount.user_objects.all()

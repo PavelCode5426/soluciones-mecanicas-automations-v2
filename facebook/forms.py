@@ -1,3 +1,4 @@
+from data_fetcher.global_request_context import get_request
 from django import forms
 
 from core.forms import PublishNowForm
@@ -7,6 +8,8 @@ from facebook.tasks import enqueue_facebook_campaign
 
 
 class CurrentUserProfile(forms.ModelForm):
+    profile = forms.ModelChoiceField(queryset=models.FacebookProfile.objects.none(), required=True)
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['profile'].queryset = models.FacebookProfile.user_objects.all()
@@ -42,6 +45,11 @@ class FacebookDistributionListUpdateForm(CurrentUserProfile):
 
 
 class FacebookPostCampaignForm(CurrentUserProfile):
+    def __init__(self, *args, **kwargs):
+        super(CurrentUserProfile, self).__init__(*args, **kwargs)
+        self.fields['distribution_lists'].queryset = models.FacebookDistributionList.objects \
+            .filter(profile__created_by=get_request().user).all()
+
     class Meta:
         model = models.FacebookPostCampaign
         exclude = ['published_count', 'distribution_count']
