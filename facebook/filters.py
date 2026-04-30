@@ -4,8 +4,12 @@ from django_filters import FilterSet, filters
 from facebook import models
 
 
+def _current_user_accounts(request):
+    return models.FacebookProfile.user_objects.all()
+
+
 class FacebookGenericFilterSet(FilterSet):
-    profile = filters.ModelChoiceFilter(queryset=models.FacebookProfile.objects.all(), label="Cuentas")
+    profile = filters.ModelChoiceFilter(queryset=_current_user_accounts, label="Cuentas")
     search = filters.CharFilter(method='search_method', label="Buscar...")
 
 
@@ -24,4 +28,4 @@ class FacebookPostCampaingFilterSet(FacebookGenericFilterSet):
         return queryset.filter(Q(name__icontains=value))
 
     class Meta:
-        fields = ['account', 'search']
+        fields = ['profile', 'search']

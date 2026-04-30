@@ -6,25 +6,31 @@ from facebook import models
 from facebook.tasks import enqueue_facebook_campaign
 
 
+class CurrentUserProfile:
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['profile'].queryset = models.FacebookProfile.user_objects.all()
+
+
 class FacebookAccountForm(forms.ModelForm):
     class Meta:
         model = models.FacebookProfile
-        exclude = ['context']
+        exclude = ['context', 'created_by']
 
 
-class FacebookAgentForm(forms.ModelForm):
+class FacebookAgentForm(CurrentUserProfile):
     class Meta:
         model = models.FacebookAgent
         exclude = ['leads_found']
 
 
-class FacebookDistributionListCreateForm(forms.ModelForm):
+class FacebookDistributionListCreateForm(CurrentUserProfile):
     class Meta:
         model = models.FacebookDistributionList
         exclude = ['groups', 'active']
 
 
-class FacebookDistributionListUpdateForm(forms.ModelForm):
+class FacebookDistributionListUpdateForm(CurrentUserProfile):
     def __init__(self, *args, **kwargs):
         super(FacebookDistributionListUpdateForm, self).__init__(*args, **kwargs)
         self.fields['profile'].disabled = True
@@ -35,7 +41,7 @@ class FacebookDistributionListUpdateForm(forms.ModelForm):
         fields = forms.ALL_FIELDS
 
 
-class FacebookPostCampaignForm(forms.ModelForm):
+class FacebookPostCampaignForm(CurrentUserProfile):
     class Meta:
         model = models.FacebookPostCampaign
         exclude = ['published_count', 'distribution_count']
