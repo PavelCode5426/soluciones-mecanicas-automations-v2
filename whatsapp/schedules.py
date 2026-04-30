@@ -60,6 +60,6 @@ def enqueue_active_messages():
 
     # TODO REGRESAR ESTO ATRAS
     # messages.update(last_whatsapp_id=None)
-    # for message in messages.all():
-    #     enqueue_whatsapp_message(message, refresh=False)
+    for message in next_version_messages.all():
+        enqueue_whatsapp_message(message, refresh=False)
     return f"Programados {len(next_version_messages)} mensajes de whatsapp a las {localtime()}"
