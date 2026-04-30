@@ -4,8 +4,16 @@ from django_filters import FilterSet, filters
 from whatsapp import models
 
 
+def _current_user_accounts(request):
+    return models.WhatsAppAccount.user_objects.all()
+
+
+def _current_user_distributionlists(request):
+    return models.WhatsAppDistributionList.objects.filter(account__created_by=request.user, active=True)
+
+
 class WhatsAppGenericFilterSet(FilterSet):
-    account = filters.ModelChoiceFilter(queryset=models.WhatsAppAccount.objects.all(), label="Cuentas")
+    account = filters.ModelChoiceFilter(queryset=_current_user_accounts, label="Cuentas")
     search = filters.CharFilter(method='search_method', label="Buscar...")
 
 
@@ -20,23 +28,18 @@ class WhatsAppStatusFilterSet(WhatsAppGenericFilterSet):
 class WhatsAppGroupsFilterSet(WhatsAppGenericFilterSet):
 
     def search_method(self, queryset, name, value):
-        return queryset.filter(
-            Q(name__icontains=value)
-        )
+        return queryset.filter(Q(name__icontains=value))
 
     class Meta:
         fields = ['account', 'distributions_lists', 'search']
 
 
 class WhatsAppContactsFilterSet(WhatsAppGenericFilterSet):
-    distribution_lists = filters.ModelChoiceFilter(
-        queryset=models.WhatsAppDistributionList.objects.filter(active=True), label="Listas de ditribución")
+    distribution_lists = filters.ModelChoiceFilter(queryset=_current_user_distributionlists,
+                                                   label="Listas de ditribución")
 
     def search_method(self, queryset, name, value):
-        return queryset.filter(
-            Q(name__icontains=value) |
-            Q(chat_id__icontains=value)
-        )
+        return queryset.filter(Q(name__icontains=value) | Q(chat_id__icontains=value))
 
     class Meta:
         fields = ['account', 'distribution_lists', 'search']

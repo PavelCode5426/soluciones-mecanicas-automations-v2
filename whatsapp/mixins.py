@@ -11,7 +11,7 @@ from whatsapp import models
 
 class WhatsAppAccountViewMixins:
     def get_queryset(self):
-        return models.WhatsAppAccount.objects.all()
+        return models.WhatsAppAccount.user_objects.all()
 
 
 class WhatsAppStatusViewMixins:
