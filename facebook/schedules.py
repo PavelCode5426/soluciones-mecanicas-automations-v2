@@ -23,10 +23,11 @@ def enqueue_active_agents():
 
 
 def enqueue_active_facebook_campaigns():
-    current_hour = localtime().hour
+    current_time = localtime()
+    current_hour = current_time.hour
     posts = (FacebookPostCampaign.objects.select_related('profile')
-             .filter(active=True, profile__active=True, from_date__lte=localtime())
-             .filter(Q(until_date__gte=localtime()) | Q(until_date__isnull=True))
+             .filter(active=True, profile__active=True, from_date__lte=current_time)
+             .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True))
              .filter(schedules__time__hour=current_hour)
              .order_by('?').all())
 
