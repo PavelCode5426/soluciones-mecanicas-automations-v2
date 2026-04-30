@@ -11,7 +11,7 @@ from django.forms import modelformset_factory
 from rest_framework.reverse import reverse
 
 from core.forms import PublishNowForm
-from core.forms.widgets import DatePickerInput, TimePickerInput
+from core.forms.widgets import DatePickerInput
 from core.models import Schedule
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
@@ -123,12 +123,10 @@ class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
 
     class Meta:
         model = WhatsAppMessage
-        exclude = ['published_count', 'order', 'frequency']
+        exclude = ['published_count', 'order', ]
         widgets = {
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
-            'from_time': TimePickerInput(),
-            'until_time': TimePickerInput(),
         }
 
 

@@ -24,7 +24,7 @@ class FacebookAccountForm(forms.ModelForm):
 class FacebookAgentForm(CurrentUserProfile):
     class Meta:
         model = models.FacebookAgent
-        exclude = ['leads_found']
+        exclude = ['leads_found','limit']
 
 
 class FacebookDistributionListCreateForm(CurrentUserProfile):

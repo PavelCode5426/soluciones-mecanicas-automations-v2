@@ -183,15 +183,6 @@ class WhatsAppMessage(AbstractWhatsAppMessage, ScheduledMessage):
     distribution_lists = models.ManyToManyField(WhatsAppDistributionList, related_name='messages', blank=True)
 
     order = models.IntegerField(default=0)
-    frequency = models.IntegerField(default=8, null=True, choices=[
-        (None, "Sin intervalo"),
-        (2, "Publicar cada 2h"),
-        (4, "Publicar cada 4h"),
-        (8, "Publicar cada 8h"),
-    ])
-
-    from_time = models.TimeField(default=datetime.time(0, 0))
-    until_time = models.TimeField(default=datetime.time(23, 59))
     weekdays = models.ManyToManyField(WeekDay, related_name='whatsapp_messages', blank=True)
 
     def __str__(self):

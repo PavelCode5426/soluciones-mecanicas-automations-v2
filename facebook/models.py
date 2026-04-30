@@ -104,7 +104,7 @@ class FacebookAgent(SoftDeleteModel):
     classificator_prompt = models.TextField(null=True, blank=True)
     agent_prompt = models.TextField(null=True, blank=True)
 
-    limit = models.IntegerField(default=100)
+    limit = models.IntegerField(default=10)
     leads_found = models.IntegerField(default=0)
     active = models.BooleanField(default=True)
 
