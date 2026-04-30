@@ -1,5 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db.models import Max
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
@@ -84,7 +85,7 @@ class WhatsAppContactsDeleteView(SuccessMessageMixin, FilterByAccountViewMixins,
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Contacto {self.get_object()} eliminado exitosamente"
+        return f"Contacto {self.object} eliminado exitosamente"
 
 
 class WhatsAppContactsToggleStatusView(SuccessMessageMixin, FilterByAccountViewMixins, ToggleStatusView):
@@ -157,7 +158,7 @@ class WhatsAppAccountsDeleteView(SuccessMessageMixin, WhatsAppAccountViewMixins,
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Cuenta {self.get_object()} eliminada exitosamente"
+        return f"Cuenta {self.object} eliminada exitosamente"
 
 
 class WhatsAppDistributionListsListView(FilterByAccountViewMixins, ListView):
@@ -213,7 +214,7 @@ class WhatsAppDistributionListsDeleteView(SuccessMessageMixin, FilterByAccountVi
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Lista de distribución {self.get_object()} eliminada exitosamente"
+        return f"Lista de distribución {self.object} eliminada exitosamente"
 
 
 class WhatsAppMessagesListView(FilterByAccountViewMixins, FilterView):
@@ -261,7 +262,7 @@ class WhatsAppMessageDeleteView(SuccessMessageMixin, FilterByAccountViewMixins, 
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Mensaje {self.get_object()} eliminado exitosamente"
+        return f"Mensaje {self.object} eliminado exitosamente"
 
 
 class WhatsAppMessageToggleStatusView(SuccessMessageMixin, FilterByAccountViewMixins, ToggleStatusView):
@@ -411,6 +412,12 @@ class WhatsAppStatusDuplicateView(FilterByAccountViewMixins, DuplicateView):
     queryset = models.WhatsAppStatus.objects.all()
     template_name = 'whatsapp/status/duplicate.html'
 
+    def duplicate_object(self):
+        old_object = self.get_object()
+        self.object.whatsapp_last_id = None
+        super().duplicate_object()
+        self.object.weekdays.set(old_object.weekdays.all())
+
     def get_success_message(self, cleaned_data):
         return f"Estado {self.get_object()} duplicado correctamente"
 
@@ -419,6 +426,20 @@ class WhatsAppMessageDuplicateView(FilterByAccountViewMixins, DuplicateView):
     success_url = reverse_lazy('whatsapp:messages.index')
     queryset = models.WhatsAppMessage.objects.all()
     template_name = 'whatsapp/messages/duplicate.html'
+
+    def duplicate_object(self):
+        old_object = self.get_object()
+        self.object.whatsapp_last_id = None
+        super().duplicate_object()
+        self.object.distribution_lists.set(old_object.distribution_lists.all())
+        self.object.weekdays.set(old_object.weekdays.all())
+
+        schedules = Schedule.objects.filter(messages__message=old_object).all()
+        for schedule in schedules:
+            last_order = (WhatsAppScheduleMessage.objects
+                          .filter(schedule=schedule, message__account=self.object.account)
+                          .aggregate(Max("order"))["order__max"] or 0)
+            WhatsAppScheduleMessage.objects.create(schedule=schedule, message=self.object, order=last_order)
 
     def get_success_message(self, cleaned_data):
         return f"Mensaje {self.get_object()} duplicado correctamente"

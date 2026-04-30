@@ -39,15 +39,18 @@ class ToggleStatusView(DeleteView):
 
 
 class DuplicateView(DeleteView):
-    def form_valid(self, form):
-        success_url = self.get_success_url()
+
+    def duplicate_object(self):
         self.object.id = None
         self.object.name += " (Copia)"
-        self.object.whatsapp_last_id = None
         self.object.created_at = None
         self.object.updated_at = None
         self.object.published_count = 0
         self.object.save()
+
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.duplicate_object()
         return HttpResponseRedirect(success_url)
 
 

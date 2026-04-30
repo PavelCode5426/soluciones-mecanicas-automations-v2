@@ -58,7 +58,7 @@ class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins,
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Cuenta {self.get_object()} eliminada exitosamente"
+        return f"Cuenta {self.object} eliminada exitosamente"
 
 
 class FacebookGroupsListView(FilterByProfileViewMixins, FilterView):
@@ -169,7 +169,7 @@ class FacebookDistributionListsDeleteView(SuccessMessageMixin, FilterByProfileVi
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Lista de distribución {self.get_object()} eliminada exitosamente"
+        return f"Lista de distribución {self.object} eliminada exitosamente"
 
 
 class FacebookPostCampaignListView(FilterByProfileViewMixins, FilterView):
@@ -213,7 +213,7 @@ class FacebookPostCampaignDeleteView(SuccessMessageMixin, FilterByProfileViewMix
     }
 
     def get_success_message(self, cleaned_data):
-        return f"Campaña {self.get_object()} eliminada exitosamente"
+        return f"Campaña {self.object} eliminada exitosamente"
 
 
 class FacebookPostCampaignToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixins, ToggleStatusView):
@@ -229,6 +229,13 @@ class FacebookPostCampaignDuplicateView(FilterByProfileViewMixins, DuplicateView
     success_url = reverse_lazy('facebook:post-campaign.index')
     queryset = models.FacebookPostCampaign.objects.all()
     template_name = 'facebook/post_campaings/duplicate.html'
+
+    def duplicate_object(self):
+        old_object = self.get_object()
+        super().duplicate_object()
+        self.object.distribution_lists.set(old_object.distribution_lists.all())
+        self.object.schedules.set(old_object.schedules.all())
+        self.object.save()
 
     def get_success_message(self, cleaned_data):
         return f"Campaña {self.get_object()} duplicada exitosamente"

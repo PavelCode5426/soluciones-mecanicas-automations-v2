@@ -34,7 +34,7 @@ def get_all_groups(page):
 
 
 def remove_pending_content(page, group_url):
-    pending_content_url = f"{group['url']}/my_pending_content"
+    pending_content_url = f"{group['url']}my_pending_content"
     page.goto(pending_content_url, timeout=timeout)
     print(page.inner_html())
 

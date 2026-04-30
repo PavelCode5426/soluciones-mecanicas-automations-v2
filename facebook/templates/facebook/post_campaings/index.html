@@ -29,7 +29,7 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
+    <td>{% object_link object 'facebook:post-campaign.update' %}</td>
     <td>{{ object.profile }}</td>
     <td>
         {% url 'facebook:post-campaign.toggle-status' pk=object.pk as change_status_url %}
