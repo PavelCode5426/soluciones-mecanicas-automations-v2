@@ -216,7 +216,8 @@ def enqueue_whatsapp_message(message: WhatsAppMessage, refresh: bool = True):
         #     message.save(update_fields=['last_whatsapp_id'])
 
         contacts_and_groups = []
-        for distribution_list in message.distribution_lists.prefetch_related('groups', 'contacts').all():
+        distribution_lists = message.distribution_lists.prefetch_related('groups', 'contacts').filter(active=True).all()
+        for distribution_list in distribution_lists:
             contacts = distribution_list.contacts.filter(active=True).all()
             groups = distribution_list.groups.filter(active=True).all()
             contacts_and_groups.extend([g.chat_id for g in groups])
