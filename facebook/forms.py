@@ -6,7 +6,7 @@ from facebook import models
 from facebook.tasks import enqueue_facebook_campaign
 
 
-class CurrentUserProfile:
+class CurrentUserProfile(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['profile'].queryset = models.FacebookProfile.user_objects.all()
@@ -32,7 +32,7 @@ class FacebookDistributionListCreateForm(CurrentUserProfile):
 
 class FacebookDistributionListUpdateForm(CurrentUserProfile):
     def __init__(self, *args, **kwargs):
-        super(FacebookDistributionListUpdateForm, self).__init__(*args, **kwargs)
+        super(CurrentUserProfile, self).__init__(*args, **kwargs)
         self.fields['profile'].disabled = True
         self.fields['groups'].queryset = models.FacebookGroup.objects.filter(profile=kwargs['instance'].profile)
 
