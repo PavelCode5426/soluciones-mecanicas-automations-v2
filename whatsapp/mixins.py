@@ -14,26 +14,31 @@ class WhatsAppAccountViewMixins:
         return models.WhatsAppAccount.user_objects.all()
 
 
-class WhatsAppStatusViewMixins:
+class FilterByAccountViewMixins:
     def get_queryset(self):
-        return models.WhatsAppStatus.objects.filter(account__created_by=get_request().user).all()
+        return super().get_queryset().filter(account__created_by=get_request().user)
 
 
-class WhatsAppContactViewMixins:
-    def get_queryset(self):
-        return models.WhatsAppContact.objects.all()
-
-
-class WhatsAppGroupViewMixins:
-    def get_queryset(self):
-        return models.WhatsAppGroup.objects.filter(account__created_by=get_request().user).all()
-
-
-class WhatsAppDistributionListViewMixins:
-    def get_queryset(self):
-        return models.WhatsAppDistributionList.objects.filter(account__created_by=get_request().user).all()
-
-
-class WhatsAppMessageViewMixins:
-    def get_queryset(self):
-        return models.WhatsAppMessage.objects.filter(account__created_by=get_request().user).all()
+# class WhatsAppStatusViewMixins:
+#     def get_queryset(self):
+#         return models.WhatsAppStatus.objects.filter(account__created_by=get_request().user).all()
+#
+#
+# class WhatsAppContactViewMixins:
+#     def get_queryset(self):
+#         return models.WhatsAppContact.objects.all()
+#
+#
+# class WhatsAppGroupViewMixins:
+#     def get_queryset(self):
+#         return models.WhatsAppGroup.objects.filter(account__created_by=get_request().user).all()
+#
+#
+# class WhatsAppDistributionListViewMixins:
+#     def get_queryset(self):
+#         return models.WhatsAppDistributionList.objects.filter(account__created_by=get_request().user).all()
+#
+#
+# class WhatsAppMessageViewMixins:
+#     def get_queryset(self):
+#         return models.WhatsAppMessage.objects.filter(account__created_by=get_request().user).all()

@@ -1,11 +1,11 @@
 from django.db import models
 from django.utils.timezone import now
 
-from core.models import WeekDay
+from core.models import WeekDay, SoftDeleteModel, SoftDeleteUserTrackedModel
 
 
 # Create your models here.
-class FacebookGroup(models.Model):
+class FacebookGroup(SoftDeleteModel):
     profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True,
                                 on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
@@ -22,7 +22,7 @@ class FacebookGroup(models.Model):
         verbose_name_plural = "Grupos"
 
 
-class FacebookDistributionList(models.Model):
+class FacebookDistributionList(SoftDeleteModel):
     profile = models.ForeignKey('FacebookProfile', related_name='distribution_lists', on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     groups = models.ManyToManyField(FacebookGroup, related_name='distribution_lists', blank=True)
@@ -35,7 +35,7 @@ class FacebookDistributionList(models.Model):
         verbose_name_plural = "Listas de Distribución"
 
 
-class FacebookProfile(models.Model):
+class FacebookProfile(SoftDeleteUserTrackedModel):
     name = models.CharField(max_length=250)
     context = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
@@ -51,7 +51,7 @@ class FacebookProfile(models.Model):
         verbose_name_plural = "Cuentas"
 
 
-class AbstractFacebookPost(models.Model):
+class AbstractFacebookPost(SoftDeleteModel):
     profile = models.ForeignKey(FacebookProfile, null=True, blank=True, on_delete=models.PROTECT)
     name = models.CharField(max_length=250)
     title = models.CharField(max_length=250, null=True, blank=True)
@@ -96,7 +96,7 @@ class FacebookPostCampaign(AbstractFacebookPost):
         ordering = ['created_at']
 
 
-class FacebookAgent(models.Model):
+class FacebookAgent(SoftDeleteModel):
     name = models.CharField(max_length=250)
     profile = models.ForeignKey(FacebookProfile, related_name='agents', on_delete=models.PROTECT)
     distribution_list = models.ForeignKey(FacebookDistributionList, related_name='agents', on_delete=models.PROTECT,
@@ -118,7 +118,7 @@ class FacebookAgent(models.Model):
         verbose_name_plural = "Agentes Comerciales"
 
 
-class FacebookHistory(models.Model):
+class FacebookHistory(SoftDeleteModel):
     profile = models.ForeignKey(FacebookProfile, related_name='histories', on_delete=models.PROTECT)
     title = models.CharField(max_length=250)
     text = models.TextField(blank=True, null=True)
