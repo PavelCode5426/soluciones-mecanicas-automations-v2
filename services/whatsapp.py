@@ -38,7 +38,7 @@ class WAHAService:
 
     def session_information(self):
         response = requests.get(f"{self._api_url}/api/sessions/{self._session}", headers=self._headers,
-                                 auth=self._auth)
+                                auth=self._auth)
         response.raise_for_status()
         return response.json()
 
@@ -262,3 +262,15 @@ class WAHAService:
             "linkPreviewHighQuality": False
 
         })
+
+    def join_group(self, group_code: str):
+        response = requests.post(f"{self._api_url}/api/{self._session}/groups/join",
+                                 headers=self._headers, auth=self._auth, data=dict(code=group_code))
+        response.raise_for_status()
+        return response.json()
+
+    def get_group_info(self, group_id: str):
+        response = requests.get(f"{self._api_url}/api/{self._session}/groups/{group_id}", headers=self._headers,
+                                auth=self._auth)
+        response.raise_for_status()
+        return response.json()

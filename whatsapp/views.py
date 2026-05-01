@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy, reverse
+from django.utils.timezone import localtime
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView, FormView
 from django_filters.views import FilterView
 
@@ -318,9 +320,12 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        # TODO REVISAR ESTE QUERYSET
-        return WhatsAppScheduleMessage.objects \
-            .filter(schedule=self.schedule, message__account=self.account).order_by('order').all()
+        current_time = localtime()
+        return (WhatsAppScheduleMessage.objects
+                .filter(schedule=self.schedule, message__account=self.account)
+                .filter(message__from_date__lte=current_time)
+                .filter(Q(message__until_date__gte=current_time) | Q(message__until_date__isnull=True))
+                .order_by('order').all())
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(object_list=self.get_queryset(), account=self.account, schedule=self.schedule,
@@ -357,7 +362,9 @@ class WhatsAppStatusSorterView(SuccessMessageMixin, FormView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
-        return self.account.status.all()
+        current_time = localtime()
+        return (self.account.status.filter(from_date__lte=current_time)
+                .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)).all())
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(object_list=self.get_queryset(), account=self.account, **kwargs)
@@ -453,3 +460,18 @@ class WhatsAppAccountScheduleDetailView(WhatsAppAccountViewMixins, DetailView):
     def get_context_data(self, **kwargs):
         schedules = Schedule.objects.filter(messages__message__account=self.get_object()).order_by('time').distinct()
         return super().get_context_data(object_list=schedules, **kwargs)
+
+
+class WhatsAppAccountJoinGroupsView(SuccessMessageMixin, FormView):
+    template_name = 'whatsapp/groups/join.html'
+    form_class = forms.WhatsAppAccountJoinGroupForm
+    success_url = reverse_lazy('whatsapp:groups.index')
+
+    def form_valid(self, form):
+        try:
+            instance = form.save()
+            self.success_message = f"La cuenta {form.cleaned_data['account']} se ha unido correctamente al grupo {instance}"
+            return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, "Ha ocurrido un error al intentar unise al grupo")
+            return self.form_invalid(form)

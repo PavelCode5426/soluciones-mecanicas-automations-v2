@@ -25,6 +25,7 @@ urlpatterns = [
          name='contacts.toggle-status'),
 
     path(r'groups', views.WhatsAppGroupsListView.as_view(), name='groups.index'),
+    path(r'groups/join', views.WhatsAppAccountJoinGroupsView.as_view(), name='groups.join'),
     path(r'groups/<int:pk>/toggle-status', views.WhatsAppGroupsToggleStatusView.as_view(),
          name='groups.toggle-status'),
 

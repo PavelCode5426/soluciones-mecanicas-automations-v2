@@ -22,7 +22,7 @@ from whatsapp.tasks import syncronize_whatsapp_account_groups, enqueue_whatsapp_
 ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')], widget=forms.Select)
 
 
-class CurrentUserAccount:
+class CurrentUserAccount(forms.Form):
     account = forms.ModelChoiceField(queryset=WhatsAppAccount.objects.none(), required=True)
 
     def __init__(self, *args, **kwargs):
@@ -131,7 +131,7 @@ class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
 
 
 class WhatsAppContactForm(RemoveActiveOnCreateMixin, forms.ModelForm):
-    push_name = forms.CharField(disabled=True,required=False)
+    push_name = forms.CharField(disabled=True, required=False)
     chat_id = forms.CharField(disabled=True)
 
     class Meta:
@@ -242,3 +242,40 @@ class PublishWhastAppMessagesForm(PublishNowForm):
     def publish(self):
         for message in self.cleaned_data['items']:
             enqueue_whatsapp_message(message)
+
+
+class WhatsAppAccountJoinGroupForm(CurrentUserAccount):
+    group_code = forms.CharField(required=True)
+
+    def save(self, *args, **kwargs):
+        account = self.cleaned_data['account']
+        service = create_whatsapp_service(account)
+        group_id = service.join_group(self.cleaned_data['group_code'])
+
+        group = service.get_group_info(group_id['id'])
+        chat_id = group['JID']
+        name = group.get('Name', 'Sin nombre')
+        is_locked = group['IsLocked']
+        is_ephemeral = group['IsEphemeral']
+        participant_count = group['ParticipantCount']
+
+        instance = None
+        if name:
+            instance, _ = WhatsAppGroup.objects.update_or_create(
+                defaults=dict(
+                    name=name,
+                    is_locked=is_locked,
+                    is_ephemeral=is_ephemeral,
+                    participant_count=participant_count,
+                ),
+                create_defaults=dict(
+                    name=name,
+                    is_locked=is_locked,
+                    is_ephemeral=is_ephemeral,
+                    participant_count=participant_count,
+                    account=account,
+                ),
+                chat_id=chat_id, account=account
+            )
+
+        return instance

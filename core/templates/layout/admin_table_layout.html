@@ -23,12 +23,10 @@
     {% if object_list %}
 
         {% block table %}
-            <div class="table-responsive">
+            <div class="table-responsive mt-4">
+                {% block table_headers_top %}{% endblock %}
                 <table class="table table-sm table-hover mb-0">
                     <thead>
-                    <tr>
-                        {% block table_headers_top %}{% endblock %}
-                    </tr>
                     <tr>
                         {% block table_headers %}{% endblock %}
                     </tr>

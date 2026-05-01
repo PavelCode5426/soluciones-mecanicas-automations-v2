@@ -4,6 +4,13 @@
 {% block title %}Grupos de WhatsApp{% endblock %}
 {% block page_title %}Grupos de WhatsApp{% endblock %}
 
+{% block table_headers_top %}
+    <div class="d-flex justify-content-end">
+        <div>
+            <a class="btn btn-primary" href="{% url 'whatsapp:groups.join' %}">Unirse a grupo</a>
+        </div>
+    </div>
+{% endblock %}
 
 {% block table_headers %}
     <th>Nombre</th>
