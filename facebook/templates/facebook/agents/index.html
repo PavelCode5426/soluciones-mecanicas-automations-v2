@@ -17,8 +17,8 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
-    <td>{% object_link object url='facebook:agents.details' %}</td>
+    <td>{% object_link object url='facebook:agents.update' %}</td>
+    <td>{% object_link object.profile url='facebook:accounts.update' %}</td>
     <td>
         {% url 'facebook:agents.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
