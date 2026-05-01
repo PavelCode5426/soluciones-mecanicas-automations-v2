@@ -10,6 +10,7 @@
     <th>Nombre</th>
     <th>Perfil</th>
     <th>Estado</th>
+    <th>Encontrados</th>
     <th class="text-end">
         {% url 'facebook:agents.create' as create_url %}
         <a href="{{ create_url }}" class="btn btn-primary"><i class="fa fa-plus"></i> Crear Nuevo</a>
@@ -23,6 +24,7 @@
         {% url 'facebook:agents.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
+    <td>{{ object.leads_found }}</td>
     <td class="text-end">
         <div class="dropdown">
             <a role="button" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
