@@ -122,7 +122,7 @@ class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
     list_display = ['name', 'profile', 'updated_at', 'active']
     fieldsets = [
         ("Detalles de la publicación", {
-            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'file_preview', 'image']
+            "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'file_preview']
         }),
         ("Panificador de la publicación", {
             "fields": ['active']
