@@ -19,7 +19,7 @@ def enqueue_active_agents():
     leads_explorers = FacebookAgent.objects.filter(active=True).order_by('?').all()
     for explorer in leads_explorers:
         enqueue_lead_explorer(explorer)
-    return "OK"
+    return f"Agendados {leads_explorers.count()} agentes comerciales"
 
 
 def enqueue_active_facebook_campaigns():

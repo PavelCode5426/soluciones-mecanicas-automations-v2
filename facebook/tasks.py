@@ -20,9 +20,9 @@ def syncronize_profile_groups(profile: FacebookProfile):
 
 def enqueue_lead_explorer(explorer: FacebookAgent):
     service = FacebookAutomationService(explorer.profile)
-    task_name = f"Leads Explorer {explorer.profile}"
-    group_name = f'facebook_leads_explorer_{explorer.profile}'
-    async_task(service.group_lead_explorer, explorer, task_name=task_name, group=group_name)
+    task_name = f"agent_{explorer}".lower().replace(" ", "_")
+    group_name = f'run_agent_{explorer.profile}'.lower().replace(" ", '_')
+    async_task(service.group_lead_explorer, explorer, task_name=task_name, group=group_name, cluster='default')
 
 
 def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
