@@ -44,7 +44,7 @@ class FacebookAccountsToggleStatusView(SuccessMessageMixin, FacebookProfileViewM
     success_url = reverse_lazy('facebook:accounts.index')
 
     def get_success_message(self, cleaned_data):
-        return f"Cuenta {self.get_object()} activada/desactivada  exitosamente"
+        return f"Cuenta {self.object} activada/desactivada  exitosamente"
 
 
 class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins, DeleteView):
@@ -114,7 +114,7 @@ class FacebookAgentToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixi
     queryset = models.FacebookAgent.objects.all()
 
     def get_success_message(self, cleaned_data):
-        return f"Agente {self.get_object()} activado/desactivado exitosamente"
+        return f"Agente {self.object} activado/desactivado exitosamente"
 
 
 class FacebookDistributionListsListView(FilterByProfileViewMixins, ListView):
@@ -154,7 +154,7 @@ class FacebookDistributionListsToggleStatusView(SuccessMessageMixin, FilterByPro
     queryset = models.FacebookDistributionList.objects.all()
 
     def get_success_message(self, cleaned_data):
-        return f"Lista de distribución {self.get_object()} activado/desactivado exitosamente"
+        return f"Lista de distribución {self.object} activado/desactivado exitosamente"
 
 
 class FacebookDistributionListsDeleteView(SuccessMessageMixin, FilterByProfileViewMixins, DeleteView):
@@ -222,7 +222,7 @@ class FacebookPostCampaignToggleStatusView(SuccessMessageMixin, FilterByProfileV
     queryset = models.FacebookPostCampaign.objects.all()
 
     def get_success_message(self, cleaned_data):
-        return f"Campaña {self.get_object()} activado/desactivado exitosamente"
+        return f"Campaña {self.object} activado/desactivado exitosamente"
 
 
 class FacebookPostCampaignDuplicateView(FilterByProfileViewMixins, DuplicateView):
@@ -238,7 +238,7 @@ class FacebookPostCampaignDuplicateView(FilterByProfileViewMixins, DuplicateView
         self.object.save()
 
     def get_success_message(self, cleaned_data):
-        return f"Campaña {self.get_object()} duplicada exitosamente"
+        return f"Campaña {self.object} duplicada exitosamente"
 
 
 class PublishNowFacebookPostCampaignView(SuccessMessageMixin, FilterByProfileViewMixins, FilterView, FormView):
