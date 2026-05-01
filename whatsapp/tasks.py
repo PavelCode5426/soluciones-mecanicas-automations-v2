@@ -202,7 +202,6 @@ def enqueue_whatsapp_status(status: WhatsAppStatus):
         publish_whatsapp_status, status,
         task_name=f'create_whatsapp_status_{status.pk}',
         cluster='whatsapp',
-        # next_run=datetime.combine(localtime(), status.publish_at)
     )
 
 

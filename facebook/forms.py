@@ -24,7 +24,7 @@ class FacebookAccountForm(forms.ModelForm):
 class FacebookAgentForm(CurrentUserProfile):
     class Meta:
         model = models.FacebookAgent
-        exclude = ['leads_found','limit']
+        exclude = ['leads_found', 'limit']
 
 
 class FacebookDistributionListCreateForm(CurrentUserProfile):
@@ -63,5 +63,4 @@ class PublishFacebookPostCampaignForm(PublishNowForm):
     items = forms.ModelMultipleChoiceField(queryset=models.FacebookPostCampaign.objects.all())
 
     def publish(self):
-        for items in self.cleaned_data['items']:
-            enqueue_facebook_campaign(items)
+        enqueue_facebook_campaign(self.cleaned_data['items'])
