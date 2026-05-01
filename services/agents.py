@@ -153,7 +153,7 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
     justification: str = Field(description="Breve explicación de por qué es o no relevante")
     phone_number: Optional[str] = Field(description="Numero de telefono para contactar, null en caso contrario")
     product_service: Optional[str] = Field(description="Describe lo que vende o el servicio que se brinda")
-    promotional_message: Optional[str] = Field(description="Genera un mensaje promocional para el cliente")
+    # promotional_message: Optional[str] = Field(description="Genera un mensaje promocional para el cliente")
 
 
 class SocialNetworkAnalyzerAgent(Workflow):
