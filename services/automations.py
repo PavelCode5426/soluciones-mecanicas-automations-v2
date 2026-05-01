@@ -82,7 +82,10 @@ class FacebookAutomationService:
         explorer.refresh_from_db()
         if all([explorer.active, self.profile.active, self.profile.can_search_leads]):
             leads_found = 0
-            group = explorer.distribution_list.groups.filter(active=True).order_by('?').first()
+            group = None
+            if explorer.distribution_list:
+                group = explorer.distribution_list.groups.filter(active=True).order_by('?').first()
+
             with get_playwright() as pw:
                 try:
                     browser = self.get_browser(pw)
