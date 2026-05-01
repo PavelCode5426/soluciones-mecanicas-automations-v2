@@ -158,17 +158,16 @@ class SocialNetworkPostAnalyzerOutputFormat(BaseModel):
 
 class SocialNetworkAnalyzerAgent(Workflow):
     def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, timeout=None, **kwargs)
-
         # self.llm = Ollama(model='llama3.2:3b', base_url='https://ia.pavelcode5426.duckdns.org', context_window=20_000,
         #                   request_timeout=500)
 
         model_name = 'meta-llama/Meta-Llama-3-8B-Instruct'
         self.llm = HuggingFaceInferenceAPI(model_name=model_name, token=settings.HUGGINGFACE_TOKEN)
 
-        self.classificator_prompt = kwargs.get('classificator_prompt')
-        self.agent_prompt = kwargs.get('agent_prompt')
-        self.agent_description = kwargs.get('agent_description')
+        self.classificator_prompt = kwargs.pop('classificator_prompt')
+        self.agent_prompt = kwargs.pop('agent_prompt')
+        self.agent_description = kwargs.pop('agent_description')
+        super().__init__(*args, timeout=None, **kwargs)
 
 
 class FacebookPostAnalyzerAgent(SocialNetworkAnalyzerAgent):
