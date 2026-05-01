@@ -32,9 +32,8 @@
                         <input type="checkbox" name="items" value="{{ object.id }}">
                     </td>
                     <td>{{ object.name }}</td>
-                    <td>{{ object.account }}</td>
+                    <td>{{ object.profile }}</td>
                     <td>{% status_badge object.active %}</td>
-                    <td>{{ object.message_type }}</td>
                     <td>{{ object.published_count }}</td>
                 </tr>
             {% endfor %}
