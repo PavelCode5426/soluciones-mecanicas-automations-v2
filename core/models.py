@@ -65,12 +65,14 @@ class UserTrackedModel(models.Model):
         abstract = True
 
     def save(self, *args, **kwargs):
-        current_user = get_request().user
-        if not self.pk:
-            if current_user and self.created_by is None:
-                self.created_by = current_user
-        if current_user:
-            self.updated_by = current_user
+        request = get_request()
+        if request:
+            current_user = request.user
+            if not self.pk:
+                if current_user and self.created_by is None:
+                    self.created_by = current_user
+            if current_user:
+                self.updated_by = current_user
         super().save(*args, **kwargs)
 
 
