@@ -244,7 +244,7 @@ class WhatsAppMessageAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["distribution_lists"]
         }),
         ("Planificación", {
-            "fields": ["order", "frequency", "from_date", "until_date", "weekdays", "sync_schedule"],
+            "fields": ["order", "from_date", "until_date", "weekdays", "sync_schedule"],
         }),
         ("Estadísticas", {
             "fields": ["published_count"],
