@@ -1,13 +1,19 @@
 `{% extends 'layout/admin_table_layout.html' %}
 {% load components %}
 {% load django_bootstrap5 %}
+{% load static %}
 
 {% block title %}Publicar mensajes de WhatsApp{% endblock %}
 {% block page_title %}Publicar mensajes de WhatsApp{% endblock %}
 
 {% block table %}
-    <form method="post" class="table-responsive">
+    <form method="post" class="table-responsive mt-4">
         {% csrf_token %}
+        <div class="d-flex justify-content-end">
+            <div>
+                <input class="btn btn-primary disabled" type="submit" value="Publicar ahora">
+            </div>
+        </div>
         <table class="table table-sm table-hover mb-0">
             <thead>
             <tr>
@@ -17,9 +23,6 @@
                 <th>Estado</th>
                 <th>Tipo</th>
                 <th>Publicaciones</th>
-                <th class="text-end">
-                    <input class="btn btn-primary" type="submit" value="Publicar ahora">
-                </th>
             </tr>
             </thead>
             <tbody>
@@ -32,7 +35,7 @@
                     <td>{{ object.account }}</td>
                     <td>{% status_badge object.active %}</td>
                     <td>{{ object.message_type }}</td>
-                    <td colspan="2">{{ object.published_count }}</td>
+                    <td>{{ object.published_count }}</td>
                 </tr>
             {% endfor %}
             </tbody>
@@ -47,5 +50,9 @@
     {% include 'components/empty.html' with url=create_url text="No existen mensajes en el sistema" %}
 {% endblock %}
 
+
+{% block page_scripts %}
+    <script src="{% static 'js/publish-messages.js' %}"></script>
+{% endblock %}
 
 
