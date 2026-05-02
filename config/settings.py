@@ -205,6 +205,7 @@ Q_CLUSTER = {
     "retry": 60 * 60,
     "queue_limit": 50,
     "bulk": 10,
+    'max_attempts': 1,
     "orm": "default",
     "ALT_CLUSTERS": {
         "high_priority": {
