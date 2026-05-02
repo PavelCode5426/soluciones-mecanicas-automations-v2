@@ -2,17 +2,17 @@
 {% load django_bootstrap5 %}
 {% load static %}
 
-{% block title %}Unirse a un grupo{% endblock %}
+{% block title %}{{ modal_title }}{% endblock %}
 
 {% block page_content %}
     <div class="container-md">
         <form class="card" method="post">
             {% csrf_token %}
             <div class="card-header bg-primary">
-                <h4 class="card-title text-white">¿Desea unirse a un grupo?</h4>
+                <h4 class="card-title text-white">{{ modal_title }}</h4>
             </div><!--end card-header-->
             <div class="card-body">
-                <p class="card-text text-muted">Al confirmar se unira</p>
+                <p class="card-text text-muted">{{ modal_description }}</p>
                 {% bootstrap_form form %}
             </div><!--end card-body-->
             <p class="card-footer m-0">

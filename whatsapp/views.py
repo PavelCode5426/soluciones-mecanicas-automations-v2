@@ -466,6 +466,12 @@ class WhatsAppAccountJoinGroupsView(SuccessMessageMixin, FormView):
     template_name = 'whatsapp/groups/join.html'
     form_class = forms.WhatsAppAccountJoinGroupForm
     success_url = reverse_lazy('whatsapp:groups.index')
+    extra_context = {
+        "page_title": "Unirse a grupo",
+        "modal_title": "Grupo",
+        "modal_description": "Grup",
+        "cancel_url": success_url
+    }
 
     def form_valid(self, form):
         try:

@@ -150,8 +150,7 @@ class FacebookAutomationService:
                     print(f"Agent error: {e}")
 
             explorer.leads_found = F('leads_found') + leads_found
-            explorer.active = False
-            explorer.save(update_fields=['leads_found', 'active'])
+            explorer.save(update_fields=['leads_found'])
 
     def save_session(self, storage_state):
         self.profile.context = storage_state
