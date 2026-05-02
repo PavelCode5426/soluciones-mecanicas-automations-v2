@@ -10,7 +10,6 @@ from django.utils.timezone import now
 from django_q.tasks import async_task
 from rest_framework.reverse import reverse
 
-from core.admin import AllObjectsModelAdmin
 from whatsapp import forms
 from whatsapp.factories import create_whatsapp_service
 from whatsapp.helpers import get_message_type
@@ -187,7 +186,7 @@ class WhatsAppStatusAdmin(admin.ModelAdmin, PreviewFileMixin):
             "fields": ["name", "account", 'message', 'file', 'file_preview', 'active']
         }),
         ("Planificar estado", {
-            "fields": ["order", 'from_date', 'until_date', 'weekdays', 'sync_schedule']
+            "fields": ["order", "schedule", 'from_date', 'until_date', 'weekdays', 'sync_schedule']
         }),
         ("Estadísticas", {
             "fields": ["published_count"],
