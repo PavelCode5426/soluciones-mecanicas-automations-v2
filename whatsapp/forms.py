@@ -67,12 +67,9 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
         instance = super(WhatsAppMessageAdminForm, self).save(commit=commit)
         if self.cleaned_data['sync_schedule']:
             weekdays = instance.weekdays.all()
-            WhatsAppMessage.objects.filter(active=True, account=instance.account).update(
-                frequency=instance.frequency,
+            WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(pk=instance.pk).update(
                 from_date=instance.from_date,
                 until_date=instance.until_date,
-                from_time=instance.from_time,
-                until_time=instance.until_time,
             )
             messages = WhatsAppMessage.objects.filter(active=True, account=instance.account).exclude(
                 pk=instance.pk).all()
