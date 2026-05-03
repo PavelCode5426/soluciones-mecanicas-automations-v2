@@ -250,11 +250,14 @@ class FacebookAutomationService:
         page.keyboard.press('Enter')
         page.keyboard.press('Enter')
 
-        hashtags = post.hashtags.split("\n")
-        for hastag in hashtags:
-            page.keyboard.type(hastag.strip(), delay=300)
+        hashtags = post.hashtags.strip()
+        if hashtags:
             page.keyboard.press('Enter')
-            page.keyboard.press("Space")
+            page.keyboard.press('Enter')
+            for hastag in hashtags.split("\n"):
+                page.keyboard.type(hastag)
+                page.keyboard.press('Enter')
+                page.keyboard.press("Space")
 
         if post.file:
             file_input = page.locator('input[type="file"][multiple]').first
