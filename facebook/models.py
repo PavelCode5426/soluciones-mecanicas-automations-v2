@@ -72,7 +72,6 @@ class FacebookDistributionList(SoftDeleteModel):
 
 class FacebookProfile(SoftDeleteUserTrackedModel):
     name = models.CharField(max_length=250)
-    context = models.JSONField(default=dict, blank=True, null=True)
     active = models.BooleanField(default=True)
     can_search_leads = models.BooleanField(default=False)
     can_post_in_groups = models.BooleanField(default=True)
