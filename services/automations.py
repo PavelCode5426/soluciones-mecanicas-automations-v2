@@ -166,7 +166,7 @@ class RealAccountAutomationService:
         group.refresh_from_db()
         post.refresh_from_db()
         profile = post.profile
-        profile_group,_ = FacebookProfileGroup.objects.get_or_create(defaults={
+        profile_group, _ = FacebookProfileGroup.objects.get_or_create(defaults={
             "profile": profile, "group": group
         }, profile=profile, group=group)
         account_group = FacebookAccountGroup.objects.get(account=self.account, group=group)
@@ -282,5 +282,5 @@ class RealAccountAutomationService:
         self.__check_blocked_account(page)
 
     def __check_blocked_account(self, page):
-        if page.get_by_text(blocked_message):
+        if page.get_by_text(blocked_message ).count() > 0:
             raise Exception('Cuenta bloqueada por Facebook')
