@@ -71,7 +71,7 @@ class FacebookGroupsListView(FilterByProfileViewMixins, FilterView):
 class FacebookGroupsToggleStatusView(SuccessMessageMixin, FilterByProfileViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('facebook:groups.index')
-    queryset = models.FacebookGroup.objects.all()
+    queryset = models.FacebookProfileGroup.objects.all()
     success_message = "Grupo activado/desactivado exitosamente"
 
 

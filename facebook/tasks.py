@@ -15,7 +15,7 @@ def syncronize_account_groups(account: FacebookRealAccount):
 
     for group in groups:
         group, _ = FacebookGroup.objects.update_or_create(
-            defaults={"name": group['name']}, create_defaults=group, url=group['url']
+            defaults={"name": group['name'], "deleted": False}, create_defaults=group, url=group['url']
         )
         FacebookAccountGroup.objects.get_or_create(
             defaults={"group": group, "account": account}, group=group, account=account
