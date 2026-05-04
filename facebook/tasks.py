@@ -18,7 +18,7 @@ def syncronize_account_groups(account: FacebookRealAccount):
             defaults={"name": group['name']}, create_defaults=group, url=group['url']
         )
         FacebookAccountGroup.objects.get_or_create(
-            defaults={"group": group, "accout": account}, group=group, account=account
+            defaults={"group": group, "account": account}, group=group, account=account
         )
         for profile in profiles:
             FacebookProfileGroup.objects.get_or_create(
