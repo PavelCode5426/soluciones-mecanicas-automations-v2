@@ -41,7 +41,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
         for_enqueue = []
         groups = FacebookGroup.objects.filter(
             active=True, distribution_lists__active=True, distribution_lists__campaigns=post,
-        ).order_by('?').all()[:post.distribution_count]
+        ).order_by('?').all()
 
         real_account = FacebookRealAccount.objects.filter(
             active=True,
@@ -52,7 +52,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
         ).order_by('?').first()
 
         service = RealAccountAutomationService(real_account)
-        for group in groups:
+        for group in groups[:post.distribution_count]:
             task_name = f"{group.name} | {post.profile}"
             for_enqueue.append(
                 {
