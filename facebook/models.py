@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.utils.timezone import now
 
@@ -5,9 +7,24 @@ from core.models import WeekDay, SoftDeleteModel, SoftDeleteUserTrackedModel, Sc
 
 
 # Create your models here.
+class FacebookFile(models.Model):
+    file = models.ImageField(upload_to='facebook_files')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+
+class FacebookRealAccount(models.Model):
+    name = models.CharField(max_length=150)
+    email = models.EmailField(unique=True)
+    password = models.CharField(max_length=255)
+    context = models.JSONField(default=dict, blank=True, null=True)
+    active = models.BooleanField(default=True)
+
+
 class FacebookGroup(SoftDeleteModel):
     profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True,
-                                on_delete=models.PROTECT)
+                                on_delete=models.SET_NULL)
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
     screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
@@ -20,6 +37,18 @@ class FacebookGroup(SoftDeleteModel):
     class Meta:
         verbose_name = "Grupo"
         verbose_name_plural = "Grupos"
+
+
+class FacebookAccountGroup(models.Model):
+    account = models.ForeignKey(FacebookRealAccount, related_name='groups', on_delete=models.CASCADE)
+    group = models.ForeignKey(FacebookGroup, related_name='real_accounts', on_delete=models.CASCADE)
+    pending_posts = models.IntegerField(default=0)
+
+
+class FacebookProfileGroup(models.Model):
+    profile = models.ForeignKey('FacebookProfile', related_name='profile_groups', on_delete=models.CASCADE)
+    group = models.ForeignKey(FacebookGroup, related_name='profiles', on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
 
 
 class FacebookDistributionList(SoftDeleteModel):
@@ -38,11 +67,12 @@ class FacebookDistributionList(SoftDeleteModel):
 
 class FacebookProfile(SoftDeleteUserTrackedModel):
     name = models.CharField(max_length=250)
-    context = models.JSONField(default=dict)
+    context = models.JSONField(default=dict, blank=True, null=True)
     active = models.BooleanField(default=True)
     can_search_leads = models.BooleanField(default=False)
     can_post_in_groups = models.BooleanField(default=True)
     posts_footer = models.TextField(null=True, blank=True)
+    real_accounts = models.ManyToManyField(FacebookRealAccount, related_name='profiles', blank=True)
 
     def __str__(self):
         return self.name
@@ -58,6 +88,7 @@ class AbstractFacebookPost(SoftDeleteModel):
     title = models.CharField(max_length=250, null=True, blank=True)
     text = models.TextField(blank=True, null=True)
     file = models.ImageField(upload_to='facebook_post', null=True, blank=True)
+    files = GenericRelation(FacebookFile)
     hashtags = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)

@@ -2,15 +2,15 @@ from django.db.models import Q
 from django.utils.timezone import localtime
 from django_q.tasks import async_task
 
-from facebook.models import FacebookProfile, FacebookPostCampaign, FacebookAgent
+from facebook.models import FacebookPostCampaign, FacebookAgent, FacebookRealAccount
 from facebook.tasks import enqueue_lead_explorer, enqueue_facebook_campaign
-from services.automations import FacebookAutomationService
+from services.automations import RealAccountAutomationService
 
 
 def check_profile_status():
-    users = FacebookProfile.objects.filter(active=True).all()
-    for user in users:
-        service = FacebookAutomationService(user)
+    accounts = FacebookRealAccount.objects.filter(active=True).all()
+    for account in accounts:
+        service = RealAccountAutomationService(account)
         async_task(service.check_status, task_name=f'check_status', group='check_status', cluster='high_priority')
     return "Comprobación de estado agendada correctamente"
 

@@ -1,10 +1,22 @@
 from data_fetcher.global_request_context import get_request
 from django import forms
+from django.forms import inlineformset_factory
 
 from core.forms import PublishNowForm
 from core.forms.widgets import DatePickerInput
 from facebook import models
 from facebook.tasks import enqueue_facebook_campaign
+
+
+class FacebookFileForm(forms.ModelForm):
+    class Meta:
+        model = models.FacebookFile
+        fields = ['file']
+
+
+# FacebookFileInlineFormSet = inlineformset_factory(
+#     models.FacebookPostCampaign, models.FacebookFile,
+#     fields=['file'], extra=5, absolute_max=5, can_delete=True)
 
 
 class CurrentUserProfile(forms.ModelForm):

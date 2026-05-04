@@ -1,6 +1,6 @@
 from data_fetcher.global_request_context import get_request
 
-from facebook import models
+from facebook import models, forms
 
 
 # class WhatsAppAccountFormViewMixins:
@@ -17,6 +17,20 @@ class FacebookProfileViewMixins:
 class FilterByProfileViewMixins:
     def get_queryset(self):
         return super().get_queryset().filter(profile__created_by=get_request().user)
+
+
+class CreateOrUpdatePostViewMixins:
+
+    def post(self, request, *args, **kwargs):
+        form = forms.FacebookPostCampaignForm(request.POST)
+        formset = forms.FacebookFileInlineFormSet(request.POST, request.FILES)
+        if form.is_valid() and formset.is_valid():
+            post = form.save()
+            instances = formset.save(commit=False)
+            for instance in instances:
+                instance.content_object = post
+                instance.save()
+
 #
 #
 # class FacebookHistoryViewMixins:

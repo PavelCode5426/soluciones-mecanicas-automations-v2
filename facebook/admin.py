@@ -7,8 +7,8 @@ from django_q.tasks import async_task
 
 from facebook.models import FacebookProfile, FacebookGroup, FacebookDistributionList, FacebookPostCampaign, \
     FacebookAgent, \
-    FacebookHistory, FacebookScheduledPost
-from facebook.tasks import syncronize_profile_groups, enqueue_facebook_campaign, enqueue_lead_explorer
+    FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup
+from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer
 
 admin.site.site_header = "Panel de Administración"
 admin.site.site_title = "Sinergia Marketing Automations"
@@ -22,16 +22,35 @@ class PreviewFileMixin:
     file_preview.short_description = "Previsualizar"
 
 
+@admin.register(FacebookRealAccount)
+class FacebookRealAccountAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'active']
+
+
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'active', 'can_search_leads', 'can_post_in_groups']
     actions = ['sync_facebook_groups']
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+
+        real_accounts = obj.real_accounts.filter(active=True).all()
+        groups = FacebookGroup.objects.filter(real_accounts__account__in=real_accounts).distinct()
+        for group in groups:
+            FacebookProfileGroup.objects.update_or_create(
+                create_defaults={'group': group, 'profile': obj},
+                group=group, profile=obj
+            )
+
     @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
     def sync_facebook_groups(self, request, queryset):
-        users = queryset.all()
-        for user in users:
-            async_task(syncronize_profile_groups, user, task_name=f"download_{user}_groups".lower(),
+        real_accounts = FacebookRealAccount.objects.filter(
+            profiles__in=queryset.filter(active=True).all(), active=True
+        ).distinct()
+
+        for account in real_accounts:
+            async_task(syncronize_account_groups, account, task_name="syncronize_account_groups",
                        cluster='high_priority')
         self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
 

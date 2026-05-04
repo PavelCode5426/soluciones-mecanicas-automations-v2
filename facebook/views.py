@@ -188,6 +188,23 @@ class FacebookPostCampaignCreateView(SuccessMessageMixin, CreateView):
     }
     success_message = "Nueva campaña %(name)s creada exitosamente"
 
+    # def form_valid(self, form):
+    #     return super(SuccessMessageMixin).form_valid(form)
+    #
+    # def post(self, request, *args, **kwargs):
+    #     form = self.get_form()
+    #     formset = forms.FacebookFileInlineFormSet(request.POST, request.FILES)
+    #     if form.is_valid() and formset.is_valid():
+    #         post = form.save()
+    #         instances = formset.save(commit=False)
+    #         for instance in instances:
+    #             instance.content_object = post
+    #             instance.save()
+    #         return self.form_invalid(form)
+    #     else:
+    #         return self.form_invalid(form)
+
+
 
 class FacebookPostCampaignUpdateView(SuccessMessageMixin, FilterByProfileViewMixins, UpdateView):
     success_url = reverse_lazy('facebook:post-campaign.index')
