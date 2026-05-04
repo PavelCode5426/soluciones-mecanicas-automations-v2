@@ -49,7 +49,7 @@ class FacebookDistributionListUpdateForm(CurrentUserProfile):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['profile'].disabled = True
-        self.fields['groups'].queryset = models.FacebookGroup.objects.filter(profile=kwargs['instance'].profile)
+        self.fields['groups'].queryset = models.FacebookGroup.objects.filter(profiles__profile=kwargs['instance'].profile)
 
     class Meta:
         model = models.FacebookDistributionList
