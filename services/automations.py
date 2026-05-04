@@ -93,7 +93,7 @@ class RealAccountAutomationService:
             group = None
             if explorer.distribution_list:
                 group = FacebookGroup.objects.filter(
-                    distribution_lists=explorer.distribution_list, real_accounts__account__in=self.account
+                    distribution_lists=explorer.distribution_list, real_accounts__account=self.account
                 ).order_by('?').first()
 
             with get_playwright() as pw:
