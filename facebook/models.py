@@ -21,6 +21,9 @@ class FacebookRealAccount(models.Model):
     context = models.JSONField(default=dict, blank=True, null=True)
     active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
 
 class FacebookGroup(SoftDeleteModel):
     profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True,

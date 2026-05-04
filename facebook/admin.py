@@ -7,7 +7,7 @@ from django_q.tasks import async_task
 
 from facebook.models import FacebookProfile, FacebookGroup, FacebookDistributionList, FacebookPostCampaign, \
     FacebookAgent, \
-    FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup
+    FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup, FacebookAccountGroup
 from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer
 
 admin.site.site_header = "Panel de Administración"
@@ -25,6 +25,16 @@ class PreviewFileMixin:
 @admin.register(FacebookRealAccount)
 class FacebookRealAccountAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'active']
+
+
+@admin.register(FacebookAccountGroup)
+class FacebookAccountGroupAdmin(admin.ModelAdmin):
+    list_display = ['account', 'group', 'pending_posts']
+
+
+@admin.register(FacebookProfileGroup)
+class FacebookProfileGroupAdmin(admin.ModelAdmin):
+    list_display = ['profile', 'group', 'active']
 
 
 @admin.register(FacebookProfile)
