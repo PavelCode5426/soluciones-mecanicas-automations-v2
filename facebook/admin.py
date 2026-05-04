@@ -15,6 +15,17 @@ admin.site.site_title = "Sinergia Marketing Automations"
 admin.site.index_title = "Bienvenido al Panel"
 
 
+class ReadOnlyAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 class PreviewFileMixin:
     def file_preview(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.file.url))
@@ -28,13 +39,15 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
 
 
 @admin.register(FacebookAccountGroup)
-class FacebookAccountGroupAdmin(admin.ModelAdmin):
+class FacebookAccountGroupAdmin(ReadOnlyAdmin):
     list_display = ['account', 'group', 'pending_posts']
+    list_filter = ['account']
 
 
 @admin.register(FacebookProfileGroup)
-class FacebookProfileGroupAdmin(admin.ModelAdmin):
+class FacebookProfileGroupAdmin(ReadOnlyAdmin):
     list_display = ['profile', 'group', 'active']
+    list_filter = ['profile', 'active']
 
 
 @admin.register(FacebookProfile)
@@ -97,8 +110,8 @@ class FacebookGroupCategoryAdmin(admin.ModelAdmin):
             obj_id = request.resolver_match.kwargs.get('object_id')
             if obj_id:
                 try:
-                    category = FacebookDistributionList.objects.get(pk=obj_id)
-                    kwargs["queryset"] = FacebookGroup.objects.filter(profile=category.profile)
+                    distribution_list = FacebookDistributionList.objects.get(pk=obj_id)
+                    kwargs["queryset"] = FacebookGroup.objects.filter(profiles__profile=distribution_list.profile)
                 except FacebookDistributionList.DoesNotExist:
                     pass
         return super().formfield_for_manytomany(db_field, request, **kwargs)
