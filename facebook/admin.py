@@ -40,6 +40,7 @@ class FacebookProfileGroupAdmin(admin.ModelAdmin):
 @admin.register(FacebookProfile)
 class FacebookProfileAdmin(admin.ModelAdmin):
     list_display = ['name', 'active', 'can_search_leads', 'can_post_in_groups']
+    filter_horizontal = ['real_accounts']
     actions = ['sync_facebook_groups']
 
     def save_model(self, request, obj, form, change):
