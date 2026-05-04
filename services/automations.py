@@ -166,7 +166,7 @@ class RealAccountAutomationService:
         group.refresh_from_db()
         post.refresh_from_db()
         profile = post.profile
-        profile_group = FacebookProfileGroup.objects.get_or_create(defaults={
+        profile_group,_ = FacebookProfileGroup.objects.get_or_create(defaults={
             "profile": profile, "group": group
         }, profile=profile, group=group)
         account_group = FacebookAccountGroup.objects.get(account=self.account, group=group)
