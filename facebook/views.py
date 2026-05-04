@@ -64,7 +64,7 @@ class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins,
 class FacebookGroupsListView(FilterByProfileViewMixins, FilterView):
     template_name = 'facebook/groups/index.html'
     filterset_class = filters.FacebookGroupsFilterSet
-    queryset = models.FacebookGroup.objects.all()
+    queryset = models.FacebookProfileGroup.objects.all()
     paginate_by = 100
 
 
@@ -203,7 +203,6 @@ class FacebookPostCampaignCreateView(SuccessMessageMixin, CreateView):
     #         return self.form_invalid(form)
     #     else:
     #         return self.form_invalid(form)
-
 
 
 class FacebookPostCampaignUpdateView(SuccessMessageMixin, FilterByProfileViewMixins, UpdateView):

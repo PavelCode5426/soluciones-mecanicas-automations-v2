@@ -67,8 +67,7 @@ class FacebookProfileAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
-    list_display = ["name", "profile", "url", "active", "error_at"]
-    list_filter = ["profile"]
+    list_display = ["name", "url", "active", "error_at"]
     readonly_fields = ["image"]
 
     def image(self, obj):

@@ -47,8 +47,8 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
             active=True,
             profiles__active=True, profiles__campaigns=post,
             groups__group__in=groups,
-            profiles__profile_groups__active=True,
-            profiles__profile_groups__group__in=groups
+            profiles__groups__active=True,
+            profiles__groups__group__in=groups
         ).order_by('?').first()
 
         service = RealAccountAutomationService(real_account)

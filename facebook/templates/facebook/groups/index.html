@@ -13,13 +13,13 @@
 {% endblock %}
 
 {% block table_data %}
-    <td>{{ object.name }}</td>
+    <td>{{ object.group }}</td>
     <td>{% object_link object.profile url='facebook:accounts.details' %}</td>
     <td>
         {% url 'facebook:groups.toggle-status' pk=object.pk as change_status_url %}
         {% toggle_status_badge object.active submit_url=change_status_url %}
     </td>
-    <td>{{ object.url }}</td>
+    <td>{{ object.group.url }}</td>
 {% endblock %}
 
 {% block empty %}

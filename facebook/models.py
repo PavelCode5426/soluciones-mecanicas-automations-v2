@@ -26,8 +26,6 @@ class FacebookRealAccount(models.Model):
 
 
 class FacebookGroup(SoftDeleteModel):
-    profile = models.ForeignKey('FacebookProfile', related_name='groups', null=True, blank=True,
-                                on_delete=models.SET_NULL)
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
     screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
@@ -49,7 +47,7 @@ class FacebookAccountGroup(models.Model):
 
 
 class FacebookProfileGroup(models.Model):
-    profile = models.ForeignKey('FacebookProfile', related_name='profile_groups', on_delete=models.CASCADE)
+    profile = models.ForeignKey('FacebookProfile', related_name='groups', on_delete=models.CASCADE)
     group = models.ForeignKey(FacebookGroup, related_name='profiles', on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
 
