@@ -163,131 +163,131 @@ class RealAccountAutomationService:
             explorer.save(update_fields=['leads_found'])
 
 
-def publish_new_campaign(self, group: FacebookGroup, post: FacebookPostCampaign):
-    self.refresh_account()
-    group.refresh_from_db()
-    post.refresh_from_db()
-    profile = post.profile
-    profile_group, _ = FacebookProfileGroup.objects.get_or_create(defaults={
-        "profile": profile, "group": group
-    }, profile=profile, group=group)
-    account_group = FacebookAccountGroup.objects.get(account=self.account, group=group)
+    def publish_new_campaign(self, group: FacebookGroup, post: FacebookPostCampaign):
+        self.refresh_account()
+        group.refresh_from_db()
+        post.refresh_from_db()
+        profile = post.profile
+        profile_group, _ = FacebookProfileGroup.objects.get_or_create(defaults={
+            "profile": profile, "group": group
+        }, profile=profile, group=group)
+        account_group = FacebookAccountGroup.objects.get(account=self.account, group=group)
 
-    if all([post.active, group.active, profile_group.active, profile.active, profile.can_post_in_groups]):
-        screenshot, exception = self.__publish_campaign(group.url, post)
-        file_name = f"{group}_{profile}_screenshot.jpeg".lower()
-        account_group.screenshot.delete(False)
-        account_group.screenshot.save(file_name, ContentFile(screenshot), False)
+        if all([post.active, group.active, profile_group.active, profile.active, profile.can_post_in_groups]):
+            screenshot, exception = self.__publish_campaign(group.url, post)
+            file_name = f"{group}_{profile}_screenshot.jpeg".lower()
+            account_group.screenshot.delete(False)
+            account_group.screenshot.save(file_name, ContentFile(screenshot), False)
 
-        account_group.error_at = None
-        if exception:
-            account_group.error_at = now()
+            account_group.error_at = None
+            if exception:
+                account_group.error_at = now()
+                account_group.save()
+                raise exception
+
             account_group.save()
-            raise exception
-
-        account_group.save()
-        post.published_count = F('published_count') + 1
-        post.save(update_fields=['published_count', 'updated_at'])
+            post.published_count = F('published_count') + 1
+            post.save(update_fields=['published_count', 'updated_at'])
 
 
-def publish_new_post(self, post: FacebookScheduledPost):
-    self.refresh_account()
-    post.refresh_from_db()
-    if all([post.active, post.profile.active]):
-        screenshot, exception = self.__publish_post(post)
+    def publish_new_post(self, post: FacebookScheduledPost):
+        self.refresh_account()
+        post.refresh_from_db()
+        if all([post.active, post.profile.active]):
+            screenshot, exception = self.__publish_post(post)
 
 
-def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):
-    exception = None
+    def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):
+        exception = None
 
-    with (get_playwright() as pw):
-        try:
-            browser = self.get_browser(pw)
-            page = browser.new_page()
+        with (get_playwright() as pw):
+            try:
+                browser = self.get_browser(pw)
+                page = browser.new_page()
 
-            page.goto(group_url, wait_until='load')
-            open_dialog_button = page.get_by_text('Escribe algo')
+                page.goto(group_url, wait_until='load')
+                open_dialog_button = page.get_by_text('Escribe algo')
 
-            self.__write_post(page, open_dialog_button, post)
-        except Exception as e:
-            exception = e
+                self.__write_post(page, open_dialog_button, post)
+            except Exception as e:
+                exception = e
 
-        screenshot = page.screenshot(quality=80, type='jpeg')
-        updated_session = browser.storage_state()
+            screenshot = page.screenshot(quality=80, type='jpeg')
+            updated_session = browser.storage_state()
 
-    self.save_session(updated_session)
-    return screenshot, exception
-
-
-def __publish_post(self, post: FacebookScheduledPost) -> (bytes, Exception | None):
-    exception = None
-
-    with (get_playwright() as pw):
-        try:
-            browser = self.get_browser(pw)
-            page = browser.new_page()
-
-            page.goto('https://facebook.com', wait_until='load')
-            open_dialog_button = page.get_by_text('¿Qué estás pensando')
-
-            self.__write_post(page, open_dialog_button, post)
-        except Exception as e:
-            exception = e
-
-        screenshot = page.screenshot(quality=80, type='jpeg')
-        updated_session = browser.storage_state()
-
-    self.save_session(updated_session)
-    return screenshot, exception
+        self.save_session(updated_session)
+        return screenshot, exception
 
 
-def __write_post(self, page, open_dialog_button, post: AbstractFacebookPost):
-    open_dialog_button.wait_for(state='visible')
-    open_dialog_button.click()
+    def __publish_post(self, post: FacebookScheduledPost) -> (bytes, Exception | None):
+        exception = None
 
-    attempts = 3
-    dialog = page.get_by_role('dialog')
-    while attempts > 0:
-        if dialog.is_visible():
-            break
-        time.sleep(5)
+        with (get_playwright() as pw):
+            try:
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+
+                page.goto('https://facebook.com', wait_until='load')
+                open_dialog_button = page.get_by_text('¿Qué estás pensando')
+
+                self.__write_post(page, open_dialog_button, post)
+            except Exception as e:
+                exception = e
+
+            screenshot = page.screenshot(quality=80, type='jpeg')
+            updated_session = browser.storage_state()
+
+        self.save_session(updated_session)
+        return screenshot, exception
+
+
+    def __write_post(self, page, open_dialog_button, post: AbstractFacebookPost):
+        open_dialog_button.wait_for(state='visible')
         open_dialog_button.click()
-        attempts -= 1
 
-    publish_button = dialog.locator('[aria-label="Publicar"]')
-    publish_button.wait_for(state='visible')
-    time.sleep(10)
+        attempts = 3
+        dialog = page.get_by_role('dialog')
+        while attempts > 0:
+            if dialog.is_visible():
+                break
+            time.sleep(5)
+            open_dialog_button.click()
+            attempts -= 1
 
-    page.keyboard.type(post.title)
-    page.keyboard.press('Enter')
-    page.keyboard.insert_text(post.text)
-    page.keyboard.press('Enter')
-    page.keyboard.press('Enter')
-    page.keyboard.insert_text(post.profile.posts_footer)
-    page.keyboard.press('Enter')
-    page.keyboard.press('Enter')
+        publish_button = dialog.locator('[aria-label="Publicar"]')
+        publish_button.wait_for(state='visible')
+        time.sleep(10)
 
-    hashtags = post.hashtags.strip()
-    if hashtags:
+        page.keyboard.type(post.title)
+        page.keyboard.press('Enter')
+        page.keyboard.insert_text(post.text)
         page.keyboard.press('Enter')
         page.keyboard.press('Enter')
-        for hastag in hashtags.split("\n"):
-            page.keyboard.type(hastag)
+        page.keyboard.insert_text(post.profile.posts_footer)
+        page.keyboard.press('Enter')
+        page.keyboard.press('Enter')
+
+        hashtags = post.hashtags.strip()
+        if hashtags:
             page.keyboard.press('Enter')
-            page.keyboard.press("Space")
+            page.keyboard.press('Enter')
+            for hastag in hashtags.split("\n"):
+                page.keyboard.type(hastag)
+                page.keyboard.press('Enter')
+                page.keyboard.press("Space")
 
-    if post.file:
-        file_input = page.locator('input[type="file"][multiple]').first
-        file_input.set_input_files(files=[post.file.path])
+        if post.file:
+            file_input = page.locator('input[type="file"][multiple]').first
+            file_input.set_input_files(files=[post.file.path])
 
-    # time.sleep(random.randint(30, 60))
-    time.sleep(random.randint(5, 15))
-    publish_button.click()
-    page.locator('span', has_text='Publicando').wait_for(state='hidden')
+        # time.sleep(random.randint(30, 60))
+        time.sleep(random.randint(5, 15))
+        publish_button.click()
+        page.locator('span', has_text='Publicando').wait_for(state='hidden')
 
-    self.__check_blocked_account(page)
+        self.__check_blocked_account(page)
 
 
-def __check_blocked_account(self, page):
-    if page.get_by_text(blocked_message).count() > 0:
-        raise Exception('Cuenta bloqueada por Facebook')
+    def __check_blocked_account(self, page):
+        if page.get_by_text(blocked_message).count() > 0:
+            raise Exception('Cuenta bloqueada por Facebook')
