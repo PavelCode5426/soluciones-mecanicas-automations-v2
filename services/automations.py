@@ -9,7 +9,7 @@ from playwright.sync_api import sync_playwright, PlaywrightContextManager, Playw
 
 from core.helpers import run_async
 from facebook.models import FacebookPostCampaign, FacebookAgent, FacebookScheduledPost, AbstractFacebookPost, \
-    FacebookRealAccount
+    FacebookRealAccount, FacebookProfileGroup, FacebookAccountGroup
 from facebook.models import FacebookProfile, FacebookGroup
 from services.agents import FacebookPostAnalyzerAgent
 
@@ -283,6 +283,8 @@ class RealAccountAutomationService:
 
     def refresh_account(self):
         self.account.refresh_from_db()
+        if not self.account.active:
+            raise Exception(f'Cuenta {self.account} inactiva')
 
     def save_session(self, storage_state):
         self.account.context = storage_state
@@ -316,55 +318,136 @@ class RealAccountAutomationService:
     def get_all_groups(self):
         self.refresh_account()
         groups = []
-        if self.account.active:
-            with get_playwright() as pw:
-                browser = self.get_browser(pw)
-                page = browser.new_page()
-                page.goto("https://www.facebook.com/groups/joins/?nav_source=tab",
-                          timeout=settings.PLAYWRIGHT['timeout'])
+        with get_playwright() as pw:
+            browser = self.get_browser(pw)
+            page = browser.new_page()
+            page.goto("https://www.facebook.com/groups/joins/?nav_source=tab",
+                      timeout=settings.PLAYWRIGHT['timeout'])
 
-                last_height = page.evaluate("document.body.scrollHeight")
-                while True:
-                    page.evaluate(f"window.scrollBy(0,document.body.scrollHeight)")
-                    time.sleep(20)
-                    new_height = page.evaluate("document.body.scrollHeight")
-                    if new_height == last_height:
-                        break
-                    last_height = new_height
+            last_height = page.evaluate("document.body.scrollHeight")
+            while True:
+                page.evaluate(f"window.scrollBy(0,document.body.scrollHeight)")
+                time.sleep(20)
+                new_height = page.evaluate("document.body.scrollHeight")
+                if new_height == last_height:
+                    break
+                last_height = new_height
 
-                groups_links = page.locator('[role="main"] [role="list"] [role="listitem"] a') \
-                    .filter(has_not_text='Ver grupo')
+            groups_links = page.locator('[role="main"] [role="list"] [role="listitem"] a') \
+                .filter(has_not_text='Ver grupo')
 
-                for link in groups_links.all():
-                    if link.text_content():
-                        groups.append(dict(url=link.get_attribute('href'), name=link.text_content()))
-                page.close()
+            for link in groups_links.all():
+                if link.text_content():
+                    groups.append(dict(url=link.get_attribute('href'), name=link.text_content()))
+            page.close()
         return groups
+
+    def group_lead_explorer(self, explorer: FacebookAgent):
+        self.refresh_account()
+        explorer.refresh_from_db()
+        if all([explorer.active, explorer.profile.active, explorer.profile.can_search_leads]):
+            leads_found = 0
+            group = None
+            if explorer.distribution_list:
+                group = (self.account.groups.filter(group__distribution_lists=explorer.distribution_list)
+                         .order_by('?').first())
+
+            with get_playwright() as pw:
+                try:
+                    browser = self.get_browser(pw)
+                    page = browser.new_page()
+
+                    url = group.url if group else f'https://www.facebook.com/search/top/'
+                    if explorer.search_keyword:
+                        url += f'?q={explorer.search_keyword}'
+                    page.goto(url, wait_until='load')
+
+                    count = 0
+                    while count <= 5:
+                        articles_locator = page.locator("div[aria-posinset]")
+                        count = articles_locator.count()
+                        if count > 0:
+                            page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
+                        time.sleep(5)
+
+                    i = 0
+                    while i < count and i < explorer.limit:
+                        article = articles_locator.nth(i)
+                        article.scroll_into_view_if_needed()
+                        article.wait_for(state="visible")
+
+                        try:
+                            button = article.get_by_role("button", name="Ver más")
+                            if button.is_visible(timeout=5):
+                                button.click()
+                        except Exception:
+                            pass
+
+                        try:
+
+                            post_analyzer = FacebookPostAnalyzerAgent(
+                                agent_prompt=explorer.agent_prompt,
+                                agent_description=explorer.agent_description,
+                                classificator_prompt=explorer.classificator_prompt,
+                            )
+                            response = run_async(post_analyzer.run(raw_html=article.inner_html()))
+
+                            if response.is_relevant:
+                                article.locator('[aria-label="Dejar un comentario"]').click()
+
+                                modal = page.get_by_role('dialog')
+
+                                textarea = modal.get_by_text("Comentar como")
+                                textarea.scroll_into_view_if_needed()
+                                textarea.highlight()
+                                textarea.click(force=True)
+
+                                page.keyboard.type(response.promotional_message)
+                                page.keyboard.press('Enter')
+
+                                modal.locator('[aria-label="Cerrar"]').click()
+                                leads_found += 1
+
+                        except Exception as e:
+                            print(f"Agent error: {e}")
+                        count = articles_locator.count()
+                        i += 1
+                except Exception as e:
+                    print(f"Agent error: {e}")
+
+            explorer.leads_found = F('leads_found') + leads_found
+            explorer.save(update_fields=['leads_found'])
 
     def publish_new_campaign(self, group: FacebookGroup, post: FacebookPostCampaign):
         self.refresh_account()
         group.refresh_from_db()
         post.refresh_from_db()
-        if all([post.active, group.active, post.profile.active, post.profile.can_post_in_groups]):
-            screenshot, exception = self.__publish_campaign(group.url, post)
-            file_name = f"{group}_screenshot.jpeg".lower()
-            group.screenshot.delete(False)
-            group.screenshot.save(file_name, ContentFile(screenshot), False)
+        profile = post.profile
+        profile_group = FacebookProfileGroup.objects.get_or_create(defaults={
+            "profile": profile, "group": group
+        }, profile=profile, group=group)
+        account_group = FacebookAccountGroup.objects.get(account=self.account, group=group)
 
-            group.error_at = None
+        if all([post.active, group.active, profile_group.active, profile.active, profile.can_post_in_groups]):
+            screenshot, exception = self.__publish_campaign(group.url, post)
+            file_name = f"{group}_{profile}_screenshot.jpeg".lower()
+            account_group.screenshot.delete(False)
+            account_group.screenshot.save(file_name, ContentFile(screenshot), False)
+
+            account_group.error_at = None
             if exception:
-                group.error_at = now()
-                group.save()
+                account_group.error_at = now()
+                account_group.save()
                 raise exception
 
-            group.save()
+            account_group.save()
             post.published_count = F('published_count') + 1
             post.save(update_fields=['published_count', 'updated_at'])
 
     def publish_new_post(self, post: FacebookScheduledPost):
         self.refresh_account()
         post.refresh_from_db()
-        if all([post.active, post.profile.active, self.account.active]):
+        if all([post.active, post.profile.active]):
             screenshot, exception = self.__publish_post(post)
 
     def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):

@@ -32,8 +32,6 @@ class FacebookRealAccount(models.Model):
 class FacebookGroup(SoftDeleteModel):
     name = models.CharField(max_length=250)
     url = models.CharField(max_length=250)
-    screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
-    error_at = models.DateTimeField(null=True, blank=True)
     active = models.BooleanField(default=True)
 
     def __str__(self):
@@ -48,6 +46,8 @@ class FacebookAccountGroup(models.Model):
     account = models.ForeignKey(FacebookRealAccount, related_name='groups', on_delete=models.CASCADE)
     group = models.ForeignKey(FacebookGroup, related_name='real_accounts', on_delete=models.CASCADE)
     pending_posts = models.IntegerField(default=0)
+    screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
+    error_at = models.DateTimeField(null=True, blank=True)
 
 
 class FacebookProfileGroup(models.Model):

@@ -19,9 +19,6 @@ class ReadOnlyAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    def has_change_permission(self, request, obj=None):
-        return False
-
     def has_delete_permission(self, request, obj=None):
         return False
 
@@ -42,6 +39,12 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
 class FacebookAccountGroupAdmin(ReadOnlyAdmin):
     list_display = ['account', 'group', 'pending_posts']
     list_filter = ['account']
+    readonly_fields = ["image"]
+
+    def image(self, obj):
+        return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
+
+    image.short_description = 'Image'
 
 
 @admin.register(FacebookProfileGroup)
@@ -81,13 +84,7 @@ class FacebookProfileAdmin(admin.ModelAdmin):
 
 @admin.register(FacebookGroup)
 class FacebookGroudAdmin(admin.ModelAdmin):
-    list_display = ["name", "url", "active", "error_at"]
-    readonly_fields = ["image"]
-
-    def image(self, obj):
-        return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
-
-    image.short_description = 'Image'
+    list_display = ["name", "url", "active"]
 
 
 @admin.register(FacebookDistributionList)
