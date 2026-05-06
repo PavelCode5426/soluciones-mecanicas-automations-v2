@@ -49,7 +49,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
             real_accounts__account__active=True
         ).order_by('?').all()[:post.distribution_count]
 
-        group_ids = groups.values_list('id', flat=True)
+        group_ids = groups.values_list('id', flat=True).all()
         real_account = FacebookRealAccount.objects.filter(
             active=True,
             profiles__active=True, profiles__campaigns=post,
