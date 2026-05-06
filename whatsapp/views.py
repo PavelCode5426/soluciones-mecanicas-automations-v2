@@ -322,6 +322,7 @@ class WhatsAppMessagesSorterView(SuccessMessageMixin, FormView):
     def get_queryset(self):
         current_time = localtime()
         return (WhatsAppScheduleMessage.objects
+                .filter(message__active=True)
                 .filter(schedule=self.schedule, message__account=self.account)
                 .filter(message__from_date__lte=current_time)
                 .filter(Q(message__until_date__gte=current_time) | Q(message__until_date__isnull=True))
@@ -363,7 +364,7 @@ class WhatsAppStatusSorterView(SuccessMessageMixin, FormView):
 
     def get_queryset(self):
         current_time = localtime()
-        return (self.account.status.filter(from_date__lte=current_time)
+        return (self.account.status.filter(from_date__lte=current_time, active=True)
                 .filter(Q(until_date__gte=current_time) | Q(until_date__isnull=True)).all())
 
     def get_context_data(self, **kwargs):

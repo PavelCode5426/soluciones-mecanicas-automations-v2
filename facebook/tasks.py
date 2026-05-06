@@ -28,6 +28,11 @@ def syncronize_account_groups(account: FacebookRealAccount):
     return groups
 
 
+def join_account_to_groups(account: FacebookRealAccount, groups_urls):
+    service = RealAccountAutomationService(account)
+    service.join_groups(groups_urls)
+
+
 def enqueue_lead_explorer(explorer: FacebookAgent):
     real_account = FacebookRealAccount.objects.filter(active=True, profiles=explorer.profile)
     if explorer.distribution_list:

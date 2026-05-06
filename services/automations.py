@@ -85,6 +85,17 @@ class RealAccountAutomationService:
             page.close()
         return groups
 
+    def join_groups(self, group_urls):
+        with (get_playwright() as pw):
+            browser = self.get_browser(pw)
+            page = browser.new_page()
+            for group_url in group_urls:
+                page.goto(group_url)
+                join_button = page.get_by_role('button', name="Unirte al grupo")
+                if join_button.is_visible() and join_button.count() == 1:
+                    join_button.first.click()
+                    time.sleep(10)
+
     def group_lead_explorer(self, explorer: FacebookAgent):
         self.refresh_account()
         explorer.refresh_from_db()
@@ -162,7 +173,6 @@ class RealAccountAutomationService:
             explorer.leads_found = F('leads_found') + leads_found
             explorer.save(update_fields=['leads_found'])
 
-
     def publish_new_campaign(self, group: FacebookGroup, post: FacebookPostCampaign):
         self.refresh_account()
         group.refresh_from_db()
@@ -189,13 +199,11 @@ class RealAccountAutomationService:
             post.published_count = F('published_count') + 1
             post.save(update_fields=['published_count', 'updated_at'])
 
-
     def publish_new_post(self, post: FacebookScheduledPost):
         self.refresh_account()
         post.refresh_from_db()
         if all([post.active, post.profile.active]):
             screenshot, exception = self.__publish_post(post)
-
 
     def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):
         exception = None
@@ -218,7 +226,6 @@ class RealAccountAutomationService:
         self.save_session(updated_session)
         return screenshot, exception
 
-
     def __publish_post(self, post: FacebookScheduledPost) -> (bytes, Exception | None):
         exception = None
 
@@ -239,7 +246,6 @@ class RealAccountAutomationService:
 
         self.save_session(updated_session)
         return screenshot, exception
-
 
     def __write_post(self, page, open_dialog_button, post: AbstractFacebookPost):
         open_dialog_button.wait_for(state='visible')
@@ -286,7 +292,6 @@ class RealAccountAutomationService:
         page.locator('span', has_text='Publicando').wait_for(state='hidden')
 
         self.__check_blocked_account(page)
-
 
     def __check_blocked_account(self, page):
         if page.get_by_text(blocked_message).count() > 0:

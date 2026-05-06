@@ -8,7 +8,8 @@ from django_q.tasks import async_task
 from facebook.models import FacebookProfile, FacebookGroup, FacebookDistributionList, FacebookPostCampaign, \
     FacebookAgent, \
     FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup, FacebookAccountGroup
-from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer
+from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer, \
+    join_account_to_groups
 
 admin.site.site_header = "Panel de Administración"
 admin.site.site_title = "Sinergia Marketing Automations"
@@ -33,6 +34,19 @@ class PreviewFileMixin:
 @admin.register(FacebookRealAccount)
 class FacebookRealAccountAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'active']
+
+    actions = ['sync_facebook_groups']
+
+    @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
+    def sync_facebook_groups(self, request, queryset):
+        accounts = queryset.filter(active=True).all()
+        groups_urls = list(FacebookGroup.objects.filter(real_accounts__in=accounts, active=True).distinct() \
+                           .values_list('url', flat=True))
+
+        for account in accounts:
+            async_task(join_account_to_groups, account, groups_urls, task_name="join_account_to_groups",
+                       cluster='default')
+        self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
 
 
 @admin.register(FacebookAccountGroup)
