@@ -58,9 +58,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
             profiles__groups__group_id__in=group_ids
         ).order_by('?').first()
 
-        if real_account.pk not in account_services:
-            account_services[real_account.pk] = RealAccountAutomationService(real_account)
-        service = account_services[real_account.pk]
+        service = account_services.setdefault(real_account.pk, RealAccountAutomationService(real_account))
 
         for group in groups:
             task_name = f"{group.name} | {post.profile}"
