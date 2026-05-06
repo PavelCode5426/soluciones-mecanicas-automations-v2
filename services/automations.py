@@ -86,15 +86,17 @@ class RealAccountAutomationService:
         return groups
 
     def join_groups(self, group_urls):
-        with (get_playwright() as pw):
-            browser = self.get_browser(pw)
-            page = browser.new_page()
-            for group_url in group_urls:
-                page.goto(group_url)
-                join_button = page.get_by_role('button', name="Unirte al grupo")
-                if join_button.is_visible() and join_button.count() == 1:
-                    join_button.first.click()
-                    time.sleep(10)
+        self.refresh_account()
+        if self.account.active:
+            with (get_playwright() as pw):
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+                for group_url in group_urls:
+                    page.goto(group_url)
+                    join_button = page.get_by_role('button', name="Unirte al grupo")
+                    if join_button.is_visible() and join_button.count() == 1:
+                        join_button.first.click()
+                        time.sleep(10)
 
     def group_lead_explorer(self, explorer: FacebookAgent):
         self.refresh_account()

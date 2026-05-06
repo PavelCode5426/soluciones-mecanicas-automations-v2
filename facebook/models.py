@@ -48,6 +48,7 @@ class FacebookAccountGroup(models.Model):
     pending_posts = models.IntegerField(default=0)
     screenshot = models.ImageField(upload_to='groups_screenshots', null=True, blank=True)
     error_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True, editable=False)
 
 
 class FacebookProfileGroup(models.Model):

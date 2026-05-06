@@ -34,14 +34,14 @@ class PreviewFileMixin:
 @admin.register(FacebookRealAccount)
 class FacebookRealAccountAdmin(admin.ModelAdmin):
     list_display = ['name', 'email', 'active']
+    actions = ['sync_facebook_accounts']
 
-    actions = ['sync_facebook_groups']
-
-    @admin.action(description='Actualizar grupos de las cuentas seleccionadas')
-    def sync_facebook_groups(self, request, queryset):
+    @admin.action(description='Sincronizar cuentas')
+    def sync_facebook_accounts(self, request, queryset):
         accounts = queryset.filter(active=True).all()
-        groups_urls = list(FacebookGroup.objects.filter(real_accounts__in=accounts, active=True).distinct() \
-                           .values_list('url', flat=True))
+        groups_urls = list(FacebookGroup.objects.filter(
+            real_accounts__account__in=accounts, active=True
+        ).distinct().values_list('url', flat=True))
 
         for account in accounts:
             async_task(join_account_to_groups, account, groups_urls, task_name="join_account_to_groups",
@@ -52,6 +52,7 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
 @admin.register(FacebookAccountGroup)
 class FacebookAccountGroupAdmin(ReadOnlyAdmin):
     list_display = ['account', 'group', 'pending_posts', 'error_at']
+    ordering = ['updated_at']
     list_filter = ['account']
     readonly_fields = ["image", "error_at"]
 
