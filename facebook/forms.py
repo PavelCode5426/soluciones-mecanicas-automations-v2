@@ -30,7 +30,7 @@ class CurrentUserProfile(forms.ModelForm):
 class FacebookAccountForm(forms.ModelForm):
     class Meta:
         model = models.FacebookProfile
-        exclude = ['context', 'created_by']
+        exclude = ['context', 'created_by','real_accounts']
 
 
 class FacebookAgentForm(CurrentUserProfile):
