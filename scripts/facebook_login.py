@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 username = "social.account@solucioneshevia.com"
 password = "@B123456*"
 
-state_file = Path(__file__).parent.joinpath("states/facebook_account_1.json")
+state_file = Path(__file__).parent.joinpath("states/facebook_account_2.json")
 timeout = 60 * 100000
 with sync_playwright() as pw:
     device = pw.devices['iPhone 8']
