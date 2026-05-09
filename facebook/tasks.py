@@ -78,7 +78,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
 
         random.shuffle(for_enqueue)
         for task in for_enqueue:
-            async_task(**task, cluster="default")
+            async_task(task['func'], *task['args'], **task['kwargs'], cluster="default")
         total_items += len(for_enqueue)
 
     return total_items
