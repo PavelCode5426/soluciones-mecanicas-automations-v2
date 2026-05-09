@@ -52,9 +52,9 @@ class WhatsAppStatusDeleteView(SuccessMessageMixin, FilterByAccountViewMixins, D
     template_name = 'layout/admin_delete_layout.html'
     queryset = models.WhatsAppStatus.objects.all()
     extra_context = {
-        "page_title": "Eliminar estado: ",
-        "modal_title": "Eliminar estado: ",
-        "modal_description": "Eliminar estado",
+        "page_title": "Eliminar estado",
+        "modal_title": "¿Deseas eliminar este estado?",
+        "modal_description": "Esta acción no se puede deshacer. Si eliminas el estado, se perderá de forma permanente.",
         "cancel_url": success_url
     }
 
@@ -95,9 +95,9 @@ class WhatsAppContactsDeleteView(SuccessMessageMixin, FilterByAccountViewMixins,
     queryset = models.WhatsAppContact.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar contacto: ",
-        "modal_title": "Eliminar contacto: ",
-        "modal_description": "Eliminar contacto",
+        "page_title": "Eliminar contacto",
+        "modal_title": "¿Quieres eliminar este contacto?",
+        "modal_description": "Si eliminas el contacto, no podrás recuperarlo más adelante. Esta acción es permanente.",
         "cancel_url": success_url
     }
 
@@ -168,9 +168,9 @@ class WhatsAppAccountsDeleteView(SuccessMessageMixin, WhatsAppAccountViewMixins,
     success_url = reverse_lazy('whatsapp:accounts.index')
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar cuenta: ",
-        "modal_title": "Eliminar cuenta: ",
-        "modal_description": "Eliminar cuenta: ",
+        "page_title": "Eliminar cuenta",
+        "modal_title": "¿Quieres eliminar esta cuenta?",
+        "modal_description": "Si eliminas la cuenta, se perderán todos los datos asociados y no podrás recuperarlos. Esta acción es definitiva.",
         "cancel_url": success_url
     }
 
@@ -224,9 +224,9 @@ class WhatsAppDistributionListsDeleteView(SuccessMessageMixin, FilterByAccountVi
     template_name = 'layout/admin_delete_layout.html'
     queryset = models.WhatsAppDistributionList.objects.all()
     extra_context = {
-        "page_title": "Eliminar lista de distribución: ",
-        "modal_title": "Eliminar lista de distribución: ",
-        "modal_description": "Eliminar lista de distribución",
+        "page_title": "Eliminar lista de distribución",
+        "modal_title": "¿Quieres eliminar esta lista de distribución?",
+        "modal_description": "Esta acción eliminará de forma permanente la lista de distribución seleccionada.",
         "cancel_url": success_url
     }
 
@@ -272,9 +272,9 @@ class WhatsAppMessageDeleteView(SuccessMessageMixin, FilterByAccountViewMixins, 
     queryset = models.WhatsAppMessage.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar mensaje: ",
-        "modal_title": "Eliminar mensaje: ",
-        "modal_description": "Eliminar mensaje",
+        "page_title": "Eliminar mensaje",
+        "modal_title": "¿Estás seguro de que deseas eliminar este mensaje?",
+        "modal_description": "Al confirmar, el mensaje seleccionado será eliminado de manera permanente. Esta acción es inmediata y no podrás visualizarlo nuevamente en el sistema.",
         "cancel_url": success_url
     }
 
@@ -484,8 +484,8 @@ class WhatsAppAccountJoinGroupsView(SuccessMessageMixin, FormView):
     success_url = reverse_lazy('whatsapp:groups.index')
     extra_context = {
         "page_title": "Unirse a grupo",
-        "modal_title": "Grupo",
-        "modal_description": "Grup",
+        "modal_title": "¿Quieres unirte a este grupo?",
+        "modal_description": "Al confirmar, pasarás a formar parte del grupo seleccionado y podrás acceder a sus contenidos y participar en las actividades que se compartan. Esta acción es inmediata y podrás salir del grupo en cualquier momento si lo deseas.",
         "cancel_url": success_url
     }
 

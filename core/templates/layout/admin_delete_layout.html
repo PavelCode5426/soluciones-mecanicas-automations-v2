@@ -9,14 +9,16 @@
     <div class="container-md">
         <form class="card" method="post">
             {% csrf_token %}
-            <div class="card-header bg-{{ color|default_if_none:'danger' }}">
+            {#            <div class="card-header bg-{{ color|default_if_none:'danger' }}">#}
+            <div class="card-header bg-danger">
                 <h4 class="card-title text-white">{{ modal_title }}</h4>
             </div><!--end card-header-->
             <div class="card-body">
                 <p class="card-text text-muted">{{ modal_description }}</p>
             </div><!--end card-body-->
             <p class="card-footer m-0">
-                <input class="btn btn-{{ color|default_if_none:'danger' }}" type="submit" value="Eliminar">
+                {#                <input class="btn btn-{{ color|default_if_none:'danger' }}" type="submit" value="Eliminar">#}
+                <input class="btn btn-danger" type="submit" value="Eliminar">
                 <a class="btn" href="{{ cancel_url }}">Cancelar</a>
             </p>
         </form>

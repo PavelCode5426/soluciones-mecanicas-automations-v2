@@ -51,9 +51,9 @@ class FacebookAccountsDeleteView(SuccessMessageMixin, FacebookProfileViewMixins,
     success_url = reverse_lazy('whatsapp:accounts.index')
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar cuenta: ",
-        "modal_title": "Eliminar cuenta: ",
-        "modal_description": "Eliminar cuenta: ",
+        "page_title": "Eliminar cuenta",
+        "modal_title": "¿Estás seguro de que deseas eliminar esta cuenta?",
+        "modal_description": "Al confirmar, la cuenta seleccionada será eliminada de manera definitiva del sistema. Esta acción es inmediata y no podrás volver a acceder con ella. Si lo prefieres, siempre puedes cancelar y mantener la cuenta activa.",
         "cancel_url": success_url
     }
 
@@ -162,9 +162,9 @@ class FacebookDistributionListsDeleteView(SuccessMessageMixin, FilterByProfileVi
     queryset = models.FacebookDistributionList.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar lista de distribución: ",
-        "modal_title": "Eliminar lista de distribución: ",
-        "modal_description": "Eliminar lista de distribución",
+        "page_title": "Eliminar lista de distribución",
+        "modal_title": "¿Estás seguro de que deseas eliminar esta lista de distribución?",
+        "modal_description": "Al confirmar, la lista de distribución seleccionada será eliminada del sistema. Esta acción es inmediata y no afectará a los contactos asociados, que permanecerán disponibles. Si lo prefieres, puedes cancelar y mantener la lista activa.",
         "cancel_url": success_url
     }
 
@@ -222,9 +222,9 @@ class FacebookPostCampaignDeleteView(SuccessMessageMixin, FilterByProfileViewMix
     queryset = models.FacebookPostCampaign.objects.all()
     template_name = 'layout/admin_delete_layout.html'
     extra_context = {
-        "page_title": "Eliminar campaña: ",
-        "modal_title": "Eliminar campaña: ",
-        "modal_description": "Eliminar campaña",
+        "page_title": "Eliminar campaña",
+        "modal_title": "¿Estás seguro de que deseas eliminar esta campaña?",
+        "modal_description": "Al confirmar, la campaña seleccionada será eliminada de manera definitiva del sistema. Esta acción es inmediata y no podrás acceder nuevamente a la información de la campaña. Si lo prefieres, puedes cancelar y mantener la campaña activa.",
         "cancel_url": success_url
     }
 
