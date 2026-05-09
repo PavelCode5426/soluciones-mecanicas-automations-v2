@@ -1,3 +1,4 @@
+import itertools
 import random
 
 from django.db.models import QuerySet
@@ -56,20 +57,20 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
         ).order_by('?').all()[:post.distribution_count]
 
         group_ids = list(groups.values_list('id', flat=True))
-        real_account = FacebookRealAccount.objects.filter(
+        real_accounts = FacebookRealAccount.objects.filter(
             active=True,
             profiles__active=True, profiles__campaigns=post,
             groups__group_id__in=group_ids,
             profiles__groups__active=True,
             profiles__groups__group_id__in=group_ids
-        ).order_by('?').first()
+        ).order_by('?')
 
-        service = account_services.setdefault(real_account.pk, RealAccountAutomationService(real_account))
-
-        for group in groups:
+        for group, real_account in zip(groups, itertools.cycle(real_accounts)):
+            service = account_services.setdefault(real_account.pk, RealAccountAutomationService(real_account))
             task_name = f"{group.name} | {post.profile}"
             for_enqueue.append(
                 {
+                    "func": service.publish_new_campaign,
                     "args": (group, post,),
                     "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}'}
                 }
@@ -77,7 +78,7 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
 
         random.shuffle(for_enqueue)
         for task in for_enqueue:
-            async_task(service.publish_new_campaign, *task['args'], **task['kwargs'], cluster="default")
+            async_task(**task, cluster="default")
         total_items += len(for_enqueue)
 
     return total_items

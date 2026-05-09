@@ -12,6 +12,7 @@ urlpatterns = [
     path(r'status', views.WhatsAppStatusListView.as_view(), name='status.index'),
     path(r'status/create', views.WhatsAppStatusCreateView.as_view(), name='status.create'),
     path(r'status/<int:pk>/edit', views.WhatsAppStatusUpdateView.as_view(), name='status.update'),
+    path(r'status/<int:pk>/delete', views.WhatsAppStatusDeleteView.as_view(), name='status.delete'),
     path(r'status/<int:pk>/toggle-status', views.WhatsAppStatusToggleStatusView.as_view(),
          name='status.toggle-status'),
 

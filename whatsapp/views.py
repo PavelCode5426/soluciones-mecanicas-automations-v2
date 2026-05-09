@@ -47,6 +47,21 @@ class WhatsAppStatusUpdateView(SuccessMessageMixin, FilterByAccountViewMixins, U
     }
 
 
+class WhatsAppStatusDeleteView(SuccessMessageMixin, FilterByAccountViewMixins, DeleteView):
+    success_url = reverse_lazy('whatsapp:status.index')
+    template_name = 'layout/admin_delete_layout.html'
+    queryset = models.WhatsAppStatus.objects.all()
+    extra_context = {
+        "page_title": "Eliminar estado: ",
+        "modal_title": "Eliminar estado: ",
+        "modal_description": "Eliminar estado",
+        "cancel_url": success_url
+    }
+
+    def get_success_message(self, cleaned_data):
+        return f"Estado {self.object} eliminado exitosamente"
+
+
 class WhatsAppStatusToggleStatusView(SuccessMessageMixin, FilterByAccountViewMixins, ToggleStatusView):
     http_method_names = ['post']
     success_url = reverse_lazy('whatsapp:status.index')
