@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import time
+from django.utils.timezone import localtime
 
 import tiktoken
 from django.conf import settings
@@ -125,7 +126,8 @@ def publish_whatsapp_status(status: WhatsAppStatus):
                 "linkPreviewHighQuality": False
             })
         status.published_count = F('published_count') + 1
-        status.save(update_fields=['published_count'])
+        status.updated_at = localtime()
+        status.save(update_fields=['published_count', 'updated_at'])
 
 
 def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
@@ -187,7 +189,8 @@ def send_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: s
     if not isinstance(message, WhatsAppAutoReplyMessage):
         message.last_whatsapp_id = response.get('id')
         message.published_count = F('published_count') + 1
-        message.save(update_fields=['published_count', 'last_whatsapp_id'])
+        message.updated_at = localtime()
+        message.save(update_fields=['published_count', 'last_whatsapp_id', 'updated_at'])
 
 
 def enqueue_simple_message(message: WhatsAppMessage | WhatsAppAutoReplyMessage, chat_id: str, typing_timeout=None):
