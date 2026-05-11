@@ -206,6 +206,8 @@ class RealAccountAutomationService:
         post.refresh_from_db()
         if all([post.active, post.profile.active]):
             screenshot, exception = self.__publish_post(post)
+            if exception:
+                raise exception
 
     def __publish_campaign(self, group_url, post: FacebookPostCampaign) -> (bytes, Exception | None):
         exception = None
