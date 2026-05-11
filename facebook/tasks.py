@@ -32,7 +32,7 @@ def syncronize_account_groups(account: FacebookRealAccount):
 def join_account_to_groups(account: FacebookRealAccount, groups_urls: list[str]):
     service = RealAccountAutomationService(account)
     service.join_groups(groups_urls)
-    syncronize_account_groups(account)
+    # syncronize_account_groups(account)
 
 
 def enqueue_lead_explorer(explorer: FacebookAgent):
