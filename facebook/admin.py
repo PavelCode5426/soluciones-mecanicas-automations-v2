@@ -9,7 +9,7 @@ from facebook.models import FacebookProfile, FacebookGroup, FacebookDistribution
     FacebookAgent, \
     FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup, FacebookAccountGroup
 from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer, \
-    join_account_to_groups
+    join_account_to_groups, enqueue_facebook_post
 
 admin.site.site_header = "Panel de Administración"
 admin.site.site_title = "Sinergia Marketing Automations"
@@ -56,7 +56,7 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
 @admin.register(FacebookAccountGroup)
 class FacebookAccountGroupAdmin(ReadOnlyAdmin):
     list_display = ['account', 'group', 'pending_posts', 'error_at']
-    ordering = ['updated_at']
+    ordering = ['updated_at', 'error_at']
     list_filter = ['account']
     readonly_fields = ["image", "error_at"]
 
@@ -178,6 +178,7 @@ class FacebookFacebookPostCampaignAdmin(FacebookPostAdmin):
 @admin.register(FacebookScheduledPost)
 class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
     list_display = ['name', 'profile', 'updated_at', 'active']
+    actions = ['add_to_queue'] + FacebookPostAdmin.actions
     fieldsets = [
         ("Detalles de la publicación", {
             "fields": ["name", "profile", 'title', 'text', 'hashtags', 'file', 'file_preview']
@@ -186,6 +187,11 @@ class FacebookFacebookScheduledPostAdmin(FacebookPostAdmin):
             "fields": ['active']
         }),
     ]
+
+    @admin.action(description='Agendar publicaciones los seleccionadas.')
+    def add_to_queue(self, request, query):
+        total_items = enqueue_facebook_post(query.filter(active=True).all())
+        self.message_user(request, f"Fueron agendadas {total_items} publicaciones", level=messages.SUCCESS)
 
 
 @admin.register(FacebookAgent)

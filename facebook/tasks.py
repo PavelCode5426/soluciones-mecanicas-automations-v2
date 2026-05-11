@@ -5,7 +5,7 @@ from django.db.models import QuerySet
 from django_q.tasks import async_task
 
 from facebook.models import FacebookGroup, FacebookPostCampaign, FacebookAgent, FacebookRealAccount, \
-    FacebookAccountGroup, FacebookProfileGroup
+    FacebookAccountGroup, FacebookProfileGroup, FacebookScheduledPost
 from services.automations import RealAccountAutomationService
 
 
@@ -73,6 +73,31 @@ def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
                     "func": service.publish_new_campaign,
                     "args": (group, post,),
                     "kwargs": {"task_name": task_name, "group": f'facebook_campaign_{post.id}'}
+                }
+            )
+
+        random.shuffle(for_enqueue)
+        for task in for_enqueue:
+            async_task(task['func'], *task['args'], **task['kwargs'], cluster="default")
+        total_items += len(for_enqueue)
+
+    return total_items
+
+
+def enqueue_facebook_post(posts: QuerySet[FacebookScheduledPost]):
+    total_items = 0
+    account_services = {}
+    for post in posts:
+        for_enqueue = []
+
+        for real_account in post.profile.real_accounts.all():
+            service = account_services.setdefault(real_account.pk, RealAccountAutomationService(real_account))
+            task_name = f"{post} | {real_account}"
+            for_enqueue.append(
+                {
+                    "func": service.publish_new_post,
+                    "args": (post,),
+                    "kwargs": {"task_name": task_name, "group": f'facebook_post_{post.id}'}
                 }
             )
 
