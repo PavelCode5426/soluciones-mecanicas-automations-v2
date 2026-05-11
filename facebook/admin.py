@@ -43,7 +43,7 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
             real_accounts__account__in=accounts, active=True
         ).distinct().values_list('url', flat=True))
 
-        n = 5
+        n = 10
         chunk_groups = [groups_urls[i:i + n] for i in range(0, len(groups_urls), n)]
 
         for account in accounts:
