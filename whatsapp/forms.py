@@ -23,7 +23,7 @@ ACTIVE_FIELD = forms.ChoiceField(choices=[(True, 'Activo'), (False, 'Inactivo')]
 
 
 class CurrentUserAccount(forms.Form):
-    account = forms.ModelChoiceField(queryset=WhatsAppAccount.objects.none(), required=True)
+    account = forms.ModelChoiceField(queryset=WhatsAppAccount.objects.none(), required=True, label="Cuenta")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -84,7 +84,7 @@ class WhatsAppMessageAdminForm(forms.ModelForm):
 
 
 class WhatsAppStatusForm(CurrentUserAccount, forms.ModelForm):
-    from_date = forms.DateField(widget=DatePickerInput, initial=today)
+    from_date = forms.DateField(widget=DatePickerInput, initial=today, label='Desde')
 
     class Meta:
         model = WhatsAppStatus
@@ -93,10 +93,16 @@ class WhatsAppStatusForm(CurrentUserAccount, forms.ModelForm):
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
         }
+        labels = {
+            'name': 'Nombre del estado',
+            'account': "Cuenta", 'message_type': 'Tipo de estado', 'message': "Mensaje", 'schedule': "Horario",
+            "weekdays": 'Días de la semana', 'active': 'Activo', 'file': 'Archivo', 'from_date': 'Desde',
+            'until_date': 'Hasta'
+        }
 
 
 class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
-    schedules = forms.ModelMultipleChoiceField(Schedule.objects.all())
+    schedules = forms.ModelMultipleChoiceField(Schedule.objects.all(), label='Horarios')
 
     def save(self, commit=True):
         instance = super().save(commit=commit)
@@ -125,15 +131,27 @@ class WhatsAppMessageForm(CurrentUserAccount, forms.ModelForm):
             'from_date': DatePickerInput(),
             'until_date': DatePickerInput(),
         }
+        labels = {
+            'name': 'Nombre del mensaje',
+            'account': "Cuenta", 'message_type': 'Tipo de mensaje', 'message': "Mensaje",
+            "weekdays": 'Días de la semana', 'active': 'Activo', 'file': 'Archivo', 'from_date': 'Desde',
+            'until_date': 'Hasta', 'distribution_lists': 'Listas de distribución'
+        }
 
 
 class WhatsAppContactForm(RemoveActiveOnCreateMixin, forms.ModelForm):
-    push_name = forms.CharField(disabled=True, required=False)
-    chat_id = forms.CharField(disabled=True)
+    push_name = forms.CharField(disabled=True, required=False, label='Nombre en WhatsApp', )
+    chat_id = forms.CharField(disabled=True, label='Identificador en WhatsApp')
 
     class Meta:
         model = WhatsAppContact
         fields = ['name', 'push_name', 'chat_id', 'active']
+        labels = {
+            'name': 'Nombre del contacto',
+            'push_name': 'Nombre en WhatsApp',
+            'chat_id': 'Identificador en WhatsApp',
+            'active': 'Activo',
+        }
 
 
 class WhatsAppCreateAccountForm(forms.ModelForm):
@@ -179,21 +197,39 @@ class WhatsAppCreateAccountForm(forms.ModelForm):
     class Meta:
         model = WhatsAppAccount
         fields = ['session']
+        labels = {
+            'session': 'Sesión'
+        }
 
 
 class WhatsAppUpdateAccountForm(WhatsAppCreateAccountForm):
-    chat_id = forms.CharField(disabled=True)
-    session = forms.CharField(disabled=True)
+    chat_id = forms.CharField(disabled=True, label='Identificador en WhatsApp')
+    session = forms.CharField(disabled=True, label='Sesión')
 
     class Meta:
         model = WhatsAppAccount
-        exclude = ['created_by']
+        exclude = ['created_by', 'can_use_webhook']
+        labels = {
+            'name': 'Nombre del contacto',
+            'push_name': 'Nombre en WhatsApp',
+            'chat_id': 'Identificador en WhatsApp',
+            'active': 'Activo',
+            'automatic_message': 'Mensaje automático',
+            'can_auto_reply': 'Puede responder automáticamente',
+            'can_find_leads': 'Puede buscar clientes automáticamente',
+            'lead_prompt': 'Instrucción para buscar clientes',
+            'can_reply_with_ia': 'Puede responder con IA',
+            'ia_application': 'Aplicación de IA',
+        }
 
 
 class WhatsAppDistributionListCreateForm(CurrentUserAccount, forms.ModelForm):
     class Meta:
         model = WhatsAppDistributionList
         exclude = ['contacts', 'groups', 'active']
+        labels = {
+            'account': 'Cuenta', 'name': 'Nombre de la lista'
+        }
 
 
 class WhatsAppDistributionListUpdateForm(CurrentUserAccount, forms.ModelForm):
@@ -206,6 +242,10 @@ class WhatsAppDistributionListUpdateForm(CurrentUserAccount, forms.ModelForm):
     class Meta:
         model = WhatsAppDistributionList
         fields = forms.ALL_FIELDS
+        labels = {
+            'account': 'Cuenta', 'name': 'Nombre de la lista', 'groups': 'Grupos de la cuenta',
+            'contacts': 'Contactos de la cuenta'
+        }
 
 
 WhatAppSortMessageFormSet = modelformset_factory(
@@ -242,7 +282,7 @@ class PublishWhastAppMessagesForm(PublishNowForm):
 
 
 class WhatsAppAccountJoinGroupForm(CurrentUserAccount):
-    group_code = forms.CharField(required=True)
+    group_code = forms.CharField(required=True,label='Enlace del grupo')
 
     def save(self, *args, **kwargs):
         account = self.cleaned_data['account']
