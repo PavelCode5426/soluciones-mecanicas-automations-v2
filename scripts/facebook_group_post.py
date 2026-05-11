@@ -3,7 +3,7 @@ from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-state_file = Path(__file__).parent.joinpath("states/facebook_pizzas_time.json")
+state_file = Path(__file__).parent.joinpath("states/accounts/account_1.json")
 
 url = "https://www.facebook.com/share/g/18UgnJk2ps/"
 

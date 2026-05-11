@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 username = "social.account@solucioneshevia.com"
 password = "@B123456*"
 
-state_file = Path(__file__).parent.joinpath("states/facebook_account_1.json")
+state_file = Path(__file__).parent.joinpath("states/accounts/account_4.json")
 timeout = 60 * 100000
 with sync_playwright() as pw:
     device = pw.devices['iPhone 8']
@@ -28,15 +28,16 @@ with sync_playwright() as pw:
     page = browser.new_page()
     page.goto('https://www.facebook.com/', timeout=timeout)
     active = not bool(page.locator('text=Iniciar sesión').count())
-    page.wait_for_load_state('networkidle', timeout=timeout)
+    # page.wait_for_load_state('networkidle', timeout=timeout)
 
-    if not active:
-        page.locator('[name="email"]').click()
-        page.keyboard.type(username)
-        page.locator('[name="pass"]').click()
-        page.keyboard.type(password)
-        page.keyboard.press('Enter')
+    # if not active:
+    #     if page.locator('[name="email"]').count() > 0:
+    #         page.locator('[name="email"]').click()
+    #         page.keyboard.type(username)
+    #     page.locator('[name="pass"]').click()
+    #     page.keyboard.type(password)
+    #     page.keyboard.press('Enter')
 
-    page.wait_for_load_state('networkidle', timeout=timeout)
+    # page.wait_for_load_state('networkidle', timeout=timeout)
     input("Continuar...")
     browser.storage_state(path=state_file)

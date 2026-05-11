@@ -43,9 +43,13 @@ class FacebookRealAccountAdmin(admin.ModelAdmin):
             real_accounts__account__in=accounts, active=True
         ).distinct().values_list('url', flat=True))
 
+        n = 5
+        chunk_groups = [groups_urls[i:i + n] for i in range(0, len(groups_urls), n)]
+
         for account in accounts:
-            async_task(join_account_to_groups, account, groups_urls, task_name="join_account_to_groups",
-                       cluster='default')
+            for groups_urls in chunk_groups:
+                async_task(join_account_to_groups, account, groups_urls, task_name="join_account_to_groups",
+                           cluster='default')
         self.message_user(request, "Tarea programada correctamente", level=messages.SUCCESS)
 
 

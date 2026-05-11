@@ -96,7 +96,7 @@ class RealAccountAutomationService:
                     join_button = page.get_by_role('button', name="Unirte al grupo")
                     if join_button.is_visible() and join_button.count() == 1:
                         join_button.first.click()
-                        time.sleep(10)
+                        time.sleep(5)
 
     def group_lead_explorer(self, explorer: FacebookAgent):
         self.refresh_account()
