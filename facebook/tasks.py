@@ -40,10 +40,11 @@ def enqueue_lead_explorer(explorer: FacebookAgent):
     if explorer.distribution_list:
         real_account = real_account.filter(groups__group__distribution_lists=explorer.distribution_list)
     real_account = real_account.order_by('?').first()
-    service = RealAccountAutomationService(real_account)
-    task_name = f"agent_{explorer}".lower().replace(" ", "_")
-    group_name = f'run_agent_{explorer.profile}'.lower().replace(" ", '_')
-    async_task(service.group_lead_explorer, explorer, task_name=task_name, group=group_name, cluster='default')
+    if real_account:
+        service = RealAccountAutomationService(real_account)
+        task_name = f"agent_{explorer}".lower().replace(" ", "_")
+        group_name = f'run_agent_{explorer.profile}'.lower().replace(" ", '_')
+        async_task(service.group_lead_explorer, explorer, task_name=task_name, group=group_name, cluster='default')
 
 
 def enqueue_facebook_campaign(posts: QuerySet[FacebookPostCampaign]):
