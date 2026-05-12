@@ -15,7 +15,8 @@ with sync_playwright() as pw:
 
     page = browser.new_page()
     page.goto('https://www.facebook.com/', timeout=timeout)
-    page.get_by_role('link').and_(page.locator('[aria-label="Reels"]')).click()
+    page.get_by_text('Reels').click()
+    # page.get_by_role('link').and_(page.locator('[aria-label="Reels"]')).click()
 
     watch_time = random.randint(5 * 60, 10 * 60)
     start_time = time.time()
