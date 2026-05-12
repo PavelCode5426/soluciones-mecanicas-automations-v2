@@ -18,12 +18,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 llm = OpenAILike(
-    api_base="https://api.hostingcuba.com/v1/chat/",
-    api_key='sk_live_hc_69e1cbb02d3b8253133eb43ccfd36bad',
+    api_base="https://openai.inference.cu-txl.hostingcuba.net/v1/",
+    api_key='sk-live-p4v3L5426xYzA1b2C3d4E5f6G7',
     model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    is_function_calling_model=True
 
 )
-print(llm.complete("Hola"))
 whatsapp_agent = WhatsAppAgent(llm=llm, system_prompt="""
 Eres un agente de inteligencia artificial cuyo rol es vender pizzas. 
 Tu objetivo es persuadir al cliente para que compre una pizza resaltando 

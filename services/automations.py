@@ -292,7 +292,7 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
             with (get_playwright() as pw):
                 browser = self.get_browser(pw)
                 page = browser.new_page()
-                page.goto('https://www.facebook.com/')
+                page.goto('https://www.facebook.com/',wait_until='load')
                 continue_button = page.get_by_text("Continuar")
                 if continue_button.is_visible():
                     continue_button.click()
