@@ -42,7 +42,6 @@ with sync_playwright() as pw:
             close_btn = dialog.locator('[aria-label*="Cerrar"]')
             close_btn.wait_for(state='visible')
             close_btn.click()
-    active = not bool(page.locator('text=Iniciar sesión').count())
     # page.wait_for_load_state('networkidle', timeout=timeout)
 
     # if not active:

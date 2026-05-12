@@ -294,7 +294,7 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
                 continue_button = page.get_by_text("Continuar")
-                if continue_button.wait_for(state='visible'):
+                if continue_button.is_visible():
                     continue_button.click()
                     page.wait_for_load_state('load')
 
@@ -309,9 +309,15 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
 
                     self.watch_reels(page)
 
+                screenshot = page.screenshot(quality=80, type='jpeg')
+                file_name = f"{self.account.name}_screenshot.jpeg".replace(' ', '_').lower()
+                self.account.screenshot.delete(False)
+                self.account.screenshot.save(file_name, ContentFile(screenshot), False)
+
                 storage_state = browser.storage_state()
                 self.account.context = storage_state
-        self.account.save(update_fields=['active', 'context'])
+
+        self.account.save(update_fields=['active', 'context', 'screenshot'])
         return self.account.active
 
     def watch_reels(self, page):

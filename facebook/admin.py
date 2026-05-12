@@ -10,6 +10,7 @@ from facebook.models import FacebookProfile, FacebookGroup, FacebookDistribution
     FacebookHistory, FacebookScheduledPost, FacebookRealAccount, FacebookProfileGroup, FacebookAccountGroup
 from facebook.tasks import syncronize_account_groups, enqueue_facebook_campaign, enqueue_lead_explorer, \
     join_account_to_groups, enqueue_facebook_post
+from services.automations import RealAccountBehaviorAutomationService
 
 admin.site.site_header = "Panel de Administración"
 admin.site.site_title = "Sinergia Marketing Automations"
@@ -32,9 +33,23 @@ class PreviewFileMixin:
 
 
 @admin.register(FacebookRealAccount)
-class FacebookRealAccountAdmin(admin.ModelAdmin):
+class FacebookRealAccountAdmin(PreviewFileMixin, admin.ModelAdmin):
     list_display = ['name', 'email', 'active']
-    actions = ['sync_facebook_accounts']
+    actions = ['sync_facebook_accounts', 'check_accounts']
+    readonly_fields = ["image"]
+
+    def image(self, obj):
+        return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
+
+    image.short_description = 'Image'
+
+    @admin.action(description='Comprobar cuentas')
+    def check_accounts(self, request, queryset):
+        accounts = queryset.all()
+        for account in accounts:
+            service = RealAccountBehaviorAutomationService(account)
+            async_task(service.check_status, task_name=f'check_status', group='check_status', cluster='high_priority')
+        self.message_user(request, "Comprobación de estado agendada correctamente", level=messages.SUCCESS)
 
     @admin.action(description='Sincronizar cuentas')
     def sync_facebook_accounts(self, request, queryset):
