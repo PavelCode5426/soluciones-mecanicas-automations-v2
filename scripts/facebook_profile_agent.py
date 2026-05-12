@@ -21,10 +21,14 @@ with sync_playwright() as pw:
     start_time = time.time()
 
     while time.time() - start_time < watch_time:
-        time.sleep(random.randint(5, 60))
+        time.sleep(random.randint(5, 30))
         if random.choice([True, False]):
             try:
                 page.get_by_role('button').and_(page.locator('[aria-label="Me gusta"][tabindex="0"]')).click()
             except:
                 pass
+            if random.choice([True, False]):
+                page.get_by_role('button').and_(page.locator('[aria-label="Compartir"][tabindex="0"]')).click()
+                page.get_by_text(random.choice(["Compartir ahora","Historia"])).click()
+
         page.keyboard.press('ArrowDown')

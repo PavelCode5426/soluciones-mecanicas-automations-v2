@@ -33,7 +33,7 @@ with sync_playwright() as pw:
     continue_button = page.get_by_text("Continuar")
     if continue_button.is_visible():
         continue_button.click()
-        page.wait_for_load_state('load')
+        page.wait_for_load_state('load',timeout=timeout)
 
     active = not bool(page.locator('text=Iniciar sesión').count())
     if active:

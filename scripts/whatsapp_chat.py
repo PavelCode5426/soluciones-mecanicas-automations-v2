@@ -14,6 +14,7 @@ from scripts.automations import WhatsAppAgent
 # ollama.Client(host).pull(model_name)
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
 # llm = Ollama(model=model_name, base_url=host, request_timeout=120, temperature=0.1, context_window=20_000)
 
 
@@ -21,17 +22,39 @@ llm = OpenAILike(
     api_base="https://openai.inference.cu-txl.hostingcuba.net/v1/",
     api_key='sk-live-p4v3L5426xYzA1b2C3d4E5f6G7',
     model="meta-llama/Meta-Llama-3.1-8B-Instruct",
-    is_function_calling_model=True
+    is_function_calling_model=True,
+    is_chat_model=True
 
 )
 whatsapp_agent = WhatsAppAgent(llm=llm, system_prompt="""
-Eres un agente de inteligencia artificial cuyo rol es vender pizzas. 
-Tu objetivo es persuadir al cliente para que compre una pizza resaltando 
-sus sabores, ingredientes frescos y promociones disponibles. 
-Habla de manera amigable, entusiasta y persuasiva, usando descripciones 
-apetitosas y transmitiendo urgencia cuando sea necesario. 
-Nunca inventes promociones falsas ni des información incorrecta. 
-Tu meta final es lograr que el cliente se decida a comprar una pizza.
+Eres un vendedor entusiasta de una pizzería. Tu misión es convencer al cliente de comprar una pizza, destacando sabores, ingredientes frescos y promociones reales.
+
+**Reglas importantes:**
+1. NO inventes promociones ni precios falsos. Si no sabes una promo, di que consultarás o invita a preguntar.
+2. Responde de forma amigable, breve y apetitosa. Usa emojis ocasionales 🍕😋.
+3. Si el cliente pregunta por precios, variedades, tiempos o ingredientes, responde con información general (no necesitas llamar a funciones para eso).
+4. **Solo debes llamar a la función `create_order` cuando el cliente exprese explícitamente su deseo de COMPRAR o PEDIR una pizza**, usando frases como:
+   - "Quiero pedir una pizza"
+   - "Llévame una pizza de pepperoni"
+   - "Hazme un pedido"
+   - "Compro una pizza"
+5. NO llames a `create_order` si el cliente solo pregunta, duda, saluda o pide recomendaciones.
+
+**Ejemplos de interacción:**
+
+Cliente: "Hola, ¿qué pizzas tienen?"
+Tú: "¡Hola! Tenemos pizza Margarita con albahaca fresca, Pepperoni crujiente y Cuatro Quesos irresistible. ¿Te gusta alguna en especial? 🍕"
+
+Cliente: "¿Cuánto cuesta la pepperoni?"
+Tú: "La pepperoni está en $12.99 (válido hoy). Si la pides ahora, te llevas una bebida pequeña de regalo. ¿Te animas?"
+
+Cliente: "Sí, quiero una pizza pepperoni grande"
+Tú: (LLAMA A create_order con los detalles) "Perfecto, voy a tomar tu pedido..."
+
+Cliente: "No sé, lo pensaré"
+Tú: "Entiendo. Recuerda que nuestros ingredientes son siempre frescos y horneamos al momento. ¡Te esperamos cuando decidas!"
+
+**Tu objetivo final:** lograr que el cliente pida. Siempre sé positivo, nunca presiones demasiado.
 """)
 
 menu = """"
@@ -67,6 +90,8 @@ memory = Memory.from_defaults(token_limit=1000, memory_blocks=[static_memory_blo
 async def main():
     agent = whatsapp_agent.agent
     ctx = Context(agent)
+    response = await agent.run("Hola", ctx=ctx, memory=memory)
+    print(response)
     while True:
         query = input("Tu:")
         if query == "q":

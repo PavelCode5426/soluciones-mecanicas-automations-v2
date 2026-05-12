@@ -292,14 +292,13 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
             with (get_playwright() as pw):
                 browser = self.get_browser(pw)
                 page = browser.new_page()
-                page.goto('https://www.facebook.com/',wait_until='load')
+                page.goto('https://www.facebook.com/', wait_until='load')
                 continue_button = page.get_by_text("Continuar")
                 if continue_button.is_visible():
                     continue_button.click()
                     page.wait_for_load_state('load')
 
                 active = not bool(page.locator('text=Iniciar sesión').count())
-                self.account.active = active
                 if active:
                     dialog = page.get_by_role('dialog')
                     if dialog.is_visible():
@@ -307,15 +306,20 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
                         close_btn.wait_for(state='visible')
                         close_btn.click()
 
-                    self.watch_reels(page)
+                    try:
+                        self.watch_reels(page)
+                    except:
+                        pass
 
                 screenshot = page.screenshot(quality=80, type='jpeg')
+                storage_state = browser.storage_state()
+                self.account.context = storage_state
+                self.account.active = active
+
+            if screenshot:
                 file_name = f"{self.account.name}_screenshot.jpeg".replace(' ', '_').lower()
                 self.account.screenshot.delete(False)
                 self.account.screenshot.save(file_name, ContentFile(screenshot), False)
-
-                storage_state = browser.storage_state()
-                self.account.context = storage_state
 
         self.account.save(update_fields=['active', 'context', 'screenshot'])
         return self.account.active

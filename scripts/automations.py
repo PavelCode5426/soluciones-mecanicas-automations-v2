@@ -302,12 +302,26 @@ class FacebookAccountAgent:
         return output.label == 'normal' and output.score > 0.85
 
 
+class OrderParams(BaseModel):
+    pizza_type: str = Field(description="Tipo de pizza")
+    size: str = Field(description="Tamaño: Pequeña, Mediana, Grande")
+    quantity: int = Field(description="Cantidad de pizzas", ge=1)
+    customer_name: str = Field(description="Nombre del cliente")
+    address: str = Field(description="Dirección de entrega")
+    phone: str = Field(description="Teléfono de contacto")
+    payment_method: str = Field(description="Método de pago")
+
+
 class WhatsAppAgent:
     def __init__(self, llm, system_prompt: str) -> None:
-        self.agent = FunctionAgent(llm=llm, system_prompt=system_prompt, tools=[
-            FunctionTool.from_defaults(self.send_general_information)
-        ])
+        self.agent = FunctionAgent(name="RootAgent", llm=llm, system_prompt=system_prompt, tools=[
+            FunctionTool.from_defaults(self.create_order,fn_schema=OrderParams,
+                                       name="create_order",
+                                       description="Registra un pedido de pizza. Requiere tipo, tamaño, cantidad, nombre, dirección y teléfono.",
+                                       return_direct=True)
+        ], verbose=True)
 
-    def send_general_information(self):
-        """USAR CUANDO EL USUARIO SOLICITE MAS INFORMACIÓN EN GENERAL"""
-        return "Mas información general"
+    def create_order(self, order: OrderParams):
+        """Crea un pedido de pizza. Solo llamar cuando el cliente haya proporcionado todos estos datos."""
+        print(f"Print: Creando orden el sistema: {order.dict()}")
+        return "Pedido creado correctamente"

@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 
 state_file = Path(__file__).parent.joinpath("states/accounts/account_1.json")
 
-url = "https://www.facebook.com/share/g/18UgnJk2ps/"
+url = "https://www.facebook.com/groups/553464032601388/"
 
 post_title = "🏪 VENTAS AL POR MAYOR – FEROS GRUPO"
 
@@ -51,7 +51,6 @@ with sync_playwright() as pw:
 
     attempts = 3
     dialog = page.get_by_role('dialog').and_(page.locator("[aria-modal]"))
-    dialog.highlight()
     while attempts > 0:
         if dialog.is_visible():
             break
@@ -62,16 +61,14 @@ with sync_playwright() as pw:
     publicar_btn = dialog.locator('[aria-label="Publicar"]')
     publicar_btn.wait_for(state='visible')
 
-    if len(post_files):
-        file_input = page.locator('input[type="file"][multiple]').first
-        file_input.set_input_files(files=post_files)
+
 
     page.keyboard.type(post_title)
     page.keyboard.press('Enter')
     page.keyboard.type(post_text)
     page.keyboard.press('Enter')
     page.keyboard.press('Enter')
-    page.keyboard.type(post_footer)
+    page.keyboard.insert_text(post_footer)
 
     hashtags = post_hastag.strip()
     if hashtags:
@@ -81,6 +78,10 @@ with sync_playwright() as pw:
             page.keyboard.type(hastag.strip())
             page.keyboard.press('Enter')
             page.keyboard.press("Space")
+
+    if len(post_files):
+        file_input = page.locator('input[type="file"][multiple]').first
+        file_input.set_input_files(files=post_files)
 
     time.sleep(3)
     publicar_btn.click()
