@@ -303,7 +303,7 @@ class FacebookAccountAgent:
 
 
 class WhatsAppAgent:
-    def __init__(self, llm: Ollama, system_prompt: str) -> None:
+    def __init__(self, llm, system_prompt: str) -> None:
         self.agent = FunctionAgent(llm=llm, system_prompt=system_prompt, tools=[
             FunctionTool.from_defaults(self.send_general_information)
         ])

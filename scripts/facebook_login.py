@@ -8,6 +8,7 @@ password = "@B123456*"
 account_number = f"account_{input('Numero de cuenta: ')}"
 
 state_file = Path(__file__).parent.joinpath(f"states/accounts/{account_number}.json")
+state_file = Path(__file__).parent.joinpath(f"states/facebook.json")
 timeout = 60 * 100000
 with sync_playwright() as pw:
     device = pw.devices['iPhone 8']
@@ -29,6 +30,18 @@ with sync_playwright() as pw:
 
     page = browser.new_page()
     page.goto('https://www.facebook.com/', timeout=timeout)
+    continue_button = page.get_by_text("Continuar")
+    if continue_button.is_visible():
+        continue_button.click()
+        page.wait_for_load_state('load')
+
+    active = not bool(page.locator('text=Iniciar sesión').count())
+    if active:
+        dialog = page.get_by_role('dialog')
+        if dialog.is_visible():
+            close_btn = dialog.locator('[aria-label*="Cerrar"]')
+            close_btn.wait_for(state='visible')
+            close_btn.click()
     active = not bool(page.locator('text=Iniciar sesión').count())
     # page.wait_for_load_state('networkidle', timeout=timeout)
 

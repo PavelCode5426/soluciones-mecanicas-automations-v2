@@ -4,16 +4,26 @@ import logging
 import ollama
 from llama_index.core.memory import StaticMemoryBlock, Memory
 from llama_index.llms.ollama import Ollama
+from llama_index.llms.openai_like import OpenAILike
 from workflows import Context
 
 from scripts.automations import WhatsAppAgent
 
-host = "https://ia.pavelcode5426.duckdns.org"
-model_name = "llama3.1:8b-instruct-q4_K_M"
-ollama.Client(host).pull(model_name)
+# host = "https://ia.pavelcode5426.duckdns.org"
+# model_name = "llama3.1:8b-instruct-q4_K_M"
+# ollama.Client(host).pull(model_name)
 
 logging.basicConfig(level=logging.INFO)
-llm = Ollama(model=model_name, base_url=host, request_timeout=120, temperature=0.1, context_window=20_000)
+# llm = Ollama(model=model_name, base_url=host, request_timeout=120, temperature=0.1, context_window=20_000)
+
+
+llm = OpenAILike(
+    api_base="https://api.hostingcuba.com/v1/chat/",
+    api_key='sk_live_hc_69e1cbb02d3b8253133eb43ccfd36bad',
+    model="meta-llama/Meta-Llama-3.1-8B-Instruct",
+
+)
+print(llm.complete("Hola"))
 whatsapp_agent = WhatsAppAgent(llm=llm, system_prompt="""
 Eres un agente de inteligencia artificial cuyo rol es vender pizzas. 
 Tu objetivo es persuadir al cliente para que compre una pizza resaltando 

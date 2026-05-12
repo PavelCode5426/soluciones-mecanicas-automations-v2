@@ -293,6 +293,11 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
                 browser = self.get_browser(pw)
                 page = browser.new_page()
                 page.goto('https://www.facebook.com/')
+                continue_button = page.get_by_text("Continuar")
+                if continue_button.wait_for(state='visible'):
+                    continue_button.click()
+                    page.wait_for_load_state('load')
+
                 active = not bool(page.locator('text=Iniciar sesión').count())
                 self.account.active = active
                 if active:
