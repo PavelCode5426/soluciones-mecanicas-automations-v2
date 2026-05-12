@@ -4,13 +4,13 @@ from django_q.tasks import async_task
 
 from facebook.models import FacebookPostCampaign, FacebookAgent, FacebookRealAccount
 from facebook.tasks import enqueue_lead_explorer, enqueue_facebook_campaign
-from services.automations import RealAccountAutomationService
+from services.automations import RealAccountBehaviorAutomationService
 
 
 def check_profile_status():
     accounts = FacebookRealAccount.objects.filter(active=True).all()
     for account in accounts:
-        service = RealAccountAutomationService(account)
+        service = RealAccountBehaviorAutomationService(account)
         async_task(service.check_status, task_name=f'check_status', group='check_status', cluster='high_priority')
     return "Comprobación de estado agendada correctamente"
 

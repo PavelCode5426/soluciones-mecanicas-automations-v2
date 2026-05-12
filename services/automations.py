@@ -20,7 +20,7 @@ def get_playwright() -> PlaywrightContextManager:
     return sync_playwright()
 
 
-class RealAccountAutomationService:
+class BaseRealAccountAutomation:
     def __init__(self, account: FacebookRealAccount):
         self.account = account
 
@@ -33,30 +33,13 @@ class RealAccountAutomationService:
         self.account.context = storage_state
         self.account.save(update_fields=['context'])
 
-    def check_status(self):
-        self.refresh_account()
-        if self.account.active:
-            with (get_playwright() as pw):
-                browser = self.get_browser(pw)
-                page = browser.new_page()
-                page.goto('https://www.facebook.com/')
-                active = not bool(page.locator('text=Iniciar sesión').count())
-                self.account.active = active
-                if active:
-                    dialog = page.get_by_role('dialog')
-                    if dialog.is_visible():
-                        close_btn = dialog.locator('[aria-label*="Cerrar"]')
-                        close_btn.wait_for(state='visible')
-                        close_btn.click()
-                    storage_state = browser.storage_state()
-                    self.account.context = storage_state
-        self.account.save(update_fields=['active', 'context'])
-        return self.account.active
-
     def get_browser(self, pw: Playwright):
         context = pw.chromium.launch(**settings.PLAYWRIGHT).new_context(storage_state=self.account.context)
         context.set_default_timeout(settings.PLAYWRIGHT['timeout'])
         return context
+
+
+class RealAccountAutomationService(BaseRealAccountAutomation):
 
     def get_all_groups(self):
         self.refresh_account()
@@ -256,7 +239,7 @@ class RealAccountAutomationService:
         open_dialog_button.click()
 
         attempts = 3
-        dialog = page.get_by_role('dialog')
+        dialog = page.get_by_role('dialog').and_(page.locator("[aria-modal]"))
         while attempts > 0:
             if dialog.is_visible():
                 break
@@ -300,3 +283,46 @@ class RealAccountAutomationService:
     def __check_blocked_account(self, page):
         if page.get_by_text(blocked_message).count() > 0:
             raise Exception('Cuenta bloqueada por Facebook')
+
+
+class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
+    def check_status(self):
+        self.refresh_account()
+        if self.account.active:
+            with (get_playwright() as pw):
+                browser = self.get_browser(pw)
+                page = browser.new_page()
+                page.goto('https://www.facebook.com/')
+                active = not bool(page.locator('text=Iniciar sesión').count())
+                self.account.active = active
+                if active:
+                    dialog = page.get_by_role('dialog')
+                    if dialog.is_visible():
+                        close_btn = dialog.locator('[aria-label*="Cerrar"]')
+                        close_btn.wait_for(state='visible')
+                        close_btn.click()
+
+                    self.watch_reels(page)
+
+                storage_state = browser.storage_state()
+                self.account.context = storage_state
+        self.account.save(update_fields=['active', 'context'])
+        return self.account.active
+
+    def watch_reels(self, page):
+        page.get_by_role('link').and_(page.locator('[aria-label="Reels"]')).click()
+
+        watch_time = random.randint(5 * 60, 10 * 60)
+        start_time = time.time()
+
+        while time.time() - start_time < watch_time:
+            time.sleep(random.randint(5, 60))
+            if random.choice([True, False]):
+                try:
+                    page.get_by_role('button').and_(page.locator('[aria-label="Me gusta"][tabindex="0"]')).click()
+                except:
+                    pass
+            page.keyboard.press('ArrowDown')
+
+    def scroll_in_home(self, page):
+        pass

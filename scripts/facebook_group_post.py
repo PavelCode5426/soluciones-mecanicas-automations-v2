@@ -50,7 +50,8 @@ with sync_playwright() as pw:
     write_btn.click()
 
     attempts = 3
-    dialog = page.get_by_role('dialog').first
+    dialog = page.get_by_role('dialog').and_(page.locator("[aria-modal]"))
+    dialog.highlight()
     while attempts > 0:
         if dialog.is_visible():
             break
