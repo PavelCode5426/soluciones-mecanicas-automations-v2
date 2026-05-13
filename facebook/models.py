@@ -52,6 +52,9 @@ class FacebookAccountGroup(models.Model):
     error_at = models.DateTimeField(null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
+    class Meta:
+        ordering = ['updated_at']
+
 
 class FacebookProfileGroup(models.Model):
     profile = models.ForeignKey('FacebookProfile', related_name='groups', on_delete=models.CASCADE)
