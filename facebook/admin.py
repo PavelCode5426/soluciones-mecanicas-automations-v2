@@ -71,7 +71,7 @@ class FacebookRealAccountAdmin(PreviewFileMixin, admin.ModelAdmin):
 @admin.register(FacebookAccountGroup)
 class FacebookAccountGroupAdmin(ReadOnlyAdmin):
     list_display = ['account', 'group', 'pending_posts', 'error_at']
-    ordering = ['updated_at', 'error_at']
+    ordering = ['-updated_at']
     list_filter = ['account']
     readonly_fields = ["image", "error_at", 'updated_at']
 

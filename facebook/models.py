@@ -53,7 +53,7 @@ class FacebookAccountGroup(models.Model):
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 
     class Meta:
-        ordering = ['updated_at']
+        ordering = ['-updated_at']
 
 
 class FacebookProfileGroup(models.Model):
