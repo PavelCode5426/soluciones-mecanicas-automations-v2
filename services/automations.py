@@ -325,7 +325,8 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
         return self.account.active
 
     def watch_reels(self, page):
-        page.get_by_text('Reels').click()
+        page.goto('https://facebook.com/reels', wait_until='load')
+        # page.get_by_text('Reels').click()
 
         watch_time = random.randint(5 * 60, 10 * 60)
         start_time = time.time()
@@ -337,6 +338,9 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
                     page.get_by_role('button').and_(page.locator('[aria-label="Me gusta"][tabindex="0"]')).click()
                 except:
                     pass
+                if random.choice([True, False]):
+                    page.get_by_role('button').and_(page.locator('[aria-label="Compartir"][tabindex="0"]')).click()
+                    page.get_by_text(random.choice(["Compartir ahora", "Historia"])).click()
             page.keyboard.press('ArrowDown')
 
     def scroll_in_home(self, page):
