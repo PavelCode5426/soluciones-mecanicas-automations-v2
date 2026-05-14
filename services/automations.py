@@ -326,19 +326,18 @@ class RealAccountBehaviorAutomationService(BaseRealAccountAutomation):
 
     def watch_reels(self, page):
         page.goto('https://facebook.com/reels', wait_until='load')
-        # page.get_by_text('Reels').click()
 
-        watch_time = random.randint(5 * 60, 10 * 60)
+        watch_time = random.randint(10 * 60, 15 * 60)
         start_time = time.time()
 
         while time.time() - start_time < watch_time:
             time.sleep(random.randint(5, 60))
-            if random.choice([True, False]):
+            if self.account.can_like_posts and random.choice([True, False, False, False]):
                 try:
                     page.get_by_role('button').and_(page.locator('[aria-label="Me gusta"][tabindex="0"]')).click()
                 except:
                     pass
-                if random.choice([True, False]):
+                if self.account.can_share_posts and random.choice([True, False, False, False]):
                     page.get_by_role('button').and_(page.locator('[aria-label="Compartir"][tabindex="0"]')).click()
                     page.get_by_text(random.choice(["Compartir ahora", "Historia"])).click()
             page.keyboard.press('ArrowDown')

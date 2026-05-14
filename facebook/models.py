@@ -20,6 +20,9 @@ class FacebookRealAccount(models.Model):
     password = models.CharField(max_length=255)
     context = models.JSONField(default=dict, blank=True, null=True)
     active = models.BooleanField(default=True)
+    can_share_posts = models.BooleanField(default=False)
+    can_like_posts = models.BooleanField(default=False)
+    can_see_reels = models.BooleanField(default=True)
     screenshot = models.ImageField(upload_to='real_profile_screenshots', null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True, editable=False)
 

@@ -34,9 +34,9 @@ class PreviewFileMixin:
 
 @admin.register(FacebookRealAccount)
 class FacebookRealAccountAdmin(PreviewFileMixin, admin.ModelAdmin):
-    list_display = ['name', 'email', 'active']
+    list_display = ['name', 'email', 'active', 'updated_at']
     actions = ['sync_facebook_accounts', 'check_accounts']
-    readonly_fields = ["image"]
+    readonly_fields = ["image", 'updated_at']
 
     def image(self, obj):
         return format_html('<img  width="500" src="{}" />'.format(obj.screenshot.url))
@@ -70,7 +70,7 @@ class FacebookRealAccountAdmin(PreviewFileMixin, admin.ModelAdmin):
 
 @admin.register(FacebookAccountGroup)
 class FacebookAccountGroupAdmin(ReadOnlyAdmin):
-    list_display = ['account', 'group', 'pending_posts', 'error_at']
+    list_display = ['account', 'group', 'pending_posts', 'updated_at', 'error_at']
     ordering = ['-updated_at']
     list_filter = ['account']
     readonly_fields = ["image", "error_at", 'updated_at']
